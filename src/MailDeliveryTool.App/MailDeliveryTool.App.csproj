@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>$(WindowsTargetFramework)</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>MailDeliveryTool.App</RootNamespace>
+    <AssemblyName>MailDeliveryTool</AssemblyName>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <!-- Windows 11 25H2 が対象（要件定義書 2章）。既定値より下限を明示する -->
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MailDeliveryTool.Core\MailDeliveryTool.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      アプリアイコンは社内ロゴの利用可否確認待ち（要件定義書 14章）。
+      未配置でもビルドが止まらないよう、存在する場合のみ ApplicationIcon を使う。
+    -->
+    <None Include="Assets\app.ico" Condition="Exists('Assets\app.ico')" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="!Exists('Assets\app.ico')">
+    <ApplicationIcon />
+  </PropertyGroup>
+
+</Project>

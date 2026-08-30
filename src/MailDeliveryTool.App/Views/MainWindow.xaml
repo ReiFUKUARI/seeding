@@ -1,0 +1,120 @@
+<Window x:Class="MailDeliveryTool.App.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="メール配信ツール"
+        Height="760" Width="1180"
+        MinHeight="600" MinWidth="960"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="{StaticResource AppFontFamily}"
+        FontSize="14"
+        Foreground="{StaticResource TextPrimaryBrush}"
+        Background="{StaticResource CanvasBrush}">
+
+    <!--
+        フェーズ3モックで確定したサイドバー構成（要件定義書 15.1）の骨組み。
+        各画面の中身はフェーズ5で実装する。
+    -->
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- サイドバー -->
+        <Border Grid.Column="0"
+                Background="{StaticResource SidebarBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,1,0">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           Text="メール配信ツール"
+                           FontWeight="SemiBold" FontSize="15"
+                           Margin="16,18,16,12" />
+
+                <StackPanel DockPanel.Dock="Top" Margin="8,4">
+                    <RadioButton x:Name="NavCompose" Content="新しい配信"
+                                 GroupName="Nav" IsChecked="True"
+                                 Style="{StaticResource NavItemStyle}"
+                                 Checked="OnNavChecked" Tag="Compose" />
+                    <RadioButton x:Name="NavPartners" Content="パートナーリスト"
+                                 GroupName="Nav"
+                                 Style="{StaticResource NavItemStyle}"
+                                 Checked="OnNavChecked" Tag="Partners" />
+                    <RadioButton x:Name="NavSettings" Content="設定"
+                                 GroupName="Nav"
+                                 Style="{StaticResource NavItemStyle}"
+                                 Checked="OnNavChecked" Tag="Settings" />
+                </StackPanel>
+
+                <!-- 送信元アカウント。未設定なら設定画面へ誘導する -->
+                <Border DockPanel.Dock="Bottom"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="0,1,0,0"
+                        Padding="14,10">
+                    <StackPanel>
+                        <TextBlock Text="送信元アカウント"
+                                   FontSize="11"
+                                   Foreground="{StaticResource TextSecondaryBrush}" />
+                        <TextBlock x:Name="AccountText"
+                                   Text="未設定"
+                                   FontSize="12.5" FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"
+                                   Margin="0,2,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <Grid />
+            </DockPanel>
+        </Border>
+
+        <!-- メイン領域 -->
+        <DockPanel Grid.Column="1">
+            <Border DockPanel.Dock="Top"
+                    Height="52"
+                    Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="0,0,0,1">
+                <TextBlock x:Name="TitleText"
+                           Text="新しい配信"
+                           VerticalAlignment="Center"
+                           Margin="20,0"
+                           FontSize="15" FontWeight="SemiBold" />
+            </Border>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
+                <StackPanel>
+                    <Border Background="{StaticResource SurfaceBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="16">
+                        <StackPanel>
+                            <TextBlock Text="フェーズ4：環境構築の確認"
+                                       FontWeight="SemiBold" Margin="0,0,0,10" />
+                            <TextBlock Foreground="{StaticResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" Margin="0,0,0,12"
+                                       Text="この画面はプロジェクト雛形の疎通確認用です。データベースが作成され、初期データが投入されていることを確認できます。各機能画面はフェーズ5で実装します。" />
+                            <TextBlock x:Name="DiagnosticsText"
+                                       FontFamily="Consolas, Yu Gothic UI"
+                                       FontSize="12.5"
+                                       TextWrapping="Wrap"
+                                       LineHeight="20" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="{StaticResource SurfaceBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="16"
+                            Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock x:Name="PlaceholderTitle"
+                                       Text="新しい配信"
+                                       FontWeight="SemiBold" Margin="0,0,0,8" />
+                            <TextBlock x:Name="PlaceholderBody"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </DockPanel>
+    </Grid>
+</Window>

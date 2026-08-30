@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+  <!--
+    Identity/Publisher は署名証明書のサブジェクトと完全一致させる必要がある。
+    社内の署名方針が決まった時点で確定させること（docs/msix-packaging.md 参照）。
+  -->
+  <Identity
+    Name="ExampleCorp.MailDeliveryTool"
+    Publisher="CN=ExampleCorp"
+    Version="0.1.0.0" />
+
+  <Properties>
+    <DisplayName>メール配信ツール</DisplayName>
+    <PublisherDisplayName>ExampleCorp</PublisherDisplayName>
+    <Logo>Images\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <!-- Windows 11 25H2 が対象だが、下限は Windows 10 1809 に置いておく -->
+    <TargetDeviceFamily Name="Windows.Desktop"
+                        MinVersion="10.0.17763.0"
+                        MaxVersionTested="10.0.22621.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="ja-JP" />
+  </Resources>
+
+  <Applications>
+    <Application Id="MailDeliveryTool"
+                 Executable="MailDeliveryTool.exe"
+                 EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="メール配信ツール"
+        Description="営業向けのメール一斉配信ツール"
+        BackgroundColor="transparent"
+        Square150x150Logo="Images\Square150x150Logo.png"
+        Square44x44Logo="Images\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Images\Wide310x150Logo.png" />
+        <uap:SplashScreen Image="Images\SplashScreen.png" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <!--
+      runFullTrust: WPF（Win32）アプリを MSIX で動かすために必須。
+      これ1つで SMTP 送信・ファイル選択・ドキュメントフォルダへの
+      バックアップ書き込みまで賄えるため、追加の capability は宣言しない。
+      （broadFileSystemAccess 等は不要。過剰な権限はストア審査・社内審査で不利になる）
+    -->
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+
+</Package>

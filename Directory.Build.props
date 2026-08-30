@@ -15,7 +15,6 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <WarningsAsErrors>nullable</WarningsAsErrors>
     <InvariantGlobalization>false</InvariantGlobalization>
     <NeutralLanguage>ja-JP</NeutralLanguage>
     <Company>営業メール配信アプリ</Company>

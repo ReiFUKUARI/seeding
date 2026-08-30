@@ -39,9 +39,13 @@ public sealed class SmtpConnectionTester
             RequestedOption = option.ToString(),
         };
 
-        var log = new MemoryStream();
         // ProtocolLogger にサーバーとの全やり取りを記録する。
         // AUTH 行にパスワードが載るため、返す前に必ずマスクする。
+        //
+        // log を client より先に宣言しているのは破棄順のため。using var は宣言の
+        // 逆順に破棄されるので client -> log の順になり、client の破棄処理が
+        // ログを書こうとしたときに解放済みストリームへ書き込む事故を防げる。
+        using var log = new MemoryStream();
         using var client = new SmtpClient(new MailKit.ProtocolLogger(log, leaveOpen: true));
         client.Timeout = (int)(timeout ?? TimeSpan.FromSeconds(30)).TotalMilliseconds;
 
@@ -89,7 +93,6 @@ public sealed class SmtpConnectionTester
         finally
         {
             result.ProtocolLog = MaskCredentials(Encoding.UTF8.GetString(log.ToArray()));
-            await log.DisposeAsync().ConfigureAwait(false);
         }
 
         return result;

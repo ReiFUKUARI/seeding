@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+    Windows Application Packaging Project (.wapproj)
+    WPF アプリを MSIX にパッケージングするための標準的な方式（要件定義書 12章）。
+
+    注意:
+      - このプロジェクトは Windows + Visual Studio（または MSBuild + Windows SDK）
+        でのみビルドできる。`dotnet build` では処理されないため、
+        MailDeliveryTool.sln 上でも Windows 以外の環境ではビルド対象外になる。
+      - 署名証明書（.pfx）はリポジトリに含めない。docs/msix-packaging.md 参照。
+  -->
+
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+    <!-- 要件定義書 2章: Windows 11 64bit 版のみを対象とする -->
+    <Platforms>x64</Platforms>
+    <ProjectGuid>b0e3f5a1-7c42-4f1e-9a6d-5c2b8e4d0117</ProjectGuid>
+    <TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <DefaultLanguage>ja-JP</DefaultLanguage>
+    <EntryPointProjectUniqueName>..\..\src\MailDeliveryTool.App\MailDeliveryTool.App.csproj</EntryPointProjectUniqueName>
+
+    <!-- 1人1台のユーザー単位インストール（要件定義書 2章・12章） -->
+    <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+    <GenerateAppInstallerFile>false</GenerateAppInstallerFile>
+    <AppxBundle>Never</AppxBundle>
+    <AppxPackageDir>$(MSBuildThisFileDirectory)..\..\artifacts\msix\</AppxPackageDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Images\**\*.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MailDeliveryTool.App\MailDeliveryTool.App.csproj" />
+  </ItemGroup>
+
+  <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.props"
+          Condition="'$(WapProjPath)' != ''" />
+  <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.targets"
+          Condition="'$(WapProjPath)' != ''" />
+
+</Project>

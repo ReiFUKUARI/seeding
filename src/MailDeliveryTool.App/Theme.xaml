@@ -1,0 +1,61 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        フェーズ3モック（mock_prototype.html）の配色をそのまま移植した色定義。
+        Windows Fluent Design に近いトーンにする（要件定義書 13章）。
+        フェーズ5で各コントロールのスタイルをここに追加していく。
+    -->
+    <Color x:Key="CanvasColor">#FFF3F3F3</Color>
+    <Color x:Key="SurfaceColor">#FFFFFFFF</Color>
+    <Color x:Key="SidebarColor">#FFFAF9F8</Color>
+    <Color x:Key="BorderColor">#FFE1DFDD</Color>
+    <Color x:Key="TextPrimaryColor">#FF201F1E</Color>
+    <Color x:Key="TextSecondaryColor">#FF605E5C</Color>
+    <Color x:Key="AccentColor">#FF0078D4</Color>
+    <Color x:Key="AccentSoftColor">#FFE5F1FB</Color>
+    <Color x:Key="DangerColor">#FFD13438</Color>
+    <Color x:Key="SuccessColor">#FF107C10</Color>
+
+    <SolidColorBrush x:Key="CanvasBrush" Color="{StaticResource CanvasColor}" />
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}" />
+    <SolidColorBrush x:Key="SidebarBrush" Color="{StaticResource SidebarColor}" />
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="{StaticResource TextPrimaryColor}" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource TextSecondaryColor}" />
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}" />
+    <SolidColorBrush x:Key="AccentSoftBrush" Color="{StaticResource AccentSoftColor}" />
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}" />
+
+    <!-- モックと同じフォント指定（Segoe UI Variable → Yu Gothic UI の順にフォールバック） -->
+    <FontFamily x:Key="AppFontFamily">Segoe UI Variable, Yu Gothic UI, Segoe UI, Meiryo UI</FontFamily>
+
+    <!-- サイドバーのナビゲーション項目。RadioButton を流用して排他選択にする -->
+    <Style x:Key="NavItemStyle" TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="Margin" Value="0,1" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Root" Background="Transparent" CornerRadius="6" Padding="10,9">
+                        <ContentPresenter VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="#FFEEECEA" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Root" Property="Background"
+                                    Value="{StaticResource AccentSoftBrush}" />
+                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                            <Setter Property="FontWeight" Value="SemiBold" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

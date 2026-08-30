@@ -125,7 +125,7 @@ internal static class Program
         }
         else
         {
-            Console.WriteLine("SIZE拡張の広告値      : 広告なし（サーバー仕様書の25MBを前提に実装値を決めること）");
+            Console.WriteLine("SIZE拡張の広告値      : 広告なし（docs/decisions.md の D-007（実測20MB）を前提に実装値を決めること）");
         }
 
         if (r.TestMailSent)

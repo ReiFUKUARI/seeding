@@ -6,7 +6,7 @@
 
     注意: 以下のバージョンは実際に復元して確認したものではない。
     Windows 実機での初回 `dotnet restore` 時に、解決できないものがあれば
-    `dotnet list package --outdated` 等で調整すること。
+    `dotnet list package` の結果を見て調整すること。
     Microsoft.* / System.* は .NET 本体（10.0）に合わせている。
     MailKit / CsvHelper / CommunityToolkit.Mvvm はフレームワーク非依存のため
     .NET のバージョンとは連動しない。

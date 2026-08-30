@@ -3,6 +3,13 @@
   <!--
     Central Package Management。NuGet のバージョンはこのファイルで一元管理する。
     各 csproj 側では <PackageReference Include="..." /> のみ記述し、Version は書かない。
+
+    注意: 以下のバージョンは実際に復元して確認したものではない。
+    Windows 実機での初回 `dotnet restore` 時に、解決できないものがあれば
+    `dotnet list package --outdated` 等で調整すること。
+    Microsoft.* / System.* は .NET 本体（10.0）に合わせている。
+    MailKit / CsvHelper / CommunityToolkit.Mvvm はフレームワーク非依存のため
+    .NET のバージョンとは連動しない。
   -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
@@ -11,7 +18,7 @@
 
   <ItemGroup>
     <!-- DB（要件定義書 12章：Microsoft.Data.Sqlite） -->
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="8.0.11" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.0" />
 
     <!-- SMTP 送信（要件定義書 12章：MailKit + MimeKit） -->
     <PackageVersion Include="MailKit" Version="4.8.0" />
@@ -20,10 +27,10 @@
     <PackageVersion Include="CsvHelper" Version="33.0.1" />
 
     <!-- CSV の Shift-JIS フォールバック読み込みに必要（.NET Core 以降は既定で未登録） -->
-    <PackageVersion Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="10.0.0" />
 
     <!-- 認証情報の暗号化（要件定義書 12章：DPAPI） -->
-    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.0" />
 
     <!-- WPF の MVVM 実装補助 -->
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.3.2" />

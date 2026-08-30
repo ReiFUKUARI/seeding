@@ -24,7 +24,7 @@ MailDeliveryTool.sln
 ## 開発環境
 
 - Windows 11（WPF のため Windows 必須）
-- .NET SDK 8.0 以降
+- .NET SDK 10.0 以降（LTS）
 - Visual Studio 2022（MSIX をビルドする場合。
   ワークロード「.NET デスクトップ開発」＋「ユニバーサル Windows プラットフォーム開発」）
 

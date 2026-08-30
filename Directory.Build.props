@@ -4,13 +4,14 @@
     ソリューション全体で共有するビルド設定。
 
     TargetFramework をここ1か所で管理しているため、.NET のバージョンを
-    上げる場合は WindowsTargetFramework / NetTargetFramework の2行を
+    上げる場合は WindowsTargetFramework の1行と global.json を
     書き換えるだけで全プロジェクトに反映される。
-    （移行方針の詳細は docs/phase4-environment-setup.md を参照）
+
+    .NET 10 は LTS（2028年11月まで）。要件定義書 12章は .NET 8/9 を
+    挙げているが、いずれもサポート期限が近い／切れているため .NET 10 を採用した。
   -->
   <PropertyGroup>
-    <WindowsTargetFramework>net8.0-windows</WindowsTargetFramework>
-    <NetTargetFramework>net8.0</NetTargetFramework>
+    <WindowsTargetFramework>net10.0-windows</WindowsTargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>

@@ -103,7 +103,11 @@ public sealed class ContactRepository
             command.Parameters.AddWithValue("$createdAt", now);
             command.Parameters.AddWithValue("$updatedAt", now);
             command.ExecuteNonQuery();
-            contact.Id = connection.LastInsertRowId;
+
+            using var idCommand = connection.CreateCommand();
+            idCommand.Transaction = transaction;
+            idCommand.CommandText = "SELECT last_insert_rowid();";
+            contact.Id = Convert.ToInt64(idCommand.ExecuteScalar());
         }
 
         ReplaceCategoryValues(connection, transaction, contact.Id, contact.CategoryValueIds);

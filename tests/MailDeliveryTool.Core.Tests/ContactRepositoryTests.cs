@@ -159,7 +159,7 @@ public sealed class ContactRepositoryTests : IDisposable
         };
         var result = _repo.Search(null, filters);
 
-        var names = result.Select(c => c.CompanyName).OrderBy(x => x).ToList();
+        var names = result.Select(c => c.CompanyName).OrderBy(x => x, StringComparer.Ordinal).ToList();
         Assert.Equal(new[] { "人材×開発", "案件×開発" }, names);
     }
 

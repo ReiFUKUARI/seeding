@@ -91,7 +91,11 @@ public sealed class CategoryRepository
             throw new DuplicateCategoryValueException(axisId, trimmed, ex);
         }
 
-        return connection.LastInsertRowId;
+        using (var idCommand = connection.CreateCommand())
+        {
+            idCommand.CommandText = "SELECT last_insert_rowid();";
+            return Convert.ToInt64(idCommand.ExecuteScalar());
+        }
     }
 
     /// <summary>

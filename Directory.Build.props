@@ -18,8 +18,16 @@
     検出できず不正な既定値（7.0）にフォールバックし、SupportedOSPlatformVersion
     （各プロジェクトで指定、17763.0）を下回って NETSDK1135 で失敗する。
     バージョンを明示すると、参照アセンブリはNuGetから確定的に解決されるため、
-    ホストOSに関わらず同じ結果になる。値は packaging/.../.wapproj の
-    TargetPlatformVersion（10.0.22621.0）と揃えてある。
+    ホストOSに関わらず同じ結果になる。
+
+    ここでの Windows SDK バージョン（10.0.22621.0）は、あくまで .NET の
+    Windows API 参照アセンブリ（NuGetから取得）の話であり、
+    packaging/.../.wapproj 側の TargetPlatformVersion（クラシックな
+    Windows Kits の UAP プラットフォームSDK。マシンに実際にインストール
+    されているバージョンでなければビルドできない）とは別物で、
+    値を一致させる必要はない。両者は独立して調整してよい
+    （実機では 10.0.22621.0 のUAP SDKが未導入だったため、.wapproj 側は
+    10.0.26100.0 を使っている。docs/msix-packaging.md 参照）。
   -->
   <PropertyGroup>
     <WindowsTargetFramework>net10.0-windows10.0.22621.0</WindowsTargetFramework>

@@ -18,7 +18,15 @@
     <!-- 要件定義書 2章: Windows 11 64bit 版のみを対象とする -->
     <Platforms>x64</Platforms>
     <ProjectGuid>b0e3f5a1-7c42-4f1e-9a6d-5c2b8e4d0117</ProjectGuid>
-    <TargetPlatformVersion>10.0.22621.0</TargetPlatformVersion>
+    <!--
+      実機で確認したところ 10.0.22621.0 の UAP プラットフォームSDKが未導入で
+      APPX3217（UAP.props の入ったSDKフォルダーが見つからない）になった。
+      C:\Program Files (x86)\Windows Kits\10\Platforms\UAP\ 配下に実際に
+      存在していたのは 10.0.26100.0 のみだったため、それに合わせている。
+      別のPCでビルドしてこのエラーが再発する場合は、そのマシンで実際に
+      インストールされているバージョンを確認し、この値を合わせること。
+    -->
+    <TargetPlatformVersion>10.0.26100.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <DefaultLanguage>ja-JP</DefaultLanguage>
     <EntryPointProjectUniqueName>..\..\src\MailDeliveryTool.App\MailDeliveryTool.App.csproj</EntryPointProjectUniqueName>

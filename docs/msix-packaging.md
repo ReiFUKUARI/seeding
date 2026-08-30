@@ -209,6 +209,37 @@ MSIXは win-x64 向けにアプリをビルドするため、`Microsoft.NETCore.
 このエラーが再発する場合は NuGet のオフラインキャッシュ／社内フィード側に
 win-x64 のランタイムパックが存在するか確認すること。
 
+### `APPX3217`（`UAP.props` の入ったSDKフォルダーが見つからない）が出る場合
+
+```
+APPX3217: 'UAP <バージョン>' の 'UAP.props' が含まれる SDK フォルダーが見つかりません
+```
+
+`.wapproj` の `TargetPlatformVersion` が指定するバージョンの
+**UWPプラットフォームSDK**（クラシックなWindows Kitsの一部。.NETのTFMに
+付けるWindows SDKバージョンとは別物で、NuGetからは取得されない）が
+そのマシンにインストールされていない。
+
+まず、実際にインストールされているバージョンを確認する。
+
+```powershell
+dir "C:\Program Files (x86)\Windows Kits\10\Platforms\UAP\"
+```
+
+表示されたバージョンに `.wapproj` の `TargetPlatformVersion`（および
+`Package.appxmanifest` の `TargetDeviceFamily` の `MaxVersionTested`）を
+合わせる。実機（2026年8月時点）では `10.0.22621.0` が未導入で
+`10.0.26100.0` のみが存在したため、両ファイルとも `10.0.26100.0` に
+揃えてある。別のマシンで異なるバージョンしか入っていない場合は、
+同じ要領でこの2ファイルの値を合わせること
+（該当バージョンのWindows SDKを個別コンポーネントとして追加インストールする
+方法でもよい）。
+
+この値は `Directory.Build.props` の `WindowsTargetFramework`
+（.NETのWindows API参照アセンブリ用。NuGetから解決されるため、UAP
+プラットフォームSDKの実インストール状況とは無関係）とは**独立**しており、
+一致させる必要はない。
+
 ---
 
 ## 6. 未決事項（社内確認が必要）

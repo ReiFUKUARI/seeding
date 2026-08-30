@@ -3,6 +3,12 @@
 要件定義書 12章で配布形式を MSIX と決定済みのため、本書では
 「どう構成するか」を具体化し、決定事項と未決事項を切り分ける。
 
+> **Windows実機で `.wapproj` のビルドに成功し、`artifacts/msix/` に
+> パッケージが生成されることを確認済みです。** 実機でしか再現しない
+> 環境依存のエラー（`APPX3217` / `NETSDK1112` 等）を複数踏んだため、
+> 「5. ビルド手順」に対処法をまとめてあります。躓いたら先にそちらを
+> 確認してください。
+
 ---
 
 ## 1. 方式の選定
@@ -206,7 +212,11 @@ MSIXは win-x64 向けにアプリをビルドするため、`Microsoft.NETCore.
 等のランタイムパックの復元が必要。`MailDeliveryTool.App.csproj` に
 `<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>` を設定済みなので、
 `/restore` 付きで通常どおりビルドすれば自動的に解決される。
-このエラーが再発する場合は NuGet のオフラインキャッシュ／社内フィード側に
+
+`App.csproj` だけでは不十分だった。`.wapproj` 経由のビルドでは
+`ProjectReference` を辿った `MailDeliveryTool.Core.csproj` の restore が
+正しく連鎖せず、`Core` 側にも同じ宣言が必要だった（設定済み）。
+それでも再発する場合は NuGet のオフラインキャッシュ／社内フィード側に
 win-x64 のランタイムパックが存在するか確認すること。
 
 ### `APPX3217`（`UAP.props` の入ったSDKフォルダーが見つからない）が出る場合
@@ -235,10 +245,11 @@ dir "C:\Program Files (x86)\Windows Kits\10\Platforms\UAP\"
 （該当バージョンのWindows SDKを個別コンポーネントとして追加インストールする
 方法でもよい）。
 
-この値は `Directory.Build.props` の `WindowsTargetFramework`
+この値は本来 `Directory.Build.props` の `WindowsTargetFramework`
 （.NETのWindows API参照アセンブリ用。NuGetから解決されるため、UAP
 プラットフォームSDKの実インストール状況とは無関係）とは**独立**しており、
-一致させる必要はない。
+一致させる必要はない。ただし実機で確認できた構成に合わせて、
+現状はどちらも `10.0.26100.0` で揃えてある。
 
 ---
 

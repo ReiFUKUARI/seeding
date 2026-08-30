@@ -8,6 +8,14 @@
     <TargetFramework>$(WindowsTargetFramework)</TargetFramework>
     <RootNamespace>MailDeliveryTool.Core</RootNamespace>
     <AssemblyName>MailDeliveryTool.Core</AssemblyName>
+    <!--
+      MSIXパッケージング（.wapproj）はwin-x64向けにApp経由でこのプロジェクトも
+      構築するため、ランタイムパックの復元が必要になる（App.csprojにも同様の
+      設定あり）。ProjectReference越しにApp側だけ宣言してもrestoreが正しく
+      連鎖せず NETSDK1112 になったため、参照グラフに含まれる各プロジェクトに
+      明示している。
+    -->
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>

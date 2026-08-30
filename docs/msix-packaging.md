@@ -140,14 +140,55 @@ MSIX 環境では `%LOCALAPPDATA%` への書き込みがパッケージ配下
 
 `.wapproj` は Windows + MSBuild でのみビルドできる（`dotnet build` では不可）。
 
-```powershell
-# 開発ビルド（署名なし。ローカル確認用）
-msbuild packaging\MailDeliveryTool.Package\MailDeliveryTool.Package.wapproj `
-  /p:Configuration=Release /p:Platform=x64 /restore
+### 必要なワークロード
 
-# 署名ありの配布パッケージ
-msbuild packaging\MailDeliveryTool.Package\MailDeliveryTool.Package.wapproj `
-  /p:Configuration=Release /p:Platform=x64 /restore `
+Visual Studio 本体を使う場合は **.NET デスクトップ開発** と
+**ユニバーサル Windows プラットフォーム開発** の2つ。
+
+**Build Tools for Visual Studio**（IDEなしの軽量版）を使う場合は名称が異なる。
+2026年時点のインストーラーでは「Universal Windows Platform build tools」という
+名前は存在せず、同じワークロード（内部ID:
+`Microsoft.VisualStudio.Workload.UniversalBuildTools`）が
+**「WinUI アプリケーション開発ビルド ツール」** として表示される。
+これを選択すること。
+
+### Visual Studio の IDE を使わずに（Developer Command Prompt無しで）ビルドする場合
+
+`.wapproj` は本来 Visual Studio の IDE から開いてビルドされることを前提にしており、
+`$(WapProjPath)`（パッケージング用ターゲットの場所）が**IDE側で自動設定される**。
+そのため、`msbuild` を素のPowerShell/コマンドプロンプトから直接叩くと、
+このプロパティが空のまま Import 条件が false になり、**`MSB4040`
+（プロジェクトにターゲットがない）で失敗する**。
+
+`msbuild.exe` の場所と `WapProjPath` を自力で見つけて明示的に渡す必要がある。
+
+```powershell
+# msbuild.exe の場所を特定する（vswhere は既定では Build Tools を検索対象外にするため
+# -products * が必須）
+$msbuild = @(& "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" `
+  -products * -latest -requires Microsoft.Component.MSBuild -find MSBuild\**\Bin\MSBuild.exe)
+
+# WapProjPath（Microsoft.DesktopBridge.props/targets の場所）を特定する
+$vsInstall = & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" `
+  -products * -latest -requires Microsoft.Component.MSBuild -property installationPath
+$wapProjPath = Get-ChildItem -Path $vsInstall -Recurse -Filter "Microsoft.DesktopBridge.props" `
+  -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty DirectoryName
+
+# 開発ビルド（署名なし。ローカル確認用）
+& $msbuild[0] packaging\MailDeliveryTool.Package\MailDeliveryTool.Package.wapproj `
+  /p:Configuration=Release /p:Platform=x64 /p:WapProjPath="$wapProjPath" /restore
+```
+
+（VS付属の「Developer Command Prompt for VS」から実行する場合は、
+起動時にこれらの環境が自動設定されるため `WapProjPath` の指定は不要。
+ただし起動時のカレントフォルダはBuildToolsのインストール先になっているため、
+先にリポジトリのフォルダへ `cd` すること。）
+
+### 署名ありの配布パッケージ
+
+```powershell
+& $msbuild[0] packaging\MailDeliveryTool.Package\MailDeliveryTool.Package.wapproj `
+  /p:Configuration=Release /p:Platform=x64 /p:WapProjPath="$wapProjPath" /restore `
   /p:AppxPackageSigningEnabled=true `
   /p:PackageCertificateKeyFile=C:\path\to\signing.pfx `
   /p:PackageCertificateThumbprint=<拇印>
@@ -156,10 +197,17 @@ msbuild packaging\MailDeliveryTool.Package\MailDeliveryTool.Package.wapproj `
 出力先は `artifacts/msix/`（`.gitignore` 済み）。
 
 Visual Studio からは「MailDeliveryTool.Package」を右クリック →
-`公開` → `アプリ パッケージの作成` でも同じものが生成できる。
+`公開` → `アプリ パッケージの作成` でも同じものが生成できる（この場合は
+`WapProjPath` の問題は起きない）。
 
-必要なワークロード: **.NET デスクトップ開発** および
-**ユニバーサル Windows プラットフォーム開発**（`.wapproj` のビルドに必要）。
+### `NETSDK1112`（ランタイムパックが見つからない）が出る場合
+
+MSIXは win-x64 向けにアプリをビルドするため、`Microsoft.NETCore.App.Runtime.win-x64`
+等のランタイムパックの復元が必要。`MailDeliveryTool.App.csproj` に
+`<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>` を設定済みなので、
+`/restore` 付きで通常どおりビルドすれば自動的に解決される。
+このエラーが再発する場合は NuGet のオフラインキャッシュ／社内フィード側に
+win-x64 のランタイムパックが存在するか確認すること。
 
 ---
 

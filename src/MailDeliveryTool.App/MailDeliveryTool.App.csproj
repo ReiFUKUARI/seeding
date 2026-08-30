@@ -9,6 +9,15 @@
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <!-- Windows 11 25H2 が対象（要件定義書 2章）。既定値より下限を明示する -->
     <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <!--
+      MSIXパッケージング（.wapproj）は win-x64 向けにこのプロジェクトを構築するため、
+      ランタイムパック（Microsoft.NETCore.App.Runtime.win-x64 等）の復元が必要になる。
+      RuntimeIdentifiers（複数形。restore用の宣言）をここで明示しないと、
+      .wapproj 側から /restore しても取得されず、後続のビルドで NETSDK1112
+      （ランタイムパックが見つからない）になる。
+      要件定義書 2章のとおり x64 のみが対象（ARM64は対象外）。
+    -->
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>

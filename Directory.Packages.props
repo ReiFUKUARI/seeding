@@ -4,12 +4,15 @@
     Central Package Management。NuGet のバージョンはこのファイルで一元管理する。
     各 csproj 側では <PackageReference Include="..." /> のみ記述し、Version は書かない。
 
-    注意: 以下のバージョンは実際に復元して確認したものではない。
-    Windows 実機での初回 `dotnet restore` 時に、解決できないものがあれば
-    `dotnet list package` の結果を見て調整すること。
+    各バージョンは nuget.org 上に存在すること、および net10.0 と互換の
+    ターゲットを持つことを確認済み（2026-08 時点の最新安定版）。
+    ただし実際の復元・ビルドは未実施のため、初回 `dotnet restore` で
+    問題が出た場合は調整すること。
+
     Microsoft.* / System.* は .NET 本体（10.0）に合わせている。
-    MailKit / CsvHelper / CommunityToolkit.Mvvm はフレームワーク非依存のため
-    .NET のバージョンとは連動しない。
+    MailKit / MimeKit / CsvHelper / CommunityToolkit.Mvvm は
+    フレームワーク非依存だが、MailKit 4.17.0 は net10.0 向けのアセンブリを
+    同梱しているため、これより古い版（net8.0 へフォールバックする）より望ましい。
   -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
@@ -18,22 +21,22 @@
 
   <ItemGroup>
     <!-- DB（要件定義書 12章：Microsoft.Data.Sqlite） -->
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.0" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.11" />
 
     <!-- SMTP 送信（要件定義書 12章：MailKit + MimeKit） -->
-    <PackageVersion Include="MailKit" Version="4.8.0" />
+    <PackageVersion Include="MailKit" Version="4.17.0" />
 
     <!-- CSV 取込／出力（要件定義書 12章：CsvHelper） -->
-    <PackageVersion Include="CsvHelper" Version="33.0.1" />
+    <PackageVersion Include="CsvHelper" Version="33.1.0" />
 
     <!-- CSV の Shift-JIS フォールバック読み込みに必要（.NET Core 以降は既定で未登録） -->
-    <PackageVersion Include="System.Text.Encoding.CodePages" Version="10.0.0" />
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="10.0.11" />
 
     <!-- 認証情報の暗号化（要件定義書 12章：DPAPI） -->
-    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="10.0.11" />
 
     <!-- WPF の MVVM 実装補助 -->
-    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
   </ItemGroup>
 
 </Project>

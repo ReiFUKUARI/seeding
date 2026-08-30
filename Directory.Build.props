@@ -25,4 +25,22 @@
     <NoWarn>$(NoWarn);CA1416</NoWarn>
   </PropertyGroup>
 
+  <!--
+    Windows 以外（Linux/macOS）でも net10.0-windows 向けプロジェクト（WPF・DPAPI利用の
+    Core を含む）を「コンパイル」できるようにする。.NET SDK は Windows Desktop の
+    参照アセンブリをクロスプラットフォームで配布しているため、コード上の誤りを
+    検出する目的のビルドはこれで足りる。
+
+    ただし WPF は Windows の UI ランタイムに依存するため、ビルドが通っても
+    非Windows環境では実行・起動確認はできない（.wapproj によるMSIX化も同様に
+    Windows + MSBuild が必須。docs/msix-packaging.md 参照）。実際の動作確認は
+    引き続きWindows実機で行うこと。
+
+    Condition により Windows実機でのビルドには一切影響しない
+    （$(OS) が Windows_NT の場合、このプロパティグループごと評価されない）。
+  -->
+  <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
 </Project>

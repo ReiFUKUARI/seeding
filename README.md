@@ -42,6 +42,17 @@ dotnet run --project src\MailDeliveryTool.App
 > MSBuild または Visual Studio でビルドしてください
 > （[手順](docs/msix-packaging.md#5-ビルド手順)）。
 
+### Windows以外（Linux/macOS）でのコンパイル確認について
+
+`Directory.Build.props` が Windows 以外のビルドで自動的に
+`EnableWindowsTargeting=true` を有効化するため、Linux/macOS でも
+`MailDeliveryTool.Core` / `MailDeliveryTool.App` の**コンパイル確認**は可能です
+（Windows実機でのビルドには影響しません）。
+
+ただし WPF は Windows の UI ランタイムに依存するため、**実行・起動確認は
+引き続きWindows実機が必要**です。コンパイルが通ることと、
+アプリが実際に動くことは別です。
+
 ## 検証
 
 ```bash

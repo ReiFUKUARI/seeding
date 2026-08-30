@@ -210,10 +210,17 @@ Wireshark を用意する必要はありません。
 
 ### 依頼したいこと
 
-1. **ターゲットフレームワークの判断**（.NET 8 のまま／.NET 10 へ変更）
-2. **Windows 実機でのビルド確認** — `dotnet restore` でパッケージ
-   バージョンの調整が必要になる可能性があります
-3. **SMTP疎通検証の実施**（[手順書](./smtp-verification.md)）と結果の追記
+1. **添付ファイル上限13MBの最終承認**（[D-007](./decisions.md#d-007-添付ファイル合計の上限は13mb暫定要最終承認)）
+2. **WPF本体（`MailDeliveryTool.App`）の再検証** — 直前のLinux環境でのビルドは
+   `NETSDK1100`（Windows以外でのビルドに未対応）で失敗したため、
+   `Directory.Build.props` に `EnableWindowsTargeting`（Windows以外でのみ有効化、
+   Windows実機のビルドには無影響）を追加した。以下の両方を確認してほしい：
+   - Windows以外の環境: `dotnet build src/MailDeliveryTool.App/MailDeliveryTool.App.csproj -c Release`
+     でコンパイルが通るか（**実行・起動確認はできない**。WPFはWindowsのUIランタイムが必要）
+   - **Windows実機**: 同じビルドに加えて `dotnet run --project src\MailDeliveryTool.App` で
+     実際にウィンドウが起動し、フェーズ4の診断表示（DB初期化状況）が出るか
+3. MSIX（`.wapproj`）のビルド確認（Windows + MSBuild または Visual Studio。
+   [手順](./msix-packaging.md#5-ビルド手順)）
 4. MSIX 未決事項の社内確認（[一覧](./msix-packaging.md#6-未決事項社内確認が必要)）
 
 ### 確定済みの仕様判断

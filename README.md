@@ -71,6 +71,7 @@ MSIX でインストールした場合、**アンインストールでデータ�
 
 | 文書 | 内容 |
 |---|---|
+| [決定事項ログ](docs/decisions.md) | 要件定義書に記載のない論点について確定させた判断 |
 | [フェーズ4 作業報告](docs/phase4-environment-setup.md) | 環境構築の成果・未実施事項・次のアクション |
 | [DBスキーマ 初版](docs/db-schema.md) | テーブル設計と設計判断の記録 |
 | [SMTP疎通検証 手順書](docs/smtp-verification.md) | WebARENA への疎通検証手順と結果記録 |

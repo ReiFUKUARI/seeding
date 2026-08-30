@@ -102,7 +102,7 @@ UI から独立した `Core` を分けているのは、SMTP 疎通検証ツー�
 
 ### ターゲットフレームワーク：.NET 10（決定済み）
 
-`Directory.Build.props` で **.NET 10（`net10.0-windows`）** を指定している。
+`Directory.Build.props` で **.NET 10（`net10.0-windows10.0.22621.0`）** を指定している。
 
 要件定義書 12章は .NET 8/9 を挙げているが、いずれもサポート期限が
 近い、または切れているため、協議のうえ .NET 10 を採用した。
@@ -211,10 +211,17 @@ Wireshark を用意する必要はありません。
 ### 依頼したいこと
 
 1. **添付ファイル上限13MBの最終承認**（[D-007](./decisions.md#d-007-添付ファイル合計の上限は13mb暫定要最終承認)）
-2. **WPF本体（`MailDeliveryTool.App`）の再検証** — 直前のLinux環境でのビルドは
-   `NETSDK1100`（Windows以外でのビルドに未対応）で失敗したため、
-   `Directory.Build.props` に `EnableWindowsTargeting`（Windows以外でのみ有効化、
-   Windows実機のビルドには無影響）を追加した。以下の両方を確認してほしい：
+2. **WPF本体（`MailDeliveryTool.App`）の再検証** — Linux Dev Containerでの
+   ビルドで2件の問題が見つかり、いずれも修正済み：
+   - `NETSDK1100`（Windows以外でのビルドに未対応）→ `EnableWindowsTargeting`
+     を追加（Windows以外でのみ有効化、Windows実機のビルドには無影響）
+   - `NETSDK1135`（`SupportedOSPlatformVersion` が `TargetPlatformVersion` を
+     超過）→ `WindowsTargetFramework` にWindows SDKバージョンを明示
+     （`net10.0-windows` → `net10.0-windows10.0.22621.0`）。バージョン
+     サフィックスなしのTFMはローカルの Windows SDK を自動検出する仕組みで、
+     Linux上では検出できず不正な既定値にフォールバックしていたのが原因
+
+   以下の両方を確認してほしい：
    - Windows以外の環境: `dotnet build src/MailDeliveryTool.App/MailDeliveryTool.App.csproj -c Release`
      でコンパイルが通るか（**実行・起動確認はできない**。WPFはWindowsのUIランタイムが必要）
    - **Windows実機**: 同じビルドに加えて `dotnet run --project src\MailDeliveryTool.App` で

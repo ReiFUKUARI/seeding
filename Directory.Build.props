@@ -9,9 +9,20 @@
 
     .NET 10 は LTS（2028年11月まで）。要件定義書 12章は .NET 8/9 を
     挙げているが、いずれもサポート期限が近い／切れているため .NET 10 を採用した。
+
+    WindowsTargetFramework には Windows SDK バージョンを明示的に埋め込んでいる
+    （net10.0-windows10.0.22621.0）。バージョンサフィックスなしの
+    net10.0-windows と書くと、ビルド時にローカルにインストール済みの
+    Windows SDK を自動検出して TargetPlatformVersion を決定する。この自動検出は
+    ネイティブWindowsでしか機能せず、Linux（WSL・Dev Container等）では
+    検出できず不正な既定値（7.0）にフォールバックし、SupportedOSPlatformVersion
+    （各プロジェクトで指定、17763.0）を下回って NETSDK1135 で失敗する。
+    バージョンを明示すると、参照アセンブリはNuGetから確定的に解決されるため、
+    ホストOSに関わらず同じ結果になる。値は packaging/.../.wapproj の
+    TargetPlatformVersion（10.0.22621.0）と揃えてある。
   -->
   <PropertyGroup>
-    <WindowsTargetFramework>net10.0-windows</WindowsTargetFramework>
+    <WindowsTargetFramework>net10.0-windows10.0.22621.0</WindowsTargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>

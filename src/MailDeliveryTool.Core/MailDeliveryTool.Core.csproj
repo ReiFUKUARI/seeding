@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      DPAPI（ProtectedData）を利用するため Windows 向け TFM を指定する。
+      UI には依存しないため、WPF（UseWPF）は参照しない。
+    -->
+    <TargetFramework>$(WindowsTargetFramework)</TargetFramework>
+    <RootNamespace>MailDeliveryTool.Core</RootNamespace>
+    <AssemblyName>MailDeliveryTool.Core</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="MailKit" />
+    <PackageReference Include="CsvHelper" />
+    <PackageReference Include="System.Text.Encoding.CodePages" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- スキーマ DDL は埋め込みリソースとして持ち、初回起動時に実行する -->
+    <EmbeddedResource Include="Data\Schema\Schema_v1.sql" />
+    <EmbeddedResource Include="Data\Schema\Seed_v1.sql" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,32 @@
+<Project>
+
+  <!--
+    Central Package Management。NuGet のバージョンはこのファイルで一元管理する。
+    各 csproj 側では <PackageReference Include="..." /> のみ記述し、Version は書かない。
+  -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- DB（要件定義書 12章：Microsoft.Data.Sqlite） -->
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="8.0.11" />
+
+    <!-- SMTP 送信（要件定義書 12章：MailKit + MimeKit） -->
+    <PackageVersion Include="MailKit" Version="4.8.0" />
+
+    <!-- CSV 取込／出力（要件定義書 12章：CsvHelper） -->
+    <PackageVersion Include="CsvHelper" Version="33.0.1" />
+
+    <!-- CSV の Shift-JIS フォールバック読み込みに必要（.NET Core 以降は既定で未登録） -->
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+
+    <!-- 認証情報の暗号化（要件定義書 12章：DPAPI） -->
+    <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+
+    <!-- WPF の MVVM 実装補助 -->
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+  </ItemGroup>
+
+</Project>

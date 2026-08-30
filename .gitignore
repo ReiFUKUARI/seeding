@@ -1,0 +1,40 @@
+## .NET / Visual Studio
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build output
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]64/
+[Bb]uild[Ll]og.*
+
+## MSIX / packaging output
+AppPackages/
+BundleArtifacts/
+*.appx
+*.appxbundle
+*.appxupload
+*.msix
+*.msixbundle
+*.msixupload
+*.pfx
+*.cer
+
+## NuGet
+*.nupkg
+packages/
+!packages/build/
+
+## Local run artifacts (never commit)
+*.db
+*.db-shm
+*.db-wal
+smtp-probe.log
+smtpprobe.settings.json

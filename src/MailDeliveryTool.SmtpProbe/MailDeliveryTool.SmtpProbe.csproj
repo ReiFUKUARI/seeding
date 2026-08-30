@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- Core が DPAPI のため Windows 向け TFM。UI は持たないコンソールアプリ -->
+    <TargetFramework>$(WindowsTargetFramework)</TargetFramework>
+    <RootNamespace>MailDeliveryTool.SmtpProbe</RootNamespace>
+    <AssemblyName>smtp-probe</AssemblyName>
+    <!-- MSIX には含めない。検証専用ツールのため製品パッケージ対象外 -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MailDeliveryTool.Core\MailDeliveryTool.Core.csproj" />
+  </ItemGroup>
+
+</Project>

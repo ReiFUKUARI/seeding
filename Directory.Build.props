@@ -1,0 +1,28 @@
+<Project>
+
+  <!--
+    ソリューション全体で共有するビルド設定。
+
+    TargetFramework をここ1か所で管理しているため、.NET のバージョンを
+    上げる場合は WindowsTargetFramework / NetTargetFramework の2行を
+    書き換えるだけで全プロジェクトに反映される。
+    （移行方針の詳細は docs/phase4-environment-setup.md を参照）
+  -->
+  <PropertyGroup>
+    <WindowsTargetFramework>net8.0-windows</WindowsTargetFramework>
+    <NetTargetFramework>net8.0</NetTargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsAsErrors>nullable</WarningsAsErrors>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <NeutralLanguage>ja-JP</NeutralLanguage>
+    <Company>営業メール配信アプリ</Company>
+    <Product>メール配信ツール</Product>
+    <Version>0.1.0</Version>
+    <!-- Windows 専用アプリのため、非 Windows 環境向けの警告は抑制する -->
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+  </PropertyGroup>
+
+</Project>

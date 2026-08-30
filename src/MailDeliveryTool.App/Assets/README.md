@@ -1,10 +1,13 @@
 # Assets
 
-アプリアイコン `app.ico` をここに配置する。
+アプリアイコン `app.ico`。
 
-現時点では未配置。要件定義書 14章のとおり、社内ブランドロゴの
-利用可否を確認したうえで差し替えること。未配置でもビルドは通る
-（`MailDeliveryTool.App.csproj` で `ApplicationIcon` を条件付きにしている）。
+モックプロトタイプ（`mock_prototype.html`）に埋め込まれていたロゴ
+（紺色の「ESC」モノグラム、128x128）をそのまま採用し、16/32/48/256pxの
+各サイズへ合成して1つの `.ico` にまとめてある（透過背景を維持）。
+社内確認の結果、このロゴのまま使用してよいことになっている
+（要件定義書 14章）。差し替えが必要になった場合は、元画像を
+同じ要領で16/32/48/256pxに合成し直すこと。
 
-必要なサイズ: 16 / 32 / 48 / 256 px を1つの .ico にまとめる。
-MSIX 側のタイル画像は `packaging/MailDeliveryTool.Package/Images/` を参照。
+MSIX 側のタイル画像は `packaging/MailDeliveryTool.Package/Images/` を参照
+（同じロゴから生成している）。

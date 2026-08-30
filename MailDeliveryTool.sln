@@ -10,6 +10,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MailDeliveryTool.SmtpProbe"
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "MailDeliveryTool.Package", "packaging\MailDeliveryTool.Package\MailDeliveryTool.Package.wapproj", "{B0E3F5A1-7C42-4F1E-9A6D-5C2B8E4D0117}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MailDeliveryTool.Core.Tests", "tests\MailDeliveryTool.Core.Tests\MailDeliveryTool.Core.Tests.csproj", "{5EEB7FA3-7F5C-4C81-82EB-7F9A9DEC3690}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -34,6 +36,10 @@ Global
 		{B0E3F5A1-7C42-4F1E-9A6D-5C2B8E4D0117}.Release|x64.ActiveCfg = Release|x64
 		{B0E3F5A1-7C42-4F1E-9A6D-5C2B8E4D0117}.Release|x64.Build.0 = Release|x64
 		{B0E3F5A1-7C42-4F1E-9A6D-5C2B8E4D0117}.Release|x64.Deploy.0 = Release|x64
+		{5EEB7FA3-7F5C-4C81-82EB-7F9A9DEC3690}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5EEB7FA3-7F5C-4C81-82EB-7F9A9DEC3690}.Debug|x64.Build.0 = Debug|Any CPU
+		{5EEB7FA3-7F5C-4C81-82EB-7F9A9DEC3690}.Release|x64.ActiveCfg = Release|Any CPU
+		{5EEB7FA3-7F5C-4C81-82EB-7F9A9DEC3690}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

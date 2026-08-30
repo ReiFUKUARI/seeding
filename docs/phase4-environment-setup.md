@@ -9,10 +9,10 @@
 
 | # | タスク | 状態 |
 |---|---|---|
-| ① | .NET + WPF プロジェクトの雛形作成 | 構成完了。`SmtpProbe`・`Core` は **Windows実機でのビルド成功を確認済み**（WPF本体は未検証） |
+| ① | .NET + WPF プロジェクトの雛形作成 | 構成完了。`SmtpProbe`・`Core` は**Windows実機でのビルド成功**、`App`（WPF本体）は**Linux Dev Containerでのコンパイル成功**を確認済み（**Windows実機での起動確認は未実施**） |
 | ② | Microsoft.Data.Sqlite によるDBスキーマ初版構築 | **完了・検証済み（17/17パス）** |
 | ③ | MailKit による WebARENA 実アカウントへの疎通検証 | **完了**。587 + Auto/StartTls とも接続・認証・送信に成功。重要な発見あり（下記） |
-| ④ | MSIXパッケージングの検討 | 完了（構成ファイル＋設計書。WPF本体を含むビルドは未検証） |
+| ④ | MSIXパッケージングの検討 | 完了（構成ファイル＋設計書。`.wapproj`のビルドは未検証） |
 
 ### 実施できなかったことと理由
 
@@ -20,8 +20,11 @@
 その取得元（`builds.dotnet.microsoft.com`）へのネットワークアクセスも
 遮断されている**ため、以下は実行できていません。
 
-- **ビルド・実行**：`dotnet build` / `dotnet run` を一度も実行していません。
-  そもそも WPF は Windows でしかビルドできないため、いずれにせよ実機での確認が必要です。
+- **ビルド・実行**：この環境（Linux）自体では `dotnet` コマンドを一度も
+  実行できていません（SDKが未インストール）。実際のビルド・実行はすべて
+  ユーザーの環境（Windows実機・Linux Dev Container）で確認いただきました。
+  なお `dotnet run` によるWPFの実際の起動確認はまだ未実施です
+  （WPFの実行にはWindowsのUIランタイムが必要なため、Windows実機でのみ可能）。
 - **NuGet パッケージの復元**：`dotnet restore` は実行できていません。
   ただし nuget.org へは到達できたため、記載した各バージョンが実在すること、
   および `net10.0` と互換のターゲットを持つことは確認済みです
@@ -49,7 +52,20 @@ Windows実機で以下を確認いただきました。
   （.NET の `SslStream` 側の同等プロパティの非推奨化に追随したもの）。
   単一の暗号スイート識別子を返す `SslCipherSuite` に置き換えた
 
-WPF本体（`MailDeliveryTool.App`）とMSIX（`.wapproj`）のビルドはまだ確認できていません。
+### WPF本体のコンパイル確認（追記）
+
+Linux Dev Containerで以下を確認いただきました。
+
+- `git pull` 後、`dotnet build src/MailDeliveryTool.App/MailDeliveryTool.App.csproj -c Release`
+  → **成功**（18.8秒。`MailDeliveryTool.dll` を生成。XAMLのコンパイルも含む）
+
+これで `Core` / `App` / `SmtpProbe` の3プロジェクトすべてでコンパイルが
+通ることを確認できました。
+
+残るのは、**Windows実機での`dotnet run`による実際の起動確認**（ウィンドウが開き、
+フェーズ4の診断表示が出るか）と、**MSIX（`.wapproj`）のビルド確認**です。
+いずれもWindows実機（`.wapproj`はWindows + MSBuildが必須）が必要なため、
+Linux Dev Containerでは確認できません。
 
 ### 重要な発見：サーバーのメールサイズ上限は20MB（要件定義書の想定25MBと異なる）
 
@@ -211,21 +227,13 @@ Wireshark を用意する必要はありません。
 ### 依頼したいこと
 
 1. **添付ファイル上限13MBの最終承認**（[D-007](./decisions.md#d-007-添付ファイル合計の上限は13mb暫定要最終承認)）
-2. **WPF本体（`MailDeliveryTool.App`）の再検証** — Linux Dev Containerでの
-   ビルドで2件の問題が見つかり、いずれも修正済み：
-   - `NETSDK1100`（Windows以外でのビルドに未対応）→ `EnableWindowsTargeting`
-     を追加（Windows以外でのみ有効化、Windows実機のビルドには無影響）
-   - `NETSDK1135`（`SupportedOSPlatformVersion` が `TargetPlatformVersion` を
-     超過）→ `WindowsTargetFramework` にWindows SDKバージョンを明示
-     （`net10.0-windows` → `net10.0-windows10.0.22621.0`）。バージョン
-     サフィックスなしのTFMはローカルの Windows SDK を自動検出する仕組みで、
-     Linux上では検出できず不正な既定値にフォールバックしていたのが原因
-
-   以下の両方を確認してほしい：
-   - Windows以外の環境: `dotnet build src/MailDeliveryTool.App/MailDeliveryTool.App.csproj -c Release`
-     でコンパイルが通るか（**実行・起動確認はできない**。WPFはWindowsのUIランタイムが必要）
-   - **Windows実機**: 同じビルドに加えて `dotnet run --project src\MailDeliveryTool.App` で
-     実際にウィンドウが起動し、フェーズ4の診断表示（DB初期化状況）が出るか
+2. **Windows実機での`dotnet run`による起動確認** — `Core`/`App`/`SmtpProbe`は
+   コンパイル確認済みだが、WPFウィンドウが実際に開くかはまだ未確認。
+   ```powershell
+   dotnet run --project src\MailDeliveryTool.App
+   ```
+   実行し、ウィンドウが開いてフェーズ4の診断表示（DB初期化状況）が
+   出ることを確認してほしい
 3. MSIX（`.wapproj`）のビルド確認（Windows + MSBuild または Visual Studio。
    [手順](./msix-packaging.md#5-ビルド手順)）
 4. MSIX 未決事項の社内確認（[一覧](./msix-packaging.md#6-未決事項社内確認が必要)）

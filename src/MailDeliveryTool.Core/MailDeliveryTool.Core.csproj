@@ -13,9 +13,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" />
     <PackageReference Include="MailKit" />
-    <PackageReference Include="CsvHelper" />
-    <PackageReference Include="System.Text.Encoding.CodePages" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+    <!--
+      CsvHelper と System.Text.Encoding.CodePages はフェーズ5のCSV取込/出力実装まで
+      未参照のため、ここには追加しない（NuGetの未使用パッケージ参照警告の原因だった）。
+      バージョンは Directory.Packages.props に残してあるので、実装時は
+      <PackageReference Include="..." /> の1行を足すだけでよい。
+    -->
   </ItemGroup>
 
   <ItemGroup>

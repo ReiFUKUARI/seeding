@@ -9,10 +9,10 @@
 
 | # | タスク | 状態 |
 |---|---|---|
-| ① | .NET + WPF プロジェクトの雛形作成 | 構成完了（**ビルド未実施**） |
+| ① | .NET + WPF プロジェクトの雛形作成 | 構成完了。`SmtpProbe`・`Core` は **Windows実機でのビルド成功を確認済み**（WPF本体は未検証） |
 | ② | Microsoft.Data.Sqlite によるDBスキーマ初版構築 | **完了・検証済み（17/17パス）** |
-| ③ | MailKit による WebARENA 実アカウントへの疎通検証 | 検証ツール・手順書は完成／**疎通検証は未実施** |
-| ④ | MSIXパッケージングの検討 | 完了（構成ファイル＋設計書） |
+| ③ | MailKit による WebARENA 実アカウントへの疎通検証 | **実施済み**。587 + Auto/StartTls とも接続・認証・送信に成功 |
+| ④ | MSIXパッケージングの検討 | 完了（構成ファイル＋設計書。WPF本体を含むビルドは未検証） |
 
 ### 実施できなかったことと理由
 
@@ -30,9 +30,29 @@
 - **③ の疎通検証本体**：WebARENA の実アカウント情報がなく、
   かつサンドボックスから外部SMTPへ接続できません。
 
-そのため③は「**検証を実行できる状態を整えるところまで**」が今回の成果です。
-実施手順は [`smtp-verification.md`](./smtp-verification.md) に記載しており、
-Windows 実機で実行して結果を追記してください。
+### Windows実機での検証結果（追記）
+
+Windows実機で以下を確認いただきました。
+
+- `dotnet build src\MailDeliveryTool.SmtpProbe\MailDeliveryTool.SmtpProbe.csproj -c Release`
+  → **成功**（プロジェクト参照経由で `Core` も含めてビルドされる）
+- `smtp-probe` による WebARENA 実アカウントへの疎通検証（587 + `Auto` / `StartTls`）
+  → **接続・認証・テストメール送信のすべてに成功**
+  （`Host: dc30.etius.jp:587` / `StartTls` 指定時 `TLS 1.2 with AES256` を確認）
+
+結果の詳細は [`smtp-verification.md`](./smtp-verification.md#4-検証結果の記録) に記録中。
+`Auto`（本番設定）指定時の暗号化状況の確認が完了次第、確定させます。
+
+ビルド時に2件の警告が出たため修正済み：
+
+- `Core` プロジェクトで `CsvHelper` / `System.Text.Encoding.CodePages` を
+  未使用のまま参照していた（CSV機能はフェーズ5で実装予定のため、
+  実装時に `PackageReference` を追加する形に変更）
+- MailKit 4.17.0 で `SslCipherAlgorithm` / `SslCipherStrength` が非推奨化されていた
+  （.NET の `SslStream` 側の同等プロパティの非推奨化に追随したもの）。
+  単一の暗号スイート識別子を返す `SslCipherSuite` に置き換えた
+
+WPF本体（`MailDeliveryTool.App`）とMSIX（`.wapproj`）のビルドはまだ確認できていません。
 
 なお、**ソースコードを書いて終わりにはせず、この環境で検証できるものは検証しました**。
 

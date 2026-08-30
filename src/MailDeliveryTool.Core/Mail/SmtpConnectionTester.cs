@@ -57,9 +57,10 @@ public sealed class SmtpConnectionTester
             result.Stage = SmtpTestStage.Connected;
             result.IsEncrypted = client.IsSecure;
             result.TlsVersion = client.IsSecure ? client.SslProtocol.ToString() : null;
-            result.CipherInfo = client.IsSecure
-                ? $"{client.SslCipherAlgorithm} ({client.SslCipherStrength} bit)"
-                : null;
+            // SslCipherAlgorithm / SslCipherStrength は .NET の SslStream 側の同等プロパティが
+            // 非推奨化されたのに伴い MailKit 4.17 で非推奨化された。単一の暗号スイート識別子
+            // （例: TLS_AES_256_GCM_SHA384）を返す SslCipherSuite に置き換える。
+            result.CipherInfo = client.IsSecure ? client.SslCipherSuite.ToString() : null;
             result.ServerAdvertisedStartTls =
                 client.Capabilities.HasFlag(SmtpCapabilities.StartTLS);
             result.OfferedAuthMechanisms = client.AuthenticationMechanisms.OrderBy(m => m).ToList();

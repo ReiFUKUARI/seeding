@@ -40,7 +40,7 @@ public sealed class SmtpConnectionTestResult
     /// <summary>ネゴシエートされたTLSバージョン（例: Tls13）。平文なら null。</summary>
     public string? TlsVersion { get; set; }
 
-    /// <summary>暗号スイート情報。平文なら null。</summary>
+    /// <summary>ネゴシエートされた暗号スイート（例: TLS_AES_256_GCM_SHA384）。平文なら null。</summary>
     public string? CipherInfo { get; set; }
 
     /// <summary>サーバーが STARTTLS を広告していたか。</summary>

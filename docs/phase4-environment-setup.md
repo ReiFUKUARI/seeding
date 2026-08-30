@@ -9,10 +9,10 @@
 
 | # | タスク | 状態 |
 |---|---|---|
-| ① | .NET + WPF プロジェクトの雛形作成 | 構成完了。`SmtpProbe`・`Core` は**Windows実機でのビルド成功**、`App`（WPF本体）は**Linux Dev Containerでのコンパイル成功**を確認済み（**Windows実機での起動確認は未実施**） |
+| ① | .NET + WPF プロジェクトの雛形作成 | **完了**。ビルド・Windows実機での起動確認・画面遷移・DB初期化まで確認済み |
 | ② | Microsoft.Data.Sqlite によるDBスキーマ初版構築 | **完了・検証済み（17/17パス）** |
 | ③ | MailKit による WebARENA 実アカウントへの疎通検証 | **完了**。587 + Auto/StartTls とも接続・認証・送信に成功。重要な発見あり（下記） |
-| ④ | MSIXパッケージングの検討 | 完了（構成ファイル＋設計書。`.wapproj`のビルドは未検証） |
+| ④ | MSIXパッケージングの検討 | 完了（構成ファイル＋設計書。`.wapproj`のビルドのみ未検証） |
 
 ### 実施できなかったことと理由
 
@@ -22,9 +22,7 @@
 
 - **ビルド・実行**：この環境（Linux）自体では `dotnet` コマンドを一度も
   実行できていません（SDKが未インストール）。実際のビルド・実行はすべて
-  ユーザーの環境（Windows実機・Linux Dev Container）で確認いただきました。
-  なお `dotnet run` によるWPFの実際の起動確認はまだ未実施です
-  （WPFの実行にはWindowsのUIランタイムが必要なため、Windows実機でのみ可能）。
+  ユーザーの環境（Windows実機・GitHub Codespaces）で確認いただきました。
 - **NuGet パッケージの復元**：`dotnet restore` は実行できていません。
   ただし nuget.org へは到達できたため、記載した各バージョンが実在すること、
   および `net10.0` と互換のターゲットを持つことは確認済みです
@@ -52,9 +50,9 @@ Windows実機で以下を確認いただきました。
   （.NET の `SslStream` 側の同等プロパティの非推奨化に追随したもの）。
   単一の暗号スイート識別子を返す `SslCipherSuite` に置き換えた
 
-### WPF本体のコンパイル確認（追記）
+### WPF本体のコンパイル確認・起動確認（追記）
 
-Linux Dev Containerで以下を確認いただきました。
+GitHub Codespaces（Linux）で以下を確認いただきました。
 
 - `git pull` 後、`dotnet build src/MailDeliveryTool.App/MailDeliveryTool.App.csproj -c Release`
   → **成功**（18.8秒。`MailDeliveryTool.dll` を生成。XAMLのコンパイルも含む）
@@ -62,10 +60,25 @@ Linux Dev Containerで以下を確認いただきました。
 これで `Core` / `App` / `SmtpProbe` の3プロジェクトすべてでコンパイルが
 通ることを確認できました。
 
-残るのは、**Windows実機での`dotnet run`による実際の起動確認**（ウィンドウが開き、
-フェーズ4の診断表示が出るか）と、**MSIX（`.wapproj`）のビルド確認**です。
-いずれもWindows実機（`.wapproj`はWindows + MSBuildが必須）が必要なため、
-Linux Dev Containerでは確認できません。
+続けて、Codespacesから「Continue Working in New Local Clone」でリポジトリを
+Windows実機にクローンし、ネイティブのVS Codeウィンドウから
+`dotnet run --project src\MailDeliveryTool.App` を実行、
+スクリーンショットで実際の起動を確認いただきました。
+
+- ウィンドウが開き、サイドバー（「新しい配信」「パートナーリスト」「設定」）
+  ・診断カードとも設計どおりに表示された
+- 診断表示：スキーマ版数 `v1`、カテゴリ軸 `2件`、カテゴリ値 `5件`、宛先 `0件`、
+  外部キー制約 `有効`、送信元サーバー `未設定` — いずれも `Seed_v1.sql` の
+  投入内容と一致
+- サイドバーの3項目をクリックすると、タイトルと説明文が正しく切り替わることを
+  スクリーンショット3枚で確認
+- 実行環境：`.NET 10.0.11` / `Windows NT 10.0.26200.0`
+
+これで①（WPF雛形）は、コンパイルだけでなく**実際の起動・画面遷移・
+DB初期化まで含めて動作確認が取れました**。
+
+残るのは **MSIX（`.wapproj`）のビルド確認**のみです
+（Windows + MSBuildが必須。GitHub Codespacesでは確認できません）。
 
 ### 重要な発見：サーバーのメールサイズ上限は20MB（要件定義書の想定25MBと異なる）
 
@@ -225,16 +238,9 @@ Wireshark を用意する必要はありません。
 
 ### 依頼したいこと
 
-1. **Windows実機での`dotnet run`による起動確認** — `Core`/`App`/`SmtpProbe`は
-   コンパイル確認済みだが、WPFウィンドウが実際に開くかはまだ未確認。
-   ```powershell
-   dotnet run --project src\MailDeliveryTool.App
-   ```
-   実行し、ウィンドウが開いてフェーズ4の診断表示（DB初期化状況）が
-   出ることを確認してほしい
-2. MSIX（`.wapproj`）のビルド確認（Windows + MSBuild または Visual Studio。
+1. MSIX（`.wapproj`）のビルド確認（Windows + MSBuild または Visual Studio。
    [手順](./msix-packaging.md#5-ビルド手順)）
-3. MSIX 未決事項の社内確認（[一覧](./msix-packaging.md#6-未決事項社内確認が必要)）
+2. MSIX 未決事項の社内確認（[一覧](./msix-packaging.md#6-未決事項社内確認が必要)）
 
 ### 確定済みの仕様判断
 

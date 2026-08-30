@@ -6,17 +6,18 @@
   IgnorableNamespaces="uap rescap">
 
   <!--
-    Identity/Publisher は署名証明書のサブジェクトと完全一致させる必要がある。
-    社内の署名方針が決まった時点で確定させること（docs/msix-packaging.md 参照）。
+    Identity/Publisher は署名証明書のサブジェクト（CN）と完全一致させる必要がある。
+    D-009（docs/decisions.md）のとおり CN=ESC で確定。証明書を発行する際は
+    Subject をこの値と一字一句合わせること（packaging/.../scripts/ 参照）。
   -->
   <Identity
-    Name="ExampleCorp.MailDeliveryTool"
-    Publisher="CN=ExampleCorp"
+    Name="ESC.MailDeliveryTool"
+    Publisher="CN=ESC"
     Version="0.1.0.0" />
 
   <Properties>
     <DisplayName>メール配信ツール</DisplayName>
-    <PublisherDisplayName>ExampleCorp</PublisherDisplayName>
+    <PublisherDisplayName>ESC</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
   </Properties>
 

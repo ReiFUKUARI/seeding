@@ -55,51 +55,93 @@ WPF は Win32 アプリのため `rescap:runFullTrust` が必須。
 ユーザーがダイアログで明示的に選んだファイル・フォルダへのアクセスは
 `runFullTrust` の範囲で可能であり、過剰な権限宣言は社内配布審査で不利になる。
 
-### Identity / Publisher
+### Identity / Publisher（確定済み）
 
 `Publisher` は**署名証明書のサブジェクト（CN）と完全一致**していなければ
-インストールが失敗する。現在はプレースホルダ（`CN=ExampleCorp`）のため、
-署名方針の確定後に必ず差し替える。→ 未決事項 A
+インストールが失敗する。[D-009](./decisions.md#d-009-msix署名方式publisher名確定)
+のとおり `CN=ESC` で確定した。証明書のSubjectもこれと一字一句合わせること。
 
 ---
 
-## 3. 署名と配布
+## 3. 署名と配布（確定済み）
 
 MSIX は**署名が必須**で、かつ**その証明書がインストール先PCで信頼されている**必要がある。
 
-### 選択肢
+### 方式：自己署名証明書（社内管理）
 
-| 方式 | 初期コスト | 配布手順 | 向き |
-|---|---|---|---|
-| **社内CA / 自己署名証明書** | 低（無償） | `.cer` を各PCの「信頼されたルート証明機関」または「信頼された発行元」に導入する手順が別途必要 | 社内数名規模 |
-| **公的コード署名証明書（OV/EV）** | 年額数万円〜 | 証明書導入が不要。ダブルクリックでインストールできる | 配布先が広い場合 |
-
-**推奨は社内CA／自己署名**。要件定義書 2章のとおり利用者は営業担当者ごとの
-個別インストールで、社内に閉じた配布のため。
-ただし証明書導入の一手間が各PCで発生する点は運用と合わせて要合意。→ 未決事項 B
+社内に署名方式の具体的なルールはなく「セキュリティが担保できていればよい」
+という方針のみのため、**手間が最も少ない自己署名証明書**を採用する
+（公的証明書は年額コスト・更新手続きが発生し、配布先が社内の営業担当者のみ
+という要件定義書 2章の前提では見合わない）。
 
 証明書ファイル（`.pfx`）は**リポジトリに含めない**（`.gitignore` で除外済み）。
 
-### 配布とインストール
+### 証明書の発行（初回のみ・担当者が1回実行）
 
-MSIX はユーザー単位インストールが既定で、要件定義書 2章の
-「1人1台・営業担当者ごとに個別インストール」と素直に合致する。管理者権限は不要。
+以下は署名鍵を管理する担当者が、自分のPCで1回だけ実行する。
+**秘密鍵（`.pfx`）は絶対にリポジトリにコミットしない。**
 
 ```powershell
-# 各PCでの初回インストール
-Add-AppxPackage -Path "\\fileserver\share\MailDeliveryTool_0.1.0.0_x64.msix"
+# 証明書を生成する（有効期限10年。更新の手間を減らすため長めに設定）
+$cert = New-SelfSignedCertificate `
+  -Type Custom `
+  -Subject "CN=ESC" `
+  -KeyUsage DigitalSignature `
+  -FriendlyName "MailDeliveryTool code signing" `
+  -CertStoreLocation "Cert:\CurrentUser\My" `
+  -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}") `
+  -NotAfter (Get-Date).AddYears(10)
+
+# 秘密鍵付き .pfx をエクスポートする（署名・ビルド時に使う。安全な場所に保管し、
+# 誰がどこで保管するかを決めておくこと）
+$pwd = Read-Host -AsSecureString "PFXのパスワードを入力"
+Export-PfxCertificate -Cert $cert -FilePath .\ESC-codesigning.pfx -Password $pwd
+
+# 公開鍵のみの .cer をエクスポートする（配布用。各PCへ配る）
+Export-Certificate -Cert $cert -FilePath .\ESC.cer
 ```
 
-Windows 11 はサイドロードが既定で有効なため、追加のポリシー設定は不要。
+### 配布とインストール（手間を最小化）
 
-### 更新
+`.cer`（公開鍵）の信頼登録と`.msix`のインストールをまとめてできるよう、
+セットアップスクリプトを用意した。**管理者権限は不要**
+（現在のユーザーの証明書ストアのみを使うため）。
 
-`.appinstaller` ファイルを併用すると、ファイル共有上のパッケージを見て
-アプリ起動時に自動更新できる。利用者が営業担当者で、更新のたびに
-手作業を依頼しにくいことを踏まえると導入価値は高い。→ 未決事項 C
+```powershell
+# 各PCでの初回セットアップ（証明書の信頼登録＋インストールを1コマンドで）
+.\packaging\MailDeliveryTool.Package\scripts\install-for-user.ps1 `
+  -CerPath .\ESC.cer `
+  -MsixPath .\MailDeliveryTool_0.1.0.0_x64.msix
+```
 
-更新時は `Package.appxmanifest` の `Version`（4桁 `major.minor.build.revision`）を
-必ず**インクリメント**する。同一バージョンでは更新が適用されない。
+（スクリプトの中身は
+[`install-for-user.ps1`](../packaging/MailDeliveryTool.Package/scripts/install-for-user.ps1)）
+
+Windows 11 は、信頼された証明書で署名済みのパッケージであれば既定で
+サイドロードできる。うまくいかない場合は
+「設定 → プライバシーとセキュリティ → 開発者向け」でサイドロードが
+許可されているか確認すること。
+
+### 更新（任意・ファイル共有の場所が決まってから有効化）
+
+`.appinstaller` を使うと、アプリ起動時にファイル共有上の新しいバージョンを
+検知して自動更新できる。「営業担当者に更新のたびに手作業を依頼しない」
+という手間削減の方針に合うため**有効化を推奨**するが、
+**パッケージを置くファイル共有の場所（社内で使っているものでよい）が
+決まるまでは保留**にしてある（`.wapproj` には反映していない。無効な
+プロパティを入れて未検証のままビルドを壊すリスクを避けるため）。
+
+決まったら `MailDeliveryTool.Package.wapproj` に以下を追加する。
+
+```xml
+<GenerateAppInstallerFile>true</GenerateAppInstallerFile>
+<AppInstallerUri>\\<ファイル共有のパス>\MailDeliveryTool\</AppInstallerUri>
+<HoursBetweenUpdateChecks>24</HoursBetweenUpdateChecks>
+```
+
+有効化後は、更新のたびに `Package.appxmanifest` の `Version`
+（4桁 `major.minor.build.revision`）を必ず**インクリメント**すること
+（同一バージョンでは更新が適用されない）。
 
 ---
 
@@ -257,7 +299,10 @@ dir "C:\Program Files (x86)\Windows Kits\10\Platforms\UAP\"
 
 | # | 項目 | 状態 |
 |---|---|---|
-| A | Identity / Publisher | **要確認**。署名証明書のサブジェクトと一致させる必要がある。正式な会社名の提供待ち（[D-009](./decisions.md#d-009-msix署名方式publisher名暫定方針)） |
-| B | 署名方式 | **暫定決定済み**。社内に特定のルールがないため自己署名証明書を採用（詳細は[D-009](./decisions.md#d-009-msix署名方式publisher名暫定方針)） |
-| C | 自動更新 | 未決定。`.appinstaller` による自動更新を採用するか。採用する場合、パッケージを置くファイル共有のパス |
+| A | Identity / Publisher | **確定済み**。`CN=ESC`（[D-009](./decisions.md#d-009-msix署名方式publisher名確定)） |
+| B | 署名方式 | **確定済み**。自己署名証明書＋手間を最小化した配布手順を採用（[D-009](./decisions.md#d-009-msix署名方式publisher名確定)） |
+| C | 自動更新 | **未決定・保留**。有効化を推奨するが、パッケージを置くファイル共有のパスが決まってから対応（「3. 署名と配布」参照） |
 | D | アプリアイコン | **確定済み**。モックのロゴをそのまま採用（[D-008](./decisions.md#d-008-アプリアイコンはモックのロゴをそのまま採用)） |
+
+残るのは **C（自動更新）のみ**。ファイル共有のパスが決まれば`.wapproj`に
+3行追加するだけで有効化できる（手順は「3. 署名と配布」参照）。

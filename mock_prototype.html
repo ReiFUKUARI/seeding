@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>営業メール配信アプリ - モック</title>
+<style>
+  :root{
+    --bg-canvas:#f3f3f3;
+    --bg-surface:#ffffff;
+    --bg-sidebar:#faf9f8;
+    --border:#e1dfdd;
+    --text-primary:#201f1e;
+    --text-secondary:#605e5c;
+    --accent:#0078d4;
+    --accent-hover:#106ebe;
+    --accent-soft:#e5f1fb;
+    --danger:#d13438;
+    --danger-soft:#fdecea;
+    --warn:#8a6d00;
+    --warn-soft:#fff8e1;
+    --success:#107c10;
+    --success-soft:#e6f4e6;
+    --radius:6px;
+    --shadow:0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:"Segoe UI Variable","Yu Gothic UI","Segoe UI",system-ui,sans-serif;
+    background:var(--bg-canvas); color:var(--text-primary); font-size:14px;
+    height:100vh; display:flex; overflow:hidden;
+  }
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:220px; background:var(--bg-sidebar); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; flex-shrink:0;
+  }
+  .app-title{
+    padding:18px 16px 12px; font-weight:600; font-size:15px; display:flex; align-items:center; gap:8px;
+  }
+  .app-title .logo{width:26px;height:26px;border-radius:6px;background:#ffffff; border:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden;}
+  .app-title .logo img{width:80%;height:80%;object-fit:contain;}
+  .nav{padding:4px 8px; display:flex; flex-direction:column; gap:2px;}
+  .nav-item{
+    display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:var(--radius);
+    color:var(--text-secondary); cursor:pointer; font-size:13.5px; user-select:none;
+  }
+  .nav-item svg{width:16px;height:16px;flex-shrink:0;}
+  .nav-item:hover{background:#eeecea;}
+  .nav-item.active{background:var(--accent-soft); color:var(--accent); font-weight:600;}
+  .sidebar-footer{margin-top:auto; padding:10px 8px; border-top:1px solid var(--border);}
+  .account-chip{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--radius);cursor:pointer;}
+  .account-chip:hover{background:#eeecea;}
+  .avatar{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0;}
+  .account-chip .meta{overflow:hidden;}
+  .account-chip .meta .name{font-size:12.5px;font-weight:600;white-space:nowrap;}
+  .account-chip .meta .mail{font-size:11px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  /* ---------- Main ---------- */
+  .main{flex:1; display:flex; flex-direction:column; min-width:0;}
+  .titlebar{
+    height:52px; flex-shrink:0; background:var(--bg-surface); border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between; padding:0 20px;
+  }
+  .titlebar h1{font-size:15px; font-weight:600; margin:0;}
+  .step-indicator{display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-secondary);}
+  .step-indicator .step{display:flex; align-items:center; gap:6px; padding:4px 10px; border-radius:14px;}
+  .step-indicator .step.current{background:var(--accent-soft); color:var(--accent); font-weight:600;}
+  .step-indicator .sep{color:#c8c6c4;}
+
+  .content{flex:1; overflow:auto; padding:20px 24px;}
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  /* ---------- Common components ---------- */
+  .card{background:var(--bg-surface); border:1px solid var(--border); border-radius:8px; box-shadow:var(--shadow); padding:16px;}
+  .card + .card{margin-top:14px;}
+  .toolbar{display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  .btn{
+    appearance:none; border:1px solid var(--border); background:var(--bg-surface); color:var(--text-primary);
+    padding:7px 14px; border-radius:var(--radius); font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+  }
+  .btn:hover{background:#f5f5f4;}
+  .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600;}
+  .btn.primary:hover{background:var(--accent-hover);}
+  .btn.primary:disabled{background:#c8c6c4; border-color:#c8c6c4; cursor:not-allowed;}
+  .btn.subtle{border-color:transparent; background:transparent;}
+  .btn.subtle:hover{background:#f0efed;}
+  input[type=text], input[type=search], textarea, select{
+    font-family:inherit; font-size:13px; padding:7px 10px; border:1px solid #c8c6c4; border-radius:var(--radius);
+    background:#fff; color:var(--text-primary); outline:none;
+  }
+  input[type=text]:focus, input[type=search]:focus, textarea:focus{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent);}
+  .input-error{border-color:var(--danger) !important; box-shadow:0 0 0 1px var(--danger) !important;}
+  .field-error{color:var(--danger); font-size:12px; margin-top:6px; line-height:1.5;}
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th{text-align:left; padding:8px 10px; color:var(--text-secondary); font-weight:600; border-bottom:1px solid var(--border); font-size:12px; background:var(--bg-surface); position:sticky; top:0;}
+  td{padding:8px 10px; border-bottom:1px solid #f0efed; vertical-align:middle;}
+  tr:hover td{background:#faf9f8;}
+  .tag-chip{display:inline-flex; align-items:center; gap:4px; background:var(--accent-soft); color:var(--accent); padding:2px 8px; border-radius:10px; font-size:11.5px; margin:2px 3px 2px 0;}
+  .section-title{font-size:13px; font-weight:600; margin:0 0 10px;}
+  .muted{color:var(--text-secondary); font-size:12.5px;}
+  .badge{display:inline-flex; align-items:center; padding:2px 8px; border-radius:10px; font-size:11.5px; font-weight:600;}
+  .badge.count{background:var(--accent-soft); color:var(--accent);}
+
+  .row-checkbox{width:15px;height:15px;}
+  .row-suspended-cell{opacity:.5; color:var(--text-secondary);}
+  .icon-btn:disabled{opacity:.35; cursor:not-allowed;}
+  .icon-btn:disabled:hover{background:#fff;}
+  .icon-btn.resume-btn{color:var(--accent); border-color:var(--accent-soft);}
+  .icon-btn.resume-btn:hover{background:var(--accent-soft);}
+  .memo-cell{max-width:160px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:inline-block; vertical-align:middle; cursor:default;}
+
+  /* ---------- Settings / Category management ---------- */
+  .axis-card{border:1px solid var(--border); border-radius:8px; padding:14px; margin-bottom:12px;}
+  .axis-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .axis-head .name{font-weight:600; font-size:13.5px;}
+  .value-chip{display:inline-flex; align-items:center; gap:6px; background:#f5f5f4; border:1px solid var(--border); padding:4px 10px 4px 12px; border-radius:14px; font-size:12.5px; margin:3px 4px 0 0;}
+  .value-chip button{border:none; background:none; cursor:pointer; color:var(--text-secondary); font-size:13px; line-height:1; padding:0;}
+  .value-chip button:hover{color:var(--danger);}
+  .add-value-input{display:inline-flex; gap:6px; margin-top:8px;}
+  .add-value-input input{width:140px; padding:5px 8px;}
+
+  /* ---------- Target selection screen ---------- */
+  .filter-panel-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;}
+  .filter-label{font-size:12px; font-weight:600; color:var(--text-secondary); margin-bottom:5px;}
+  .axis-filter .axis-name{font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.03em; margin-bottom:6px;}
+  .axis-checkbox-grid{display:grid; grid-template-rows:repeat(2, auto); grid-auto-flow:column; column-gap:22px; row-gap:2px;}
+  .checkbox-row{display:flex; align-items:center; gap:7px; padding:2px 0; font-size:13px; white-space:nowrap;}
+
+  .tab-bar{display:flex; gap:4px; border-bottom:1px solid var(--border);}
+  .tab-item{padding:8px 14px; font-size:13px; color:var(--text-secondary); cursor:pointer; border-bottom:2px solid transparent; display:flex; align-items:center; gap:7px; user-select:none;}
+  .tab-item:hover{color:var(--text-primary);}
+  .tab-item.active{color:var(--accent); font-weight:600; border-bottom-color:var(--accent);}
+  .tab-count{background:#f0efed; color:var(--text-secondary); font-size:11px; padding:1px 8px; border-radius:9px; font-weight:600;}
+  .tab-item.active .tab-count{background:var(--accent-soft); color:var(--accent);}
+  .tab-content{padding-top:12px;}
+  .scroll-table{max-height:360px; overflow:auto; border:1px solid var(--border); border-radius:6px;}
+  table.compact td{padding:4px 10px; font-size:12.5px;}
+  table.compact th{padding:6px 10px;}
+  .tab-footer{display:flex; justify-content:flex-end; gap:10px; padding:12px 0 2px;}
+
+  /* ---------- Compose screen ---------- */
+  .compose-layout{display:grid; grid-template-columns:1fr 260px; gap:16px; align-items:start;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12.5px; font-weight:600; color:var(--text-secondary); margin-bottom:5px;}
+  .field input[type=text]{width:100%;}
+  .field textarea{width:100%; min-height:220px; resize:vertical; line-height:1.6;}
+  .tag-insert-menu{position:relative; display:inline-block;}
+  .tag-dropdown{
+    display:none; position:absolute; top:36px; left:0; background:#fff; border:1px solid var(--border);
+    border-radius:8px; box-shadow:var(--shadow); min-width:180px; z-index:10; overflow:hidden;
+  }
+  .tag-dropdown.open{display:block;}
+  .tag-dropdown div{padding:8px 12px; font-size:13px; cursor:pointer;}
+  .tag-dropdown div:hover{background:var(--accent-soft); color:var(--accent);}
+  .signature-box{background:#faf9f8; border:1px dashed var(--border); border-radius:6px; padding:10px 12px; font-size:12.5px; color:var(--text-secondary); white-space:pre-line; margin-top:6px;}
+  .attach-drop{border:1.5px dashed #c8c6c4; border-radius:8px; padding:16px; text-align:center; color:var(--text-secondary); font-size:12.5px; cursor:pointer;}
+  .attach-drop:hover{border-color:var(--accent); color:var(--accent);}
+  .attach-list{margin-top:8px; display:flex; flex-direction:column; gap:6px;}
+  .attach-item{display:flex; align-items:center; justify-content:space-between; background:#faf9f8; border:1px solid var(--border); border-radius:6px; padding:6px 10px; font-size:12.5px;}
+  .side-summary .card{margin-bottom:12px;}
+  .side-summary .num{font-size:26px; font-weight:700; color:var(--accent); line-height:1;}
+
+  /* ---------- Confirmation / Warning screen ---------- */
+  .warn-item{display:flex; gap:10px; align-items:flex-start; padding:12px; border-radius:8px; margin-bottom:10px;}
+  .warn-item.warn{background:var(--warn-soft); border:1px solid #f0dc82;}
+  .warn-item .icon{font-size:16px; flex-shrink:0;}
+  .warn-item .title{font-weight:600; font-size:13px; margin-bottom:2px;}
+  .warn-item .detail{font-size:12.5px; color:var(--text-secondary);}
+  .warn-item.warn .title{color:var(--warn);}
+
+  /* ---------- Progress screen ---------- */
+  .progress-wrap{max-width:480px; margin:60px auto; text-align:center;}
+  .progress-bar-outer{width:100%; height:10px; background:#eceae8; border-radius:6px; overflow:hidden; margin:20px 0 10px;}
+  .progress-bar-inner{height:100%; width:0%; background:var(--accent); transition:width .25s linear;}
+  .progress-log{text-align:left; background:#faf9f8; border:1px solid var(--border); border-radius:8px; padding:10px 12px; font-size:12px; color:var(--text-secondary); height:120px; overflow:auto; font-family:Consolas,monospace;}
+
+  /* ---------- Result screen ---------- */
+  .result-summary{display:flex; gap:16px; margin-bottom:16px;}
+  .stat-card{flex:1; text-align:center; padding:18px;}
+  .stat-card .num{font-size:30px; font-weight:700;}
+  .stat-card.success .num{color:var(--success);}
+  .stat-card.fail .num{color:var(--danger);}
+  .stat-card .label{font-size:12.5px; color:var(--text-secondary); margin-top:4px;}
+  .result-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .copy-toast{
+    position:fixed; bottom:24px; right:24px; background:#201f1e; color:#fff; padding:10px 16px;
+    border-radius:8px; font-size:13px; opacity:0; transform:translateY(6px); transition:all .2s; pointer-events:none;
+  }
+  .copy-toast.show{opacity:1; transform:translateY(0);}
+
+  .icon-btn{border:1px solid var(--border); background:#fff; border-radius:6px; width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-secondary);}
+  .icon-btn:hover{background:#f5f5f4; color:var(--text-primary);}
+  .icon-btn.attach-remove{color:var(--danger); border-color:#f3c6c7;}
+  .icon-btn.attach-remove:hover{background:var(--danger-soft); color:var(--danger);}
+
+  /* ---------- Preview modal ---------- */
+  .modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:100;}
+  .modal-overlay.open{display:flex;}
+  .modal-box{background:#fff; border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,.28); max-width:640px; width:90%; max-height:80vh; overflow:auto; padding:22px 24px;}
+  .modal-box .modal-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+  .modal-box .modal-body{white-space:pre-line; font-size:15px; line-height:1.85; color:var(--text-primary);}
+  .spinner{width:30px;height:30px;border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; margin:4px auto 16px; animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<!-- ============ SIDEBAR ============ -->
+<div class="sidebar">
+  <div class="app-title"><span class="logo"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAWYUlEQVR4nO2de3QcV33Hv997ZyXtyo5jreSEEJoHoUmAQIjTYAj2yo5DTChwToma8igBekp45ACnaXkWVLWU5yGU5vSVU1JooC/REtoQQhwirW0gQEx4lBBISHikNbZXsuVYu5J27v32jzujXclS/FrFXnc+5+yxNTM7c2fub37397p3gYyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjOMdHusGLCEMnwECuxa5z34PDAmAnsiGZSwpgwYoRYf3nQEbPnNeCC6w7YTjBLq5QQMMAYBPNrBz1WVnWflzIJwBqA9SMdm1k+QvBfNA1ZqfYOfmycZ5Bmz4d9jNO7fHCcgJIgADNu2wfM+GS0hdLepyAr8Omk7CIGj5xu0KAuQ8gJ8D+AZh/iuqz3xlYmLbnnDE6lyhb9llQO6d9O7PJsdG7m6+zonCYarK45HQKd2r1l0gbz4A6KWkBeABeUGC6EEQzUM9AYCRAc1ZAM+C/CvruejRfG9pC0AH4DcAc55hBIf6dwDcvbgt0b60+Q2VIqAc54v915LmE6TJS3UPIYaJOgjAy1UA/IDADz38IwbcB1CAKCEH8CkAnkPiUpqO5VDQ9AoCFIOGkv9JrdJ3ATDscYIZjG0sAKHzC8X+d9LkPizVAagOmBxpILm7Pfh30ZS/e//+cuVgZ+tcddnZ1rnrQF4HIAcoRtCQCo/Jra5Wttx3og0DbToEDFhgOO7qLb2CjD4s1WNABG0O0mPw7k3VsdHPNX3BACWz+Pn6/fSuoYcB/EF3cf1tIm4h7WlS7ACKjCLJvxjAfSfaMNCON2MAqGvl2tONjf4bwDLACzAEMOXpr5jaXd7WZM0fqto2wGoLbK939pXOsTJfIc3ZUjwDRh1Q/M1qpbwGmGdMtDmP81YcrwwQgGjs+8noJCSDNmmN5K9POr8jqOlhh0PvLA9srwOlaHp3+SFn442S/wVoOxA0wUWdfaVzkvO14XNbmHa7EQLDrtBXOpXA70ixEtVvveIHamP9NyXDQ/3IL1GOgVI0vXPrI8bXXwRpHCDJKGccNoU2PN5w0l602Y2ULADQawNNtAzwHqAICwpfDsGaXS1Q0UEI9o9vu9/JXQUYD8DD4DfDuftPmKBQmwlAQODq4MqxqaO1Ay21aRJNMLZlRN79AUhDYE2hr3RqEhVsR/vpANpMAFalHf5kQHM6QODy1l8vCEFtvHyj/Mx/0ORXCHhB2Feyrb/eE0+bCUAKm9otCh6krkBD9bfw7exP3nZ/nVQXhDeG7atOCE+gzQQg8cGJnZjtbFoo9mR0Sb7Y/5bw1gJJRrAFgjDkgUFWK1t3yNevI/jPYfvwCWEHtNk4lkT/ete/nrSfkuoOoEUQBoHGQP6Pq5XHPhpcOuAI4gGLcUL5/yktEoDBJ0iTjBqg33etvPvJxtoHAXYCak7ziYzoFX+P5CdzM/VbG9k9ALMRwSMtBFkoVXxIEBgwQYOtEvD05Lr3s7FtWGikshf47tKEn9tMAzTIF9d90JiOdzdpgQQ50FrCwPt4B8g7BdxO2W21sbv+d+5ZSlHy8JcoyTNoQicfcucxGJepfbGLjSFtaTgaASAA5YsbTwPjzwAw4W2kS57lQaxkCpJDyN3O0yASQA8lqTnSAEqPCZFAsADweYn2d4lhmNyPkg41lolsSPE+gN8GtRniXdVK73fndkzLhoqkjYNMi0gKfaVT5c0lgC4mcC6AUwEQ1C6BD8Lz26C950ABBVasKJ1cz2GgWll181JogaMRAAPAd/aVzrEwDwIMOXeG/JIUL3ryoLPTY13Szw0DPuxL+5MAPCQ3p8ECQr8DHrQm/F/ztAEEwAWX0Vgm55QcBN1P8i5At1ehr2F3eX/jawM2qOkjqQJqZAu7+vovNeIbAbyYpmMlSMjPQHJjFPcJKpAsklEkeMj779Dw8x5+q4nZrYjrKL2CJneWj+trauOj32r1cNCCIaAUdZ6C0zEFdESmMwbOBfRGGvMiyMfz/fUkgAMAVcB/TJ6bfc7tAkwiAZ652HTG9KuMj84EsVpQieSzQQPI1WfbTRPB+4dAfRW01xIGUgwAMYKANmsWBc1AAYhAA8KklUG/FLGZsl+oWjPSKBFLbZtDFYS0PuH5p5GdHwHwSpoOI9UB6YsiPwfnvlEbX7VjthP7Ssu6ac+GdxsE82qa3GogfYEMBAfCOK/4X2uV8qtanY5eMhsg39t/p6G9PEmpNr+VHjSUd79VGyvfemhnG7DdxUrJG11P2CuDhvc+NN8IwCXeqYsW7yOwibRpQUeqAczc2AGQCIMHZEBr0rIxyf8MwhdpefPkrru/n17/4END4qGsLG2CNZ8izWkAIPl7PXD9VGVkyyE9t54Nl9DoPSBflrQ/BpgDVPMuOm9qz12/QKJ9D+3ZPT6tEoCmh7spB9wxXegrbQKiL2OuAHjQGMk/UKuMnt9khM17sINoWMhAsyHUXSy9WrQ3gjgZctNkR6f3M/9aGyv/DgDki6WLacyrIL0ENE8Nb5FPk4aJRmq2F5J2hRqyWWGQXAzyC3L+47Xx0W+GwxZ7+5LO7yu9DrCfgsRQlOI/X83tuwY7tlebbIzU+2jyXgYZPJxy0g6gq7f/aoJ/aWhWycfTNB2d3tc/UBsbfV96vcPqoUVYAg0waIAhLetZd5435odo+M8E5MjIernNtcroFc2G0sFpuGDdK9ddIGv/EzRnQs4BqMqb82vja3fMnu+MUlf3fqzxNC8CtIngs4JmUGo7pMIw31hNOyEiI0hOAj4D799XGy8/eqAQJJ3fs/Ya2s5PS3FM2sh7d1ttbPSl4d4Pp8MankNn3/qnGo9/M8ZcpHCfO7upc3fvLqdVzEftuSyV/y6a3CLjFJEM1Ao3eqik+f3Vuck9W37gbLwB8j8DaclouYy/OnT+QAcwYPHz8tTkWHm0Vhl5Z60yeiHgLhLce+D9NgDTZBSBUdr5SXsAhGcSAVBwMQVjotfCmHvzxf6XhTak8w4GLFCOu4vr1sPkbpZcHSAl90hN1VeFYwbN4b2tQz69xvTukZ92+X0bJPd10FjSnjYJMxDa2ppcxLEKBR+F5CZFGzu3PhILmyTsBgBK1wAwoRZgOInfD9iks1StbLmvunvkQ9WxkbWOeqZX/HbIfR0gyCgCyKAaNDuvINEOlK/HJE6hsbcWevqvSZNEwLDvXrXhFA/7TyAMIJDGSv7tGP/WvtBJRzqfoBwDA3bPnu0T0czUSyT9KDGC3xzus9wSG6DNcgEpoQNmxkZ+LMRXSX6GJnpmd09pAwAFVwkKb1I5RvDL0xlDnN5dfqhWGf1ktTJ6KYCL5d0NgP6HzFnQmnmCAAAR5D3kPKz5dHex/zKg7ABIzv2VMfZUyM2ANie5e2tjW/7z8N/8hRh2wIDdt++ecWPc1fJxFcxd1NVXej4A3xgWj5w2FQAgFYKpytYtQP3NNB1G5JVh3wGFm4lPX05V/awwVCsj26tjI9fn6nqm5K6V/PfmCkIKk0AXIPLTwCALff1X0OReLsUxQEMQEv4+HD/aomcbhoPJXVt+ILj30HQaCn+CFvVdGwsAkHSoqVa2fgrx5IZOHw01bX88moQhaIaJifLeamXkplpFF8u71wB6kMzZeUJgIefI6PRCcfQd8np3OIcIMJLiGqQvJW1oYbaw7IBBU6tsudG76mYIjwJPj1qRkWyXsvA5AcB5eACcHNsyMrnAzoMzlFr9SRy+HFfHcEtPzyVfrNnCJwxzr5+bb6CV6gL55wRMEnhKFIT7bvAUkvBl61CSvEKtMvrCFp63bTTAvMzdoJk3/qkFM3nVXEswPv6tfbXdo7/nVf9IogmaO5SY8+yoEDvgN5LvL3G1UOuyr+0hAOds6ly5cuOKhvuVukrNHX5YJeAHoZyEkktRrVJ+l1c8SkbzbIL51xIM/H2tuf7BaN1M5eNcAEKHF/ZOvWs6Mg9296AfALqL69YXiqVPLvHFZ91Bgh9bYH+ztrGCh/P6afizfcrFjnMBCAg4h8b2efpuABDNAG3nWwu9a09NDlmi+wiuXtSVu8fL7QVMWn00r3kkvJuGbJLOnR/aPn45ngUgqZQpRZCeC8UCouCGSeOgcaC5Ak/ARI19XWaSwF6QwCLDjMDH8rR7Z/9sE46lAKTJnnmfNGCzOgKGXb6oNxgTPU1yBHxobwjqW4nX4ImYqDFRy0noXKRbBRKEJvfsiaaWtB1LwLEMBaspMNP0SQM22+vdvetfQdobJB/PM/AtFIPguq7edWuTHMBSWN4EgE7gVBK9iVkwz9MIUiGyBtxxFFPSjg3HKg6QQ19pGWYQIarPWtbLZ/IdytVXiVztwVeIvDIE3xQvWJJLGiPzUQDPa9ImLVS/JQOUZcFLySh3YP1hM/MLX9qDJ1gAaKUYJDcWPHYjEoGONJIm1xnnwMgSBoQAxT5J0izwcAl4N02TW5MvloZqY+VBYHUO2O7Q6iCMdO2cWWjz2wGAYh4odQDlthoGnmgNIIAUtI/Q/aHYE2hoVUryKyF/Jo3tUijcWPyNJo0UO5ro/d296/dOVkY+EXaUoqT0+0gFgcBADhieKfSuewOZe17y9h+42lQoMoSg7hUrXH5iApkALI48GVmovrU6Vn7pwscMmuW9Xz0nFl5L8I8wu0zLghCAhZwHoxvyvf0Xwuu9IRxbTvanZdZPnw2nLnK+ZAgpmeD+Dc8UevtfDPAvFVYTIxI3YCFPkOSKqQ5bBLAnKXRpC0/gmNgAEpJS8NU2Udmzu4Ah/1gFPwHwnkJfaQtkv4DU/1scSnFsGL3GG3dlvnf9zcbwc6Gmb9HEUGozJNedNUw9UIq6i/ZtAj4MKAJ8HYxy8vFOApOgPTusSpKeQx60UeTd6dPAQ4dX6HJsOZbJIA+cTWD7fDWdPNSBqLp7+I5CsfQ+mtzHdMCwLo9QyWOTNzMKlbTsJe075OO3F3r7vyNgm8BvG+LHNNGOyZ12ArhjGgfkF0pRZx/ONN5cDuj3Ycxzgg2iOpnLSdpprH2hnH9XWDrG+aYEkSeM8XDnAxhtp3WEjsdsYNIxw3Vg0FQ7tv91ob7/bWR0msJbF2BkCHVJHoL2QJoBERE4SfA5MtcBcg2BNZCD5Lx3M3sLRU4IpT0EaklVsAcQAeyDdAaN6ZQ8pDgGTUQYA/k7nZl50/SubQ/ni/3Tqdl3QMvJSwD8TTuFgo9HAUgRcL/BjtuqKPbfA9txFfysNicU3wf5W+Tjr9lO8/D+mfr0irqJajnTG0FPlXSxPNaQuhDgk8nIkOyB1EPgrHCBA8dyQUmcyUfy+g5R/8TkWPmzyQGG9I8skHQ0ggeFS5NSsaQK6fiPCB7PAoAm3/7bknu2pdsDAIS7YXL36Dsw7wFPhH/2zAAPArgDCFOrpnN8lvHuuQBWCzoXwKmEloPMA7MTAqog90J4GNTXPfTlqbHRLZi1+t8QATfV5Xk/rZC4rumlDeQF8px8URfWxrB9KSd0JpXJi00mPSyOcwEIBlx1bPRjAD6O5Iarla07wv5Zd69ZENhYIr7fT0wM7QWwJfkAAFau3LiihumTLMwKRYhIOVfX3qmOrvG5C0cDjTLwm8I8NIvvUnE9TNaY4xK6MMVr+rcB3LuEdsDhTDY9KMe5AMySzPCZpWnCSLlpc5iT0CiVSl3B5qnZw27PnrsmEBTGLxe4VpPrOOybHrYHwOnd/Q/ni+UHaOwFIUGVuoahOogwr+rrK/1pUrvf6mGAANTdU9oY5/xPp3du/Vmy/Yiv0S4CAMx9mAvd8GJLumuBNyZNPDVtGkrPq8Vdx5IFhmKg/zbCXCDQo5FPMYB3ZO60/ai/DsCNrZzBk16n+5TL++Tcl4zDg8Dq5wDbj+r8x3M6eD6PJ+UGgC/0lS5E8fnpYlGPp4KT8XOo6YNDmBYeso5W5rMhMjh/CjwpOUF870knvbAnOb5Fz7hkAHgfT3+QtqMDHn+bzJE4qiRYOwnAIgxYAL575fpnANE3C+i4Kdm+BPc25IFBs3/87vsB3E5GnFcmZgDvDaNT6h0zfxGOX92CLGU697D/CmM7f8+7qQdq46tuAsCkaOWIaXMBCAba8uWXFWX172TUAeC7Yd9SGWFplI9Dkk+nujdpDlqp7gyj3833lK4Lb+nqHI64YDV0ftfKtU+BeDMAEP56YHimMQHmyGljAUis89PX5F2nu5WMzpWb3i9Et4T9razLbybM1qlWRrZD/q9CxTDmjcNJksraGws9pdceuGDVIcEgOOV42ZNKvTT2VprO07yb+cdqZcvtrVonoE0FoBQBww5PWl3IT3V9kbQvEORBbA7LrAwkPxmyVAx7YNBUo9y7vOo/BG0Oc4UglI3Le9roH/LF9UMI8xZdo/0D6dI4zRVRpnk+I7C9vqxn3fmuzq8a23GR3NRPunzurcHbac0ydce4JOxIvtNYhaNQX77ZMLpcPp4OkzTwGTRKzZaSoHZ3bp6MxJdDqoAmwoFCQMl5Y+z7C73rv1boXX9l2F6OE2FIDc/042fnM56+Jp/v7X+rM3abYfQs+foEbTyQuLCNNhwlS+UG0ru4A3bWR27qECGJwKmxXNrBGDTJAgoxUI67e0obRfv3JM+Q6nUY2ym5X9byfXeG8x6dYXRohDK0x8aGf5wvrruSiG4nbW+YIo5cclAiBHUHRs8F8KV8sf8+gP9l5LbFOT3UNWX2TJyMqeL+em7SF1ZaEz/NG65nTb9NY58GAJKbpPdXTVa2fT9oiKHjbYmYOb/TFwHlqe5i6dUwuVvmlVGFghBpVy0/dSYevWcqFH8uexxBaPjRYaFm826Ibw1RAZf8okcu8pr5eK1S/sMW+96HQBiLl/WsO98Z+y/GRM+SryskmQ5YuSxJYjFdqGJGwgSJKQk5AifDmK5khRKQBh7aIcVXT1W2bF2Ke1sSVVnoXfskILob5LmQE+au7evIyMr7G6pjI9cfyvm6V228wPv4lQBfb2hXJb8TkJ5XAAXiouruke8dm9/4SwyyvtKygsyHALyFtGwsWDW7LA2QLoE3u25RUmcSah+FZE0g0sLL3+mtu3Z6Z/lnSyXYRyMAITLXV1qWd7wCEA3R5clnEHglwF8DfL0pVNqMB9gB4KuCv03Ar+hZT2sDjVGHF3sonQ/D3wBwIWk7JAcIUyCSeYByYGQhd2+1Mvo8tHDxpMOnIXj5ntIaGvMOAC9Jl4BLli5MNcN8jWcAmsaahu4BEB+t7h75h7B76X6o6mgEwADwHcXSebmo60dzCmxm11c4SDCOUZN8zMvnzB42+/AWaLJA5uBc9c21sfLfPPHq/wDYnAXsXrnxAln/W4A2AXoGaJZz1u5OI9tK18N8FNLXZcxwreBuw8/LU2g81CUT6qPXACtKJxci/D6aCzglC7Pgmz8XIZ3QudCxSY/LNIpHF2oFFU3X/m7fvnvG0Xiqx5gD1xcs9K59kqd5qhVO9+AplPIC9gL4FY15pGqihw78CdsT5+fp/p/SWJbm0I5f8Eesl5RWXIjH/tczyi2cGr5kNKWlm5lTsXy830NGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRkZGRsYx4P8ADdVtmE2tu8sAAAAASUVORK5CYII=" alt="logo"></span>メール配信ツール</div>
+  <div class="nav">
+    <div class="nav-item active" data-screen="target" onclick="switchNav(this)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5"/><path d="M2 4.2l6 4.8 6-4.8"/></svg>
+      新しい配信
+    </div>
+    <div class="nav-item" data-screen="list" onclick="switchNav(this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v2H2V3zm0 4h12v2H2V7zm0 4h12v2H2v-2z"/></svg>
+      パートナーリスト
+    </div>
+    <div class="nav-item" data-screen="settings" onclick="switchNav(this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 5a3 3 0 100 6 3 3 0 000-6zm6.4 3a5.4 5.4 0 00-.1-1.1l1.4-1.1-1.4-2.4-1.7.5a5.6 5.6 0 00-1.9-1.1L10.3 1H7.7l-.4 1.8a5.6 5.6 0 00-1.9 1.1l-1.7-.5-1.4 2.4L3.7 6.9A5.4 5.4 0 003.6 8c0 .4 0 .7.1 1.1L2.3 10.2l1.4 2.4 1.7-.5c.6.5 1.2.9 1.9 1.1l.4 1.8h2.6l.4-1.8c.7-.2 1.3-.6 1.9-1.1l1.7.5 1.4-2.4-1.4-1.1c.1-.4.1-.7.1-1.1z"/></svg>
+      設定
+    </div>
+  </div>
+</div>
+
+<!-- ============ MAIN ============ -->
+<div class="main">
+  <div class="titlebar">
+    <h1 id="titlebarText">宛先を選択</h1>
+    <div class="step-indicator" id="stepIndicator">
+      <span class="step current" id="stepA">① 宛先選択</span>
+      <span class="sep">›</span>
+      <span class="step" id="stepB">② メール作成</span>
+      <span class="sep">›</span>
+      <span class="step" id="stepC">③ 送信</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ============ 画面: リスト ============ -->
+    <div class="screen" id="screen-list">
+      <div class="card filter-panel" style="margin-bottom:14px; padding-top:10px;">
+        <div class="filter-panel-head">
+          <div class="section-title" style="margin:0; font-size:15px;">検索</div>
+          <button class="btn subtle" onclick="clearListFilters()">条件をクリア</button>
+        </div>
+        <div style="display:flex; gap:40px; flex-wrap:wrap; align-items:flex-start;">
+          <div style="min-width:200px;">
+            <div class="filter-label">キーワード（会社名・担当者名・メモ）</div>
+            <input type="search" id="listSearchInput" placeholder="部分一致で検索" style="width:220px;" oninput="renderListTable()">
+          </div>
+          <div id="listAxisFilters" style="display:flex; gap:48px; flex-wrap:wrap; flex:1;"></div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <span style="flex:1"></span>
+        <button class="btn primary" onclick="openAddContactModal()">追加する</button>
+        <button class="btn" onclick="openCsvImportModal()">CSVから取り込む</button>
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>会社名 <span style="color:var(--danger)">*</span></th>
+              <th>担当者名 <span style="color:var(--danger)">*</span></th>
+              <th>メールアドレス <span style="color:var(--danger)">*</span></th>
+              <th>種別 <span style="color:var(--danger)">*</span></th>
+              <th>技術領域 <span style="color:var(--danger)">*</span></th>
+              <th>メモ</th>
+              <th style="width:80px"></th>
+            </tr>
+          </thead>
+          <tbody id="listTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============ 画面: 設定（カテゴリ管理を含む） ============ -->
+    <div class="screen" id="screen-settings">
+      <div class="card">
+        <div class="section-title">メールアカウント</div>
+        <table style="width:auto;" id="acctInfoTable"></table>
+        <button class="btn" style="margin-top:10px;" onclick="openAccountModal()">変更する</button>
+      </div>
+      <div class="card">
+        <div class="section-title">バックアップ</div>
+        <p class="muted" style="margin:0 0 10px;">保存先：ドキュメント¥営業メール配信¥Backup／週次自動実行＋手動実行</p>
+        <button class="btn" onclick="runBackupNow()">今すぐバックアップする</button>
+      </div>
+      <div class="card">
+        <div class="section-title">カテゴリ管理</div>
+        <p class="muted" style="margin-bottom:14px;">パートナーリストの種別と技術領域の値を自由に追加・編集・削除できます。</p>
+        <div id="axisContainer"></div>
+      </div>
+    </div>
+
+    <!-- ============ 画面: 宛先を選択（ステップ1） ============ -->
+    <div class="screen active" id="screen-target">
+      <div class="card filter-panel" style="margin-bottom:14px; padding-top:10px;">
+        <div class="filter-panel-head">
+          <div class="section-title" style="margin:0; font-size:15px;">検索</div>
+          <button class="btn subtle" onclick="clearFilters()">条件をクリア</button>
+        </div>
+        <div style="display:flex; gap:40px; flex-wrap:wrap; align-items:flex-start;">
+          <div style="min-width:180px;">
+            <div class="filter-label">会社名</div>
+            <input type="search" id="searchInput" placeholder="部分一致で検索" style="width:180px;" oninput="applyFilter()">
+          </div>
+          <div id="axisFilters" style="display:flex; gap:48px; flex-wrap:wrap; flex:1;"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tab-bar">
+          <div class="tab-item active" id="tabSearch" onclick="switchTargetTab('search')">すべて <span class="tab-count" id="searchTabCount">0</span></div>
+          <div class="tab-item" id="tabList" onclick="switchTargetTab('list')">メールリスト <span class="tab-count" id="listTabCount">0</span></div>
+        </div>
+
+        <div class="tab-content" id="tabContentSearch">
+          <div class="scroll-table">
+            <table class="compact">
+              <thead><tr><th style="width:24px"><input type="checkbox" id="searchHeaderCb" onchange="toggleAllSearch(this.checked)"></th><th>会社名</th><th>担当者名</th><th>メールアドレス</th><th>種別</th><th>技術領域</th><th>メモ</th></tr></thead>
+              <tbody id="targetTableBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-footer">
+            <button class="btn primary" onclick="addCheckedToList()">メールリストに追加</button>
+          </div>
+        </div>
+
+        <div class="tab-content" id="tabContentList" style="display:none;">
+          <div class="scroll-table">
+            <table class="compact">
+              <thead><tr><th style="width:24px"><input type="checkbox" id="listHeaderCb" onchange="toggleAllList(this.checked)"></th><th>会社名</th><th>担当者名</th><th>メールアドレス</th><th>種別</th><th>技術領域</th><th>メモ</th><th style="width:28px"></th></tr></thead>
+              <tbody id="listTabTableBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-footer">
+            <button class="btn primary" id="confirmTargetBtn" onclick="confirmTarget()" disabled>確定する</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 画面: メール作成（ステップ2） ============ -->
+    <div class="screen" id="screen-compose">
+      <div style="margin-bottom:12px;">
+        <button class="btn subtle" onclick="goBackToTarget()">← 宛先の選択に戻る</button>
+      </div>
+      <div class="compose-layout">
+        <div>
+          <div class="card">
+            <div class="field">
+              <label>件名</label>
+              <input type="text" id="subjectInput" placeholder="件名を入力" value="【ご案内】新サービスに関するご案内">
+            </div>
+            <div class="field">
+              <label style="display:flex; align-items:center; justify-content:space-between;">
+                本文
+                <span class="tag-insert-menu">
+                  <button class="btn subtle" onclick="toggleTagMenu(event)">🏷 タグを挿入 ▾</button>
+                  <div class="tag-dropdown" id="tagDropdown">
+                    <div onclick="insertTag('会社名')">#会社名#</div>
+                    <div onclick="insertTag('担当者名')">#担当者名#</div>
+                    <div onclick="insertTag('メールアドレス')">#メールアドレス#</div>
+                  </div>
+                </span>
+              </label>
+              <textarea id="bodyInput">#会社名#
+#担当者名# 様
+
+いつもお世話になっております。
+このたび新サービスをご案内させていただきます。
+
+#電話番号# 宛にご連絡いただければ詳細をご案内いたします。</textarea>
+              <div class="field-error" id="bodyError" style="display:none;"></div>
+              <div class="signature-box">-- 署名（自動挿入） --
+田中 太郎
+〇〇株式会社 営業部
+tanaka@example-corp.jp
+※本メールの配信停止をご希望の場合は上記アドレスまでご連絡ください。</div>
+            </div>
+            <div class="field">
+              <label>添付ファイル（複数可）</label>
+              <div class="attach-drop" id="attachDropArea" onclick="addAttachment()">クリックしてファイルを選択、またはドラッグ＆ドロップ</div>
+              <div class="attach-list" id="attachList"></div>
+              <div class="field-error" id="attachError" style="display:none;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="side-summary">
+          <div class="card" id="targetSummaryCard">
+            <div class="section-title">宛先</div>
+            <div class="num" id="composeTargetCount">0</div>
+            <div class="muted">件に送信します</div>
+            <div class="field-error" id="targetError" style="display:none;"></div>
+          </div>
+          <div class="card" style="position:relative;">
+            <div class="section-title">プレビュー（1件目）</div>
+            <div class="muted" id="previewBox" style="white-space:pre-line; line-height:1.6;"></div>
+            <button class="icon-btn" id="previewExpandBtn" title="クリックで拡大表示" onclick="openPreviewModal()" style="position:absolute; right:10px; bottom:10px; background:#fff;">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.2H2.2v3.8M10 13.8h3.8v-3.8M2.2 13.8l5-5M13.8 2.2l-5 5"/></svg>
+            </button>
+          </div>
+          <button class="btn primary" style="width:100%; justify-content:center;" onclick="checkAndProceed()">確認する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 画面: 送信前の確認 ============ -->
+    <div class="screen" id="screen-warning">
+      <div class="card" style="max-width:720px;">
+        <div class="section-title">送信内容</div>
+        <div style="margin-bottom:14px;">
+          <div class="section-title" style="font-size:12.5px;">宛先一覧（<span id="confirmTargetCount"></span>件）</div>
+          <div style="max-height:200px; overflow:auto; border:1px solid var(--border); border-radius:6px;">
+            <table>
+              <thead><tr><th>会社名</th><th>担当者名</th><th>メールアドレス</th></tr></thead>
+              <tbody id="confirmTargetBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="confirmMeta" style="margin-bottom:10px;"></div>
+        <div style="margin-bottom:14px;">
+          <div class="section-title" style="font-size:12.5px;">本文</div>
+          <div id="confirmBody" style="white-space:pre-line; background:#faf9f8; border:1px solid var(--border); border-radius:6px; padding:10px 12px; font-size:12.5px; max-height:280px; overflow:auto;"></div>
+        </div>
+        <div style="margin-bottom:6px;">
+          <div class="section-title" style="font-size:12.5px;">添付ファイル</div>
+          <div id="confirmAttachments" class="muted"></div>
+        </div>
+        <div id="confirmWarnings"></div>
+        <div class="tab-footer">
+          <button class="btn" onclick="showScreen('compose')">戻る</button>
+          <button class="btn primary" id="proceedSendBtn" onclick="startSending()">送信する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 画面: 送信実行 ============ -->
+    <div class="screen" id="screen-progress">
+      <div class="progress-wrap">
+        <div class="section-title" style="font-size:15px;">送信しています…</div>
+        <div class="muted" id="progressText">0 / 0 件 送信済み</div>
+        <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar"></div></div>
+        <div class="progress-log" id="progressLog"></div>
+      </div>
+    </div>
+
+    <!-- ============ 画面: 送信結果 ============ -->
+    <div class="screen" id="screen-result">
+      <div class="result-summary">
+        <div class="card stat-card success"><div class="num" id="successCount">0</div><div class="label">送信成功</div></div>
+        <div class="card stat-card fail"><div class="num" id="failCount">0</div><div class="label">送信失敗</div></div>
+      </div>
+      <div class="card">
+        <div class="result-header">
+          <div class="section-title" style="margin:0;">送信失敗の宛先一覧</div>
+          <button class="btn primary" onclick="copyFailList()">📋 一覧をコピー</button>
+        </div>
+        <table>
+          <thead><tr><th>会社名</th><th>担当者名</th><th>メールアドレス</th><th>エラー内容</th></tr></thead>
+          <tbody id="failTableBody"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:16px; text-align:right;">
+        <button class="btn primary" onclick="resetToTarget()">完了する</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="copy-toast" id="copyToast">失敗一覧をクリップボードにコピーしました</div>
+
+<div class="modal-overlay" id="previewModal" onclick="if(event.target===this) closePreviewModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="section-title" style="margin:0;">プレビュー（1件目）</div>
+      <button class="icon-btn" onclick="closePreviewModal()">✕</button>
+    </div>
+    <div class="modal-body" id="previewModalBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="addContactModal" onclick="if(event.target===this) closeModal('addContactModal')">
+  <div class="modal-box" style="max-width:460px;">
+    <div class="modal-header">
+      <div class="section-title" style="margin:0;">宛先を追加</div>
+      <button class="icon-btn" onclick="closeModal('addContactModal')">✕</button>
+    </div>
+    <div class="field">
+      <label>会社名 <span style="color:var(--danger)">*</span></label>
+      <input type="text" id="newContactCompany" style="width:100%;">
+    </div>
+    <div class="field">
+      <label>担当者名 <span style="color:var(--danger)">*</span></label>
+      <input type="text" id="newContactName" style="width:100%;">
+    </div>
+    <div class="field">
+      <label>メールアドレス <span style="color:var(--danger)">*</span></label>
+      <input type="text" id="newContactMail" style="width:100%;">
+    </div>
+    <div class="field">
+      <label>種別 <span style="color:var(--danger)">*</span></label>
+      <div id="newContactAxis1" class="axis-checkbox-grid"></div>
+    </div>
+    <div class="field">
+      <label>技術領域 <span style="color:var(--danger)">*</span></label>
+      <div id="newContactAxis2" class="axis-checkbox-grid"></div>
+    </div>
+    <div class="field">
+      <label>メモ（100文字まで）</label>
+      <textarea id="newContactMemo" maxlength="100" style="width:100%; min-height:56px;"></textarea>
+    </div>
+    <div class="field-error" id="newContactError" style="display:none;"></div>
+    <div class="tab-footer">
+      <button class="btn" onclick="closeModal('addContactModal')">キャンセル</button>
+      <button class="btn primary" onclick="submitNewContact()">登録する</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="csvImportModal" onclick="if(event.target===this) closeModal('csvImportModal')">
+  <div class="modal-box" style="max-width:460px;">
+    <div class="modal-header">
+      <div class="section-title" style="margin:0;">CSVから取り込む</div>
+      <button class="icon-btn" onclick="closeModal('csvImportModal')">✕</button>
+    </div>
+    <p class="muted" style="margin:0 0 6px;">既存のカテゴリ値（種別・技術領域）に存在しない値が含まれる場合はエラーとして取込を停止します。</p>
+    <p class="muted" style="margin:0 0 14px;">現在登録されている種別・技術領域の選択肢に対応したフォーマットをダウンロードできます。</p>
+    <button class="btn subtle" style="margin-bottom:14px; padding-left:0;" onclick="downloadCsvTemplate()">⬇ フォーマットをダウンロード</button>
+    <div class="attach-drop" id="csvDropArea" onclick="document.getElementById('csvFileInput').click()">クリックしてCSVファイルを選択</div>
+    <input type="file" id="csvFileInput" accept=".csv" style="display:none;" onchange="handleCsvFileSelect(this)">
+    <div id="csvSelectedFile" class="muted" style="margin-top:8px;"></div>
+    <div id="csvImportResult" style="margin-top:12px;"></div>
+    <div class="tab-footer">
+      <button class="btn" onclick="closeModal('csvImportModal')">キャンセル</button>
+      <button class="btn primary" id="csvImportBtn" onclick="runCsvImport()" disabled>取り込む</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="accountModal" onclick="if(event.target===this) closeModal('accountModal')">
+  <div class="modal-box" style="max-width:440px;">
+    <div class="modal-header">
+      <div class="section-title" style="margin:0;">メールアカウントを変更</div>
+      <button class="icon-btn" onclick="closeModal('accountModal')">✕</button>
+    </div>
+    <div class="field"><label>サーバー名</label><input type="text" id="acctServer" style="width:100%;"></div>
+    <div class="field"><label>アカウント名</label><input type="text" id="acctAccount" style="width:100%;"></div>
+    <div class="field"><label>パスワード</label><input type="password" id="acctPassword" style="width:100%;" placeholder="変更する場合のみ入力"></div>
+    <div class="field"><label>ポート</label><input type="text" id="acctPort" style="width:120px;"></div>
+    <div class="field">
+      <label>暗号化方法</label>
+      <select id="acctEncryption" style="width:100%; padding:7px 10px; border:1px solid #c8c6c4; border-radius:6px; font-size:13px;">
+        <option>自動（STARTTLSが利用可能な場合は自動使用）</option>
+        <option>STARTTLSを必須にする</option>
+        <option>暗号化なし</option>
+      </select>
+    </div>
+    <div class="tab-footer">
+      <button class="btn" onclick="closeModal('accountModal')">キャンセル</button>
+      <button class="btn primary" onclick="saveAccountSettings()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="backupModal" onclick="if(event.target===this) closeModal('backupModal')">
+  <div class="modal-box" style="max-width:400px; text-align:center;">
+    <div id="backupModalContent"></div>
+  </div>
+</div>
+
+<script>
+/* ================= Mock Data ================= */
+function memoCellHtml(memo){
+  const escaped = (memo||'').replace(/"/g,'&quot;');
+  return `<span class="memo-cell" title="${escaped}">${memo || ''}</span>`;
+}
+let axes = [
+  {id:'axis1', name:'種別', values:['案件','人材']},
+  {id:'axis2', name:'技術領域', values:['開発','インフラ','その他']}
+];
+
+let contacts = [
+  {company:'株式会社アルファ商事', name:'佐藤 一郎', mail:'sato@alpha.co.jp', axis1:['案件'], axis2:['開発'], memo:'年次契約更新は3月', suspended:false},
+  {company:'ベータ物流株式会社', name:'鈴木 花子', mail:'suzuki@beta-logi.co.jp', axis1:['人材'], axis2:['インフラ'], memo:'', suspended:false},
+  {company:'ガンマ製作所', name:'高橋 健', mail:'takahashi@gamma-ss.co.jp', axis1:['案件','人材'], axis2:['開発','その他'], memo:'決裁は本社経由', suspended:false},
+  {company:'デルタ商会', name:'', mail:'info@delta-shokai.jp', axis1:['案件'], axis2:['その他'], memo:'', suspended:false},
+  {company:'イプシロンテック株式会社', name:'伊藤 直樹', mail:'ito@epsilon-tech.jp', axis1:['人材'], axis2:['開発'], memo:'', suspended:false},
+  {company:'ゼータ工業', name:'渡辺 誠', mail:'watanabe@zeta-kogyo.co.jp', axis1:['案件'], axis2:['インフラ','開発'], memo:'昨年末から発注が止まっており休眠気味。担当交代の可能性ありのため次回接点時に決裁者を再確認すること。', suspended:true},
+  {company:'イータ商事', name:'山本 美咲', mail:'yamamoto@eta-shoji.co.jp', axis1:['人材'], axis2:['その他'], memo:'', suspended:false},
+  {company:'シータ物産', name:'中村 大輔', mail:'nakamura@theta-bussan.jp', axis1:['案件'], axis2:['開発'], memo:'', suspended:false},
+];
+
+let currentTargetList = [];   // 検索結果（フィルタのたびに再計算される）
+let excludedIndexes = new Set(); // 検索結果タブ内でのチェック解除
+let addedList = [];           // リストタブ（永続的に蓄積される宛先の下書き）
+let activeTargetTab = 'search';
+let attachments = [];
+
+/* ================= Navigation ================= */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  const titles = {
+    list:'パートナーリスト', settings:'設定', target:'宛先を選択', compose:'メール作成',
+    warning:'内容の確認', progress:'送信中', result:'送信完了'
+  };
+  document.getElementById('titlebarText').innerText = titles[id] || '';
+  const wizard = ['target','compose','warning','progress','result'].includes(id);
+  document.getElementById('stepIndicator').style.visibility = wizard ? 'visible' : 'hidden';
+  ['stepA','stepB','stepC'].forEach(s=>document.getElementById(s).classList.remove('current'));
+  if(id==='target') document.getElementById('stepA').classList.add('current');
+  if(id==='compose'||id==='warning') document.getElementById('stepB').classList.add('current');
+  if(id==='progress'||id==='result') document.getElementById('stepC').classList.add('current');
+}
+function switchNav(el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  showScreen(el.dataset.screen);
+  if(el.dataset.screen==='list'){ renderListAxisFilters(); renderListTable(); }
+  if(el.dataset.screen==='settings') renderAxes();
+  if(el.dataset.screen==='target'){ applyFilter(); renderListTab(); }
+}
+
+/* ================= 画面: パートナーリスト ================= */
+function renderListAxisFilters(){
+  const container = document.getElementById('listAxisFilters');
+  container.innerHTML = axes.map(axis=>`
+    <div class="axis-filter">
+      <div class="axis-name">${axis.name}</div>
+      <div class="axis-checkbox-grid">
+        ${axis.values.map(v=>`
+          <label class="checkbox-row">
+            <input type="checkbox" class="list-filter-cb" data-axis="${axis.id}" data-value="${v}" onchange="renderListTable()">
+            ${v}
+          </label>`).join('')}
+      </div>
+    </div>`).join('');
+}
+function clearListFilters(){
+  document.getElementById('listSearchInput').value = '';
+  document.querySelectorAll('.list-filter-cb').forEach(cb=>cb.checked=false);
+  renderListTable();
+}
+function renderListTable(){
+  const searchTerm = (document.getElementById('listSearchInput')?.value || '').trim();
+  const checks = Array.from(document.querySelectorAll('.list-filter-cb:checked'));
+  const byAxis = {};
+  checks.forEach(cb=>{
+    const axis = cb.dataset.axis;
+    (byAxis[axis] = byAxis[axis] || []).push(cb.dataset.value);
+  });
+  const filtered = contacts.filter(c=>{
+    if(searchTerm){
+      const haystack = [c.company, c.name, c.memo||''].join(' ');
+      if(!haystack.includes(searchTerm)) return false;
+    }
+    for(const axisId in byAxis){
+      const selected = byAxis[axisId];
+      const has = (c[axisId]||[]).some(v=>selected.includes(v));
+      if(!has) return false;
+    }
+    return true;
+  });
+  const body = document.getElementById('listTableBody');
+  body.innerHTML = filtered.map(c=>{
+    const i = contacts.indexOf(c);
+    const dim = c.suspended ? 'row-suspended-cell' : '';
+    return `
+    <tr>
+      <td class="${dim}">${c.company || '<span style="color:var(--danger)">（未入力・保存不可）</span>'}</td>
+      <td class="${dim}">${c.name || '-'}</td>
+      <td class="${dim}">${c.mail}</td>
+      <td class="${dim}">${c.axis1.map(v=>`<span class="tag-chip">${v}</span>`).join('')}</td>
+      <td class="${dim}">${c.axis2.map(v=>`<span class="tag-chip">${v}</span>`).join('')}</td>
+      <td class="${dim} muted">${memoCellHtml(c.memo)}</td>
+      <td>
+        <button class="icon-btn" title="編集" ${c.suspended ? 'disabled' : ''} onclick="alert('編集フォームを開く')">✎</button>
+        <button class="icon-btn ${c.suspended?'resume-btn':'attach-remove'}" title="${c.suspended?'再開する':'停止する'}" onclick="toggleSuspend(${i})">${c.suspended?'↺':'⏸'}</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function toggleSuspend(i){
+  contacts[i].suspended = !contacts[i].suspended;
+  renderListTable();
+}
+
+/* ---- 汎用モーダル開閉 ---- */
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+/* ---- 宛先を追加モーダル ---- */
+function openAddContactModal(){
+  document.getElementById('newContactCompany').value = '';
+  document.getElementById('newContactName').value = '';
+  document.getElementById('newContactMail').value = '';
+  document.getElementById('newContactMemo').value = '';
+  document.getElementById('newContactError').style.display = 'none';
+  const axis1 = axes.find(a=>a.id==='axis1');
+  const axis2 = axes.find(a=>a.id==='axis2');
+  document.getElementById('newContactAxis1').innerHTML = (axis1?.values||[]).map(v=>`
+    <label class="checkbox-row"><input type="checkbox" class="new-contact-axis1-cb" value="${v}"> ${v}</label>`).join('');
+  document.getElementById('newContactAxis2').innerHTML = (axis2?.values||[]).map(v=>`
+    <label class="checkbox-row"><input type="checkbox" class="new-contact-axis2-cb" value="${v}"> ${v}</label>`).join('');
+  openModal('addContactModal');
+}
+function submitNewContact(){
+  const company = document.getElementById('newContactCompany').value.trim();
+  const name = document.getElementById('newContactName').value.trim();
+  const mail = document.getElementById('newContactMail').value.trim();
+  const memo = document.getElementById('newContactMemo').value.trim();
+  const axis1Vals = Array.from(document.querySelectorAll('.new-contact-axis1-cb:checked')).map(cb=>cb.value);
+  const axis2Vals = Array.from(document.querySelectorAll('.new-contact-axis2-cb:checked')).map(cb=>cb.value);
+  const err = document.getElementById('newContactError');
+  if(!company || !name || !mail || axis1Vals.length===0 || axis2Vals.length===0){
+    err.style.display = 'block';
+    err.innerText = '⚠️ 会社名・担当者名・メールアドレス・種別・技術領域は必須です。';
+    return;
+  }
+  contacts.push({company, name, mail, axis1:axis1Vals, axis2:axis2Vals, memo, suspended:false});
+  closeModal('addContactModal');
+  renderListTable();
+}
+
+/* ---- CSVから取り込むモーダル ---- */
+function downloadCsvTemplate(){
+  // ダウンロード時点の axes（種別・技術領域）を毎回読みに行くため、
+  // 設定画面で値を追加・削除した後もテンプレートは常に最新の選択肢に対応する
+  const axis1 = axes.find(a=>a.id==='axis1');
+  const axis2 = axes.find(a=>a.id==='axis2');
+  const ex1 = (axis1 && axis1.values[0]) || '';
+  const ex2 = (axis2 && axis2.values[0]) || '';
+  const header = ['会社名','担当者名','メールアドレス', axis1?.name || '種別', axis2?.name || '技術領域', 'メモ'];
+  const exampleRow = ['株式会社サンプル','山田 太郎','sample@example.jp', `"${ex1}"`, `"${ex2}"`, '初回商談済み'];
+  const csvBody = [header.join(','), exampleRow.join(',')].join('\r\n');
+  const bom = '\uFEFF'; // Excelでの文字化けを防ぐためBOM付きUTF-8にする
+  const blob = new Blob([bom + csvBody], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = '宛先リスト_テンプレート.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function openCsvImportModal(){
+  document.getElementById('csvSelectedFile').innerText = '';
+  document.getElementById('csvImportResult').innerHTML = '';
+  document.getElementById('csvFileInput').value = '';
+  document.getElementById('csvImportBtn').disabled = true;
+  openModal('csvImportModal');
+}
+function handleCsvFileSelect(input){
+  const file = input.files[0];
+  if(!file) return;
+  document.getElementById('csvSelectedFile').innerText = '選択中のファイル：' + file.name;
+  document.getElementById('csvImportBtn').disabled = false;
+}
+function runCsvImport(){
+  const resultBox = document.getElementById('csvImportResult');
+  document.getElementById('csvImportBtn').disabled = true;
+  resultBox.innerHTML = '<div class="muted">取り込んでいます…</div>';
+  setTimeout(()=>{
+    const sample = [
+      {company:'カッパ商会', name:'小林 恭平', mail:'kobayashi@kappa-corp.jp', axis1:['案件'], axis2:['開発'], memo:'', suspended:false},
+      {company:'ラムダ物産', name:'松本 舞', mail:'matsumoto@lambda-bussan.jp', axis1:['人材'], axis2:['インフラ'], memo:'', suspended:false},
+    ];
+    let addedN = 0;
+    sample.forEach(s=>{ if(!contacts.some(c=>c.mail===s.mail)){ contacts.push(s); addedN++; } });
+    resultBox.innerHTML = `<div class="warn-item" style="background:var(--success-soft); border:1px solid #bfe3bf;">
+      <div class="icon">✅</div>
+      <div><div class="title" style="color:var(--success)">取込が完了しました</div><div class="detail">${addedN}件を新規登録しました。</div></div>
+    </div>`;
+    renderListTable();
+    renderListAxisFilters();
+  }, 900);
+}
+
+/* ---- メールアカウントモーダル ---- */
+let accountSettings = {
+  server: 'mail.example-corp.jp',
+  account: 'tanaka@example-corp.jp',
+  password: 'P@ssw0rd!2026',
+  port: '587',
+  encryption: '自動（STARTTLSが利用可能な場合は自動使用）'
+};
+function renderAccountInfo(){
+  document.getElementById('acctInfoTable').innerHTML = `
+    <tr><td class="muted" style="padding-right:24px;">サーバー名</td><td>${accountSettings.server}</td></tr>
+    <tr><td class="muted" style="padding-right:24px;">アカウント名</td><td>${accountSettings.account}</td></tr>
+    <tr><td class="muted" style="padding-right:24px;">パスワード</td><td>&#42;&#42;&#42;&#42;&#42;&#42;&#42;&#42;</td></tr>
+    <tr><td class="muted" style="padding-right:24px;">ポート</td><td>${accountSettings.port}</td></tr>
+    <tr><td class="muted" style="padding-right:24px;">暗号化方法</td><td>${accountSettings.encryption}</td></tr>`;
+}
+function openAccountModal(){
+  document.getElementById('acctServer').value = accountSettings.server;
+  document.getElementById('acctAccount').value = accountSettings.account;
+  document.getElementById('acctPassword').value = '';
+  document.getElementById('acctPort').value = accountSettings.port;
+  document.getElementById('acctEncryption').value = accountSettings.encryption;
+  openModal('accountModal');
+}
+function saveAccountSettings(){
+  accountSettings.server = document.getElementById('acctServer').value.trim();
+  accountSettings.account = document.getElementById('acctAccount').value.trim();
+  const pw = document.getElementById('acctPassword').value;
+  if(pw) accountSettings.password = pw;
+  accountSettings.port = document.getElementById('acctPort').value.trim();
+  accountSettings.encryption = document.getElementById('acctEncryption').value;
+  renderAccountInfo();
+  closeModal('accountModal');
+}
+
+/* ---- 今すぐバックアップするモーダル ---- */
+function runBackupNow(){
+  const content = document.getElementById('backupModalContent');
+  content.innerHTML = `
+    <div class="spinner"></div>
+    <div class="section-title" style="margin:0 0 4px;">バックアップを実行しています…</div>
+    <div class="muted">しばらくお待ちください</div>`;
+  openModal('backupModal');
+  setTimeout(()=>{
+    const now = new Date();
+    const pad = n=>String(n).padStart(2,'0');
+    const ts = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+    content.innerHTML = `
+      <div style="font-size:32px; color:var(--success); margin-bottom:8px;">✅</div>
+      <div class="section-title" style="margin:0 0 6px;">バックアップが完了しました</div>
+      <div class="muted" style="margin-bottom:4px;">保存先：ドキュメント¥営業メール配信¥Backup</div>
+      <div class="muted" style="margin-bottom:16px;">ファイル名：backup_${ts}.csv</div>
+      <button class="btn primary" onclick="closeModal('backupModal')">閉じる</button>`;
+  }, 1100);
+}
+
+/* ================= 画面: 設定 / カテゴリ管理 ================= */
+function renderAxes(){
+  const container = document.getElementById('axisContainer');
+  container.innerHTML = axes.map(axis=>{
+    return `
+    <div class="axis-card">
+      <div class="axis-head">
+        <div class="name">${axis.name}</div>
+      </div>
+      <div>
+        ${axis.values.map(v=>`
+          <span class="value-chip">${v}
+            <button onclick="deleteValue('${axis.id}','${v}')" title="削除">×</button>
+          </span>`).join('')}
+      </div>
+      <div class="add-value-input">
+        <input type="text" id="newval-${axis.id}" placeholder="新しい値を入力">
+        <button class="btn" onclick="addValue('${axis.id}')">追加</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addValue(axisId){
+  const input = document.getElementById('newval-'+axisId);
+  const val = input.value.trim();
+  if(!val) return;
+  const axis = axes.find(a=>a.id===axisId);
+  if(!axis.values.includes(val)) axis.values.push(val);
+  input.value = '';
+  renderAxes();
+  // 新しい配信・パートナーリストの各フィルタも最新の値で再描画しておく
+  renderAxisFilters();
+  renderListAxisFilters();
+}
+function deleteValue(axisId, val){
+  const usage = contacts.filter(c => (c[axisId]||[]).includes(val)).length;
+  const msg = usage > 0
+    ? `「${val}」は現在 ${usage} 件の宛先で使用中です。削除すると該当の宛先から自動的に紐付けが解除されます。削除しますか？`
+    : `「${val}」を削除しますか？`;
+  if(!confirm(msg)) return;
+  const axis = axes.find(a=>a.id===axisId);
+  axis.values = axis.values.filter(v=>v!==val);
+  contacts.forEach(c=>{ if(c[axisId]) c[axisId] = c[axisId].filter(v=>v!==val); });
+  renderAxes();
+  // 新しい配信・パートナーリストの各フィルタも最新の値で再描画しておく
+  renderAxisFilters();
+  renderListAxisFilters();
+}
+
+/* ================= 画面: 宛先を選択 ================= */
+function renderAxisFilters(){
+  const container = document.getElementById('axisFilters');
+  container.innerHTML = axes.map(axis=>`
+    <div class="axis-filter">
+      <div class="axis-name">${axis.name}</div>
+      <div class="axis-checkbox-grid">
+        ${axis.values.map(v=>`
+          <label class="checkbox-row">
+            <input type="checkbox" class="filter-cb" data-axis="${axis.id}" data-value="${v}" onchange="applyFilter()">
+            ${v}
+          </label>`).join('')}
+      </div>
+    </div>`).join('');
+}
+function clearFilters(){
+  document.getElementById('searchInput').value = '';
+  document.querySelectorAll('.filter-cb').forEach(cb=>cb.checked=false);
+  applyFilter();
+}
+function applyFilter(){
+  const searchTerm = (document.getElementById('searchInput')?.value || '').trim();
+  const checks = Array.from(document.querySelectorAll('.filter-cb:checked'));
+  const byAxis = {};
+  checks.forEach(cb=>{
+    const axis = cb.dataset.axis;
+    (byAxis[axis] = byAxis[axis] || []).push(cb.dataset.value);
+  });
+
+  currentTargetList = contacts.filter(c=>{
+    if(c.suspended) return false;
+    if(searchTerm && !c.company.includes(searchTerm)) return false;
+    for(const axisId in byAxis){
+      const selected = byAxis[axisId];
+      const has = (c[axisId]||[]).some(v=>selected.includes(v));
+      if(!has) return false;
+    }
+    return true;
+  });
+  excludedIndexes = new Set(); // 新しい検索結果は初期値ですべて選択状態
+  renderTargetTable();
+}
+function renderTargetTable(){
+  const body = document.getElementById('targetTableBody');
+  body.innerHTML = currentTargetList.map((c,i)=>`
+    <tr>
+      <td><input type="checkbox" class="row-checkbox" ${excludedIndexes.has(i)?'':'checked'} onchange="toggleExclude(${i})"></td>
+      <td>${c.company}</td>
+      <td>${c.name || '<span style="color:var(--warn)">（未入力）</span>'}</td>
+      <td>${c.mail}</td>
+      <td>${c.axis1.map(v=>`<span class="tag-chip">${v}</span>`).join('')}</td>
+      <td>${c.axis2.map(v=>`<span class="tag-chip">${v}</span>`).join('')}</td>
+      <td class="muted">${memoCellHtml(c.memo)}</td>
+    </tr>`).join('');
+  const cb = document.getElementById('searchHeaderCb');
+  if(cb) cb.checked = currentTargetList.length>0 && excludedIndexes.size===0;
+  updateTabCounts();
+}
+function toggleExclude(i){
+  if(excludedIndexes.has(i)) excludedIndexes.delete(i); else excludedIndexes.add(i);
+  renderTargetTable();
+}
+function toggleAllSearch(checked){
+  excludedIndexes = new Set();
+  if(!checked) currentTargetList.forEach((_,i)=>excludedIndexes.add(i));
+  renderTargetTable();
+}
+function switchTargetTab(tab){
+  activeTargetTab = tab;
+  document.getElementById('tabSearch').classList.toggle('active', tab==='search');
+  document.getElementById('tabList').classList.toggle('active', tab==='list');
+  document.getElementById('tabContentSearch').style.display = tab==='search' ? 'block':'none';
+  document.getElementById('tabContentList').style.display = tab==='list' ? 'block':'none';
+}
+function addCheckedToList(){
+  const checkedItems = currentTargetList.filter((_,i)=>!excludedIndexes.has(i));
+  let addedN = 0;
+  checkedItems.forEach(c=>{
+    if(!addedList.some(a=>a.mail===c.mail)){
+      addedList.push({...c, _selected:true});
+      addedN++;
+    }
+  });
+  renderListTab();
+  if(addedN>0) switchTargetTab('list');
+}
+function toggleAllList(checked){
+  addedList.forEach(a=>a._selected=checked);
+  renderListTab();
+}
+function toggleListItemSelect(i){
+  addedList[i]._selected = !addedList[i]._selected;
+  renderListTab();
+}
+function removeListItem(i){
+  addedList.splice(i,1);
+  renderListTab();
+}
+function renderListTab(){
+  const body = document.getElementById('listTabTableBody');
+  body.innerHTML = addedList.map((c,i)=>`
+    <tr>
+      <td><input type="checkbox" class="row-checkbox" ${c._selected?'checked':''} onchange="toggleListItemSelect(${i})"></td>
+      <td>${c.company}</td>
+      <td>${c.name || '<span style="color:var(--warn)">（未入力）</span>'}</td>
+      <td>${c.mail}</td>
+      <td>${(c.axis1||[]).map(v=>`<span class="tag-chip">${v}</span>`).join('')}</td>
+      <td>${(c.axis2||[]).map(v=>`<span class="tag-chip">${v}</span>`).join('')}</td>
+      <td class="muted">${memoCellHtml(c.memo)}</td>
+      <td><button class="icon-btn attach-remove" title="リストから削除" onclick="removeListItem(${i})">✕</button></td>
+    </tr>`).join('');
+  const cb = document.getElementById('listHeaderCb');
+  if(cb) cb.checked = addedList.length>0 && addedList.every(a=>a._selected);
+  updateTabCounts();
+  const anyChecked = addedList.some(a=>a._selected);
+  document.getElementById('confirmTargetBtn').disabled = !(addedList.length>0 && anyChecked);
+}
+function updateTabCounts(){
+  document.getElementById('searchTabCount').innerText = currentTargetList.length;
+  document.getElementById('listTabCount').innerText = addedList.length;
+}
+function confirmTarget(){
+  const finalList = addedList.filter(c=>c._selected);
+  if(finalList.length===0){ alert('確定する宛先にチェックを入れてください。'); return; }
+  window._confirmedTargets = finalList.map(({_selected, ...rest})=>rest); // スナップショット（チェック済みのみが対象）
+  document.getElementById('composeTargetCount').innerText = finalList.length;
+  updatePreview();
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector('.nav-item[data-screen="target"]').classList.add('active');
+  showScreen('compose');
+}
+function goBackToTarget(){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector('.nav-item[data-screen="target"]').classList.add('active');
+  switchTargetTab('list');
+  renderListTab();
+  showScreen('target');
+}
+
+/* ================= 画面: メール作成 ================= */
+function toggleTagMenu(e){
+  e.stopPropagation();
+  document.getElementById('tagDropdown').classList.toggle('open');
+}
+document.addEventListener('click', ()=>document.getElementById('tagDropdown').classList.remove('open'));
+function insertTag(colName){
+  const ta = document.getElementById('bodyInput');
+  const tag = `#${colName}#`;
+  const pos = ta.selectionStart || ta.value.length;
+  ta.value = ta.value.slice(0,pos) + tag + ta.value.slice(pos);
+  document.getElementById('tagDropdown').classList.remove('open');
+  updatePreview();
+}
+document.addEventListener('input', (e)=>{
+  if(e.target && e.target.id==='bodyInput'){
+    updatePreview();
+    document.getElementById('bodyInput').classList.remove('input-error');
+    document.getElementById('bodyError').style.display='none';
+  }
+});
+function updatePreview(){
+  const list = window._confirmedTargets || [];
+  const sample = list[0];
+  if(!sample){ document.getElementById('previewBox').innerText=''; window._lastPreviewText=''; return; }
+  let body = document.getElementById('bodyInput').value;
+  body = body.replaceAll('#会社名#', sample.company)
+             .replaceAll('#担当者名#', sample.name || '')
+             .replaceAll('#メールアドレス#', sample.mail);
+  const signatureText = `田中 太郎
+〇〇株式会社 営業部
+tanaka@example-corp.jp
+※本メールの配信停止をご希望の場合は上記アドレスまでご連絡ください。`;
+  const full = body + '\n\n-- \n' + signatureText;
+  document.getElementById('previewBox').innerText = full;
+  window._lastPreviewText = full;
+}
+function openPreviewModal(){
+  document.getElementById('previewModalBody').innerText = window._lastPreviewText || document.getElementById('previewBox').innerText;
+  document.getElementById('previewModal').classList.add('open');
+}
+function closePreviewModal(){
+  document.getElementById('previewModal').classList.remove('open');
+}
+function addAttachment(){
+  const size = (Math.random()*15+1).toFixed(1);
+  attachments.push({name:`資料_${attachments.length+1}.pdf`, size:size});
+  renderAttachments();
+  document.getElementById('attachDropArea').classList.remove('input-error');
+  document.getElementById('attachError').style.display='none';
+}
+function renderAttachments(){
+  document.getElementById('attachList').innerHTML = attachments.map((a,i)=>`
+    <div class="attach-item">
+      <span>${a.name}（${a.size}MB）</span>
+      <button class="icon-btn attach-remove" onclick="removeAttachment(${i})">✕</button>
+    </div>`).join('');
+}
+function removeAttachment(i){
+  attachments.splice(i,1);
+  renderAttachments();
+  document.getElementById('attachDropArea').classList.remove('input-error');
+  document.getElementById('attachError').style.display='none';
+}
+
+/* ================= 内容を確認する（インライン検証 → 送信前の確認画面） ================= */
+function clearComposeErrors(){
+  document.getElementById('bodyInput').classList.remove('input-error');
+  document.getElementById('bodyError').style.display='none';
+  document.getElementById('attachDropArea').classList.remove('input-error');
+  document.getElementById('attachError').style.display='none';
+  document.getElementById('targetSummaryCard').classList.remove('input-error');
+  document.getElementById('targetError').style.display='none';
+}
+function showFieldError(elId, errId, message){
+  document.getElementById(elId).classList.add('input-error');
+  const errEl = document.getElementById(errId);
+  errEl.style.display='block';
+  errEl.innerText = '⚠️ ' + message;
+}
+function checkAndProceed(){
+  clearComposeErrors();
+  const list = window._confirmedTargets || [];
+  const body = document.getElementById('bodyInput').value;
+  const knownCols = ['会社名','担当者名','メールアドレス'];
+  const usedTags = [...body.matchAll(/#([^#]+)#/g)].map(m=>m[1]);
+  const unknownTags = [...new Set(usedTags.filter(t=>!knownCols.includes(t)))];
+
+  const emptyTargets = list.filter(c=>!c.name || !c.company);
+  const totalAttachSize = attachments.reduce((s,a)=>s+parseFloat(a.size),0);
+  const overSize = totalAttachSize > 20;
+
+  let hasError = false;
+
+  if(unknownTags.length){
+    hasError = true;
+    showFieldError('bodyInput', 'bodyError', `本文中の ${unknownTags.map(t=>'#'+t+'#').join('、')} は、現在のリストに存在しない項目です。`);
+  }
+  if(emptyTargets.length){
+    hasError = true;
+    showFieldError('targetSummaryCard', 'targetError', `${emptyTargets.length}件の宛先で会社名または担当者名が空欄です。リストを確認してください。`);
+  }
+  if(overSize){
+    hasError = true;
+    showFieldError('attachDropArea', 'attachError', `添付ファイルの合計サイズが上限（約20MB）を超えています（現在：${totalAttachSize.toFixed(1)}MB）。ファイルを減らしてください。`);
+  }
+
+  if(hasError) return;
+
+  const mails = list.map(c=>c.mail);
+  const dupMails = [...new Set(mails.filter((m,i)=>mails.indexOf(m)!==i))];
+  renderConfirmation(list, body, dupMails);
+  showScreen('warning');
+}
+function renderConfirmation(list, body, dupMails){
+  document.getElementById('confirmMeta').innerHTML = `
+    <span class="muted" style="font-size:12.5px;">件名</span><br><strong>${document.getElementById('subjectInput').value}</strong>`;
+  document.getElementById('confirmTargetCount').innerText = list.length;
+  document.getElementById('confirmTargetBody').innerHTML = list.map(c=>`
+    <tr><td>${c.company}</td><td>${c.name||'-'}</td><td>${c.mail}</td></tr>`).join('');
+  const signatureText = `田中 太郎
+〇〇株式会社 営業部
+tanaka@example-corp.jp
+※本メールの配信停止をご希望の場合は上記アドレスまでご連絡ください。`;
+  document.getElementById('confirmBody').innerText = body + '\n\n-- \n' + signatureText;
+  document.getElementById('confirmAttachments').innerHTML = attachments.length
+    ? attachments.map(a=>`${a.name}（${a.size}MB）`).join('<br>')
+    : '添付ファイルはありません';
+  const warnBox = document.getElementById('confirmWarnings');
+  if(dupMails.length){
+    warnBox.innerHTML = `<div class="warn-item warn"><div class="icon">⚠️</div><div><div class="title">重複したメールアドレスがあります</div><div class="detail">${dupMails.length}件のメールアドレスが宛先内で重複しています。そのまま重複して送信されます。</div></div></div>`;
+  }else{
+    warnBox.innerHTML = '';
+  }
+}
+
+/* ================= 画面: 送信実行 ================= */
+function startSending(){
+  showScreen('progress');
+  const list = window._confirmedTargets || [];
+  const total = list.length;
+  let sent = 0;
+  const log = document.getElementById('progressLog');
+  log.innerHTML = '';
+  const bar = document.getElementById('progressBar');
+  const text = document.getElementById('progressText');
+  const failResults = [];
+
+  const timer = setInterval(()=>{
+    if(sent >= total){
+      clearInterval(timer);
+      finishSending(total-failResults.length, failResults);
+      return;
+    }
+    const c = list[sent];
+    const isFail = Math.random() < 0.12;
+    if(isFail){
+      failResults.push({...c, error:'550 No such user here'});
+      log.innerHTML += `<div style="color:var(--danger)">✕ ${c.company} 宛の送信に失敗（スキップ）</div>`;
+    }else{
+      log.innerHTML += `<div>✓ ${c.company} 宛に送信しました</div>`;
+    }
+    log.scrollTop = log.scrollHeight;
+    sent++;
+    bar.style.width = (sent/total*100)+'%';
+    text.innerText = `${sent} / ${total} 件 送信済み`;
+  }, 90);
+}
+function finishSending(successN, fails){
+  document.getElementById('successCount').innerText = successN;
+  document.getElementById('failCount').innerText = fails.length;
+  document.getElementById('failTableBody').innerHTML = fails.map(f=>`
+    <tr><td>${f.company}</td><td>${f.name||'-'}</td><td>${f.mail}</td><td>${f.error}</td></tr>
+  `).join('') || '<tr><td colspan="4" class="muted">失敗した宛先はありません</td></tr>';
+  window._lastFails = fails;
+  showScreen('result');
+}
+function copyFailList(){
+  const fails = window._lastFails || [];
+  const text = fails.map(f=>`${f.company}\t${f.name||''}\t${f.mail}\t${f.error}`).join('\n');
+  navigator.clipboard?.writeText(text || '（失敗した宛先はありません）');
+  const toast = document.getElementById('copyToast');
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'), 1800);
+}
+function resetToTarget(){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector('.nav-item[data-screen="target"]').classList.add('active');
+  addedList = [];
+  applyFilter();
+  renderListTab();
+  switchTargetTab('search');
+  showScreen('target');
+}
+
+/* ================= Init ================= */
+renderAccountInfo();
+renderListAxisFilters();
+renderListTable();
+renderAxes();
+renderAxisFilters();
+applyFilter();
+renderListTab();
+</script>
+</body>
+</html>

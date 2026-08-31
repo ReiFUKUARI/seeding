@@ -6,8 +6,12 @@
         設定画面（要件定義書10章）。メールアカウント／バックアップ／カテゴリ管理の
         3セクションを1画面に統合する。カテゴリ一覧は SettingsViewModel.Axes 経由で
         CategoryStore（App全体の単一の共有ストア。D-003）を参照している。
+
+        スクロールは MainWindow 側の外側の ScrollViewer が担う。ここに独自の
+        ScrollViewer を入れると、WPFの仕様上マウスホイールが外側へ伝播しなくなる
+        （ネストしたScrollViewerがホイールイベントを飲み込む既知の挙動）ため、
+        このUserControl自体はスクロールしないこと。
     -->
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="0,0,0,20">
 
             <!-- メールアカウント（要件定義書10.1） -->
@@ -160,5 +164,4 @@
             </Border>
 
         </StackPanel>
-    </ScrollViewer>
 </UserControl>

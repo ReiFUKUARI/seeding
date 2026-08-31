@@ -136,6 +136,17 @@ public sealed partial class SettingsViewModel : ObservableObject
             BackupStatusText = $"完了しました: {result.FullPath}";
             LoadBackupInfo();
         }
+        catch (UnauthorizedAccessException ex)
+        {
+            // フォルダ自体は作成できているのにファイル書き込みだけ拒否される場合、
+            // 多くは Windows の「コントロールされたフォルダー アクセス」（ランサムウェア対策）が
+            // 未許可アプリとしてドキュメントフォルダーへの書き込みをブロックしている。
+            BackupStatusText = "バックアップに失敗しました: 保存先フォルダーへのアクセスが拒否されました。\n"
+                + "Windowsセキュリティ →「ウイルスと脅威の防止」→「ランサムウェアの防止」→"
+                + "「コントロールされたフォルダー アクセス」で本アプリが許可されているか確認するか、"
+                + "保存先を変更してください。\n"
+                + $"詳細: {ex.Message}";
+        }
         catch (Exception ex)
         {
             BackupStatusText = $"バックアップに失敗しました: {ex.Message}";

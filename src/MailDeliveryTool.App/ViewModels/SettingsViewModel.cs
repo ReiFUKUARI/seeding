@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -8,6 +9,7 @@ using MailDeliveryTool.Core;
 using MailDeliveryTool.Core.Backup;
 using MailDeliveryTool.Core.Data.Repositories;
 using MailDeliveryTool.Core.Models;
+using Microsoft.Win32;
 
 namespace MailDeliveryTool.App.ViewModels;
 
@@ -116,13 +118,48 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool _isBackingUp;
 
+    /// <summary>既定の保存先ではなく、ユーザーが変更している場合のみ「既定に戻す」を有効にする。</summary>
+    [ObservableProperty]
+    private bool _isBackupFolderCustom;
+
     private void LoadBackupInfo()
     {
         var configured = _appSettingRepository.GetBackupFolderPath();
         BackupFolderText = string.IsNullOrWhiteSpace(configured) ? AppPaths.DefaultBackupDirectory : configured;
+        IsBackupFolderCustom = !string.IsNullOrWhiteSpace(configured);
 
         var lastBackupAt = _appSettingRepository.GetLastBackupAt();
         LastBackupText = lastBackupAt is null ? "未実行" : lastBackupAt.Value.ToString("yyyy年MM月dd日 HH:mm");
+    }
+
+    /// <summary>
+    /// バックアップの保存先フォルダーを変更する（要件定義書10.2）。
+    /// 企業ポリシー等でドキュメントフォルダーへの書き込みが拒否される環境向けの回避策も兼ねる。
+    /// </summary>
+    [RelayCommand]
+    private void ChangeBackupFolder()
+    {
+        var dialog = new OpenFolderDialog
+        {
+            Title = "バックアップの保存先フォルダーを選択",
+            InitialDirectory = Directory.Exists(BackupFolderText) ? BackupFolderText : null,
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            _appSettingRepository.SetBackupFolderPath(dialog.FolderName);
+            LoadBackupInfo();
+            BackupStatusText = string.Empty;
+        }
+    }
+
+    /// <summary>保存先を既定（ドキュメントフォルダー配下）に戻す。</summary>
+    [RelayCommand]
+    private void ResetBackupFolder()
+    {
+        _appSettingRepository.SetBackupFolderPath(string.Empty);
+        LoadBackupInfo();
+        BackupStatusText = string.Empty;
     }
 
     [RelayCommand]

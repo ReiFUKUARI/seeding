@@ -34,6 +34,7 @@ public partial class MainWindow : Window
     }
 
     private SettingsViewModel? _settingsViewModel;
+    private PartnersViewModel? _partnersViewModel;
 
     private void ShowPlaceholder(string key)
     {
@@ -47,26 +48,38 @@ public partial class MainWindow : Window
             SettingsViewHost.DataContext = _settingsViewModel;
 
             TitleText.Text = "設定";
-            PlaceholderCard.Visibility = Visibility.Collapsed;
-            SettingsViewHost.Visibility = Visibility.Visible;
+            SetActiveView(SettingsViewHost);
             return;
         }
 
-        var (title, body) = key switch
+        if (key == "Partners")
         {
-            "Partners" => ("パートナーリスト",
-                "宛先マスタの検索・一覧・登録・停止管理（要件定義書 5章）。"
-                + "CSV取込とテンプレートダウンロードもこの画面のモーダルから行います。"),
-            _ => ("新しい配信",
-                "宛先選択（すべて／メールリストの2タブ）→ メール作成 → 内容の確認 → 送信中 → 送信結果"
-                + "というウィザードフロー（要件定義書 6〜9章）。"),
-        };
+            _partnersViewModel ??= new PartnersViewModel(App.Services.ContactRepository, App.Services.CategoryStore);
+            PartnersViewHost.DataContext = _partnersViewModel;
 
+            TitleText.Text = "パートナーリスト";
+            SetActiveView(PartnersViewHost);
+            return;
+        }
+
+        const string title = "新しい配信";
         TitleText.Text = title;
         PlaceholderTitle.Text = title;
-        PlaceholderBody.Text = body + "\n\n（フェーズ5で実装予定）";
-        SettingsViewHost.Visibility = Visibility.Collapsed;
-        PlaceholderCard.Visibility = Visibility.Visible;
+        PlaceholderBody.Text =
+            "宛先選択（すべて／メールリストの2タブ）→ メール作成 → 内容の確認 → 送信中 → 送信結果"
+            + "というウィザードフロー（要件定義書 6〜9章）。"
+            + "\n\n（フェーズ5で実装予定）";
+        SetActiveView(PlaceholderCard);
+    }
+
+    /// <summary>
+    /// メイン領域に表示するビューを1つだけ切り替える。他のビューはすべて隠す。
+    /// </summary>
+    private void SetActiveView(UIElement active)
+    {
+        PlaceholderCard.Visibility = active == PlaceholderCard ? Visibility.Visible : Visibility.Collapsed;
+        SettingsViewHost.Visibility = active == SettingsViewHost ? Visibility.Visible : Visibility.Collapsed;
+        PartnersViewHost.Visibility = active == PartnersViewHost ? Visibility.Visible : Visibility.Collapsed;
     }
 
     /// <summary>

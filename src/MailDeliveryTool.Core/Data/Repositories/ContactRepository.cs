@@ -33,16 +33,27 @@ public sealed class ContactRepository
     }
 
     /// <summary>
-    /// 「新しい配信」画面の「すべて」タブ用の検索（要件定義書 6.1）。
-    /// 会社名は部分一致。カテゴリは軸内OR・軸間AND。停止中は常に除外する。
+    /// 会社名・カテゴリ軸での絞り込み検索。会社名は部分一致。カテゴリは軸内OR・軸間AND。
+    /// 「新しい配信」画面（要件定義書 6.1）は停止中を常に除外して使う（<paramref name="includeSuspended"/> を省略）。
+    /// パートナーリスト画面（要件定義書 5章）は停止中の管理そのものが目的のため、
+    /// <paramref name="includeSuspended"/> に true を渡して停止中も含めて検索する。
     /// </summary>
     /// <param name="companyKeyword">会社名の部分一致キーワード（null/空文字なら絞り込まない）。</param>
     /// <param name="axisFilters">軸ID→選択されたカテゴリ値IDの一覧。値が空の軸は絞り込みに使わない。</param>
-    public List<Contact> Search(string? companyKeyword, IReadOnlyDictionary<long, IReadOnlyList<long>>? axisFilters)
+    /// <param name="includeSuspended">true の場合、停止中の宛先も結果に含める。既定は false（除外）。</param>
+    public List<Contact> Search(
+        string? companyKeyword,
+        IReadOnlyDictionary<long, IReadOnlyList<long>>? axisFilters,
+        bool includeSuspended = false)
     {
         using var connection = _factory.Create();
 
-        var conditions = new List<string> { "c.IsSuspended = 0" };
+        var conditions = new List<string>();
+        if (!includeSuspended)
+        {
+            conditions.Add("c.IsSuspended = 0");
+        }
+
         var parameters = new Dictionary<string, object>();
 
         if (!string.IsNullOrWhiteSpace(companyKeyword))

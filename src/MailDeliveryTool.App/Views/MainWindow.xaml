@@ -119,6 +119,10 @@
                     <views:SettingsView x:Name="SettingsViewHost"
                                          Margin="0,14,0,0"
                                          Visibility="Collapsed" />
+
+                    <views:PartnersView x:Name="PartnersViewHost"
+                                         Margin="0,14,0,0"
+                                         Visibility="Collapsed" />
                 </StackPanel>
             </ScrollViewer>
         </DockPanel>

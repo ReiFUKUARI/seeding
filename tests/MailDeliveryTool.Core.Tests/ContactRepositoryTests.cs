@@ -99,6 +99,21 @@ public sealed class ContactRepositoryTests : IDisposable
     }
 
     [Fact]
+    public void Search_includeSuspendedがtrueなら停止中も結果に含む()
+    {
+        var active = new Contact { CompanyName = "稼働中", ContactName = "A", Email = "a@x.jp" };
+        var suspended = new Contact { CompanyName = "停止中", ContactName = "B", Email = "b@x.jp" };
+        _repo.Add(active);
+        _repo.Add(suspended);
+        _repo.SetSuspended(suspended.Id, true);
+
+        var result = _repo.Search(null, null, includeSuspended: true);
+
+        Assert.Contains(result, c => c.Id == active.Id);
+        Assert.Contains(result, c => c.Id == suspended.Id);
+    }
+
+    [Fact]
     public void Search_会社名は部分一致()
     {
         _repo.Add(new Contact

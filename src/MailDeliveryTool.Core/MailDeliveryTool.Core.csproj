@@ -22,11 +22,12 @@
     <PackageReference Include="Microsoft.Data.Sqlite" />
     <PackageReference Include="MailKit" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" />
+    <!-- CSVバックアップ書き出し（Backup/ContactCsvExporter）用。要件定義書5.5・10.2 -->
+    <PackageReference Include="CsvHelper" />
     <!--
-      CsvHelper と System.Text.Encoding.CodePages はフェーズ5のCSV取込/出力実装まで
-      未参照のため、ここには追加しない（NuGetの未使用パッケージ参照警告の原因だった）。
-      バージョンは Directory.Packages.props に残してあるので、実装時は
-      <PackageReference Include="..." /> の1行を足すだけでよい。
+      System.Text.Encoding.CodePages はCSV取込（Shift-JISフォールバック読み込み）まで
+      未参照のため、ここにはまだ追加しない。バージョンは Directory.Packages.props に
+      残してあるので、実装時は <PackageReference Include="..." /> の1行を足すだけでよい。
     -->
   </ItemGroup>
 

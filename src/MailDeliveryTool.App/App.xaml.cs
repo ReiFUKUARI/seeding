@@ -9,9 +9,12 @@ public partial class App : Application
 {
     /// <summary>
     /// アプリ全体で共有する接続ファクトリ。
-    /// フェーズ5でDIコンテナを導入する際にここを差し替える。
+    /// 本格的なDIコンテナを導入するほどの規模ではないため、静的プロパティで共有する。
     /// </summary>
     public static SqliteConnectionFactory ConnectionFactory { get; private set; } = null!;
+
+    /// <summary>アプリ全体で共有するリポジトリ・サービス（<see cref="CoreServices"/> 参照）。</summary>
+    public static CoreServices Services { get; private set; } = null!;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -23,6 +26,7 @@ public partial class App : Application
             // ログイン機能がないため、起動直後に無条件で実行してよい（要件定義書 2章）。
             ConnectionFactory = new SqliteConnectionFactory(AppPaths.DatabasePath);
             new DatabaseInitializer(ConnectionFactory).EnsureCreated();
+            Services = new CoreServices(ConnectionFactory);
         }
         catch (Exception ex)
         {

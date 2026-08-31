@@ -1,6 +1,7 @@
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using MailDeliveryTool.App.ViewModels;
 using MailDeliveryTool.Core;
 using MailDeliveryTool.Core.Data;
 
@@ -32,16 +33,30 @@ public partial class MainWindow : Window
         ShowPlaceholder(key);
     }
 
+    private SettingsViewModel? _settingsViewModel;
+
     private void ShowPlaceholder(string key)
     {
+        if (key == "Settings")
+        {
+            _settingsViewModel ??= new SettingsViewModel(
+                App.Services.MailAccountSettingRepository,
+                App.Services.AppSettingRepository,
+                App.Services.BackupService,
+                App.Services.CategoryStore);
+            SettingsViewHost.DataContext = _settingsViewModel;
+
+            TitleText.Text = "設定";
+            PlaceholderCard.Visibility = Visibility.Collapsed;
+            SettingsViewHost.Visibility = Visibility.Visible;
+            return;
+        }
+
         var (title, body) = key switch
         {
             "Partners" => ("パートナーリスト",
                 "宛先マスタの検索・一覧・登録・停止管理（要件定義書 5章）。"
                 + "CSV取込とテンプレートダウンロードもこの画面のモーダルから行います。"),
-            "Settings" => ("設定",
-                "メールアカウント／バックアップ／カテゴリ管理の3セクション（要件定義書 10章）。"
-                + "パスワードはDPAPIで暗号化して保存します。"),
             _ => ("新しい配信",
                 "宛先選択（すべて／メールリストの2タブ）→ メール作成 → 内容の確認 → 送信中 → 送信結果"
                 + "というウィザードフロー（要件定義書 6〜9章）。"),
@@ -50,6 +65,8 @@ public partial class MainWindow : Window
         TitleText.Text = title;
         PlaceholderTitle.Text = title;
         PlaceholderBody.Text = body + "\n\n（フェーズ5で実装予定）";
+        SettingsViewHost.Visibility = Visibility.Collapsed;
+        PlaceholderCard.Visibility = Visibility.Visible;
     }
 
     /// <summary>

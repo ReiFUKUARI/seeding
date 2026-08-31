@@ -1,0 +1,208 @@
+using System.Collections.ObjectModel;
+using System.Windows;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using MailDeliveryTool.App.Services;
+using MailDeliveryTool.App.Views;
+using MailDeliveryTool.Core;
+using MailDeliveryTool.Core.Backup;
+using MailDeliveryTool.Core.Data.Repositories;
+using MailDeliveryTool.Core.Models;
+
+namespace MailDeliveryTool.App.ViewModels;
+
+/// <summary>
+/// 設定画面のビューモデル（要件定義書10章：メールアカウント／バックアップ／カテゴリ管理）。
+/// </summary>
+public sealed partial class SettingsViewModel : ObservableObject
+{
+    private readonly MailAccountSettingRepository _mailAccountRepository;
+    private readonly AppSettingRepository _appSettingRepository;
+    private readonly BackupService _backupService;
+    private readonly CategoryStore _categoryStore;
+
+    private MailAccountSetting _currentSetting = new();
+
+    public SettingsViewModel(
+        MailAccountSettingRepository mailAccountRepository,
+        AppSettingRepository appSettingRepository,
+        BackupService backupService,
+        CategoryStore categoryStore)
+    {
+        _mailAccountRepository = mailAccountRepository;
+        _appSettingRepository = appSettingRepository;
+        _backupService = backupService;
+        _categoryStore = categoryStore;
+
+        // Reload()はClear()+Add()で行われ、ObservableCollectionが内部的に
+        // "Item[]" のPropertyChangedを発火するため、TypeAxis/TechFieldAxisも
+        // それに追随させてWPF側の再描画を促す。
+        _categoryStore.Axes.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(TypeAxis));
+            OnPropertyChanged(nameof(TechFieldAxis));
+        };
+
+        LoadMailAccount();
+        LoadBackupInfo();
+    }
+
+    /// <summary>種別・技術領域の2軸。CategoryStoreを直接公開する（D-003：単一の共有ストア）。</summary>
+    public ObservableCollection<CategoryAxis> Axes => _categoryStore.Axes;
+
+    /// <summary>「種別」軸（ID固定・要件定義書5.3）。位置ではなくIDで参照する。</summary>
+    public CategoryAxis? TypeAxis => Axes.FirstOrDefault(a => a.Id == CategoryAxis.TypeAxisId);
+
+    /// <summary>「技術領域」軸（ID固定・要件定義書5.3）。</summary>
+    public CategoryAxis? TechFieldAxis => Axes.FirstOrDefault(a => a.Id == CategoryAxis.TechFieldAxisId);
+
+    // --- メールアカウント（要件定義書10.1） ---
+
+    [ObservableProperty]
+    private string _accountServerText = "未設定";
+
+    [ObservableProperty]
+    private string _accountNameText = "未設定";
+
+    [ObservableProperty]
+    private string _accountPortText = "-";
+
+    [ObservableProperty]
+    private string _accountEncryptionText = "-";
+
+    private void LoadMailAccount()
+    {
+        _currentSetting = _mailAccountRepository.Get();
+        AccountServerText = string.IsNullOrWhiteSpace(_currentSetting.Host) ? "未設定" : _currentSetting.Host;
+        AccountNameText = string.IsNullOrWhiteSpace(_currentSetting.UserName) ? "未設定" : _currentSetting.UserName;
+        AccountPortText = _currentSetting.Port.ToString();
+        AccountEncryptionText = DescribeEncryption(_currentSetting.SecureSocketOption);
+    }
+
+    private static string DescribeEncryption(string option) => option switch
+    {
+        "Auto" => "自動（STARTTLSが利用可能な場合は自動使用）",
+        "StartTls" => "STARTTLSを必須にする",
+        "StartTlsWhenAvailable" => "STARTTLSが利用可能な場合のみ使用",
+        "SslOnConnect" => "接続時にSSL/TLSを使用",
+        "None" => "暗号化なし",
+        _ => option,
+    };
+
+    [RelayCommand]
+    private void ChangeMailAccount()
+    {
+        var editViewModel = MailAccountEditViewModel.FromModel(_currentSetting);
+        var window = new MailAccountEditWindow(editViewModel) { Owner = Application.Current.MainWindow };
+        if (window.ShowDialog() == true)
+        {
+            var updated = editViewModel.ToModel(_currentSetting.Password);
+            _mailAccountRepository.Save(updated, editViewModel.PasswordChanged);
+            LoadMailAccount();
+        }
+    }
+
+    // --- バックアップ（要件定義書5.5・10.2） ---
+
+    [ObservableProperty]
+    private string _backupFolderText = string.Empty;
+
+    [ObservableProperty]
+    private string _lastBackupText = "未実行";
+
+    [ObservableProperty]
+    private string _backupStatusText = string.Empty;
+
+    [ObservableProperty]
+    private bool _isBackingUp;
+
+    private void LoadBackupInfo()
+    {
+        var configured = _appSettingRepository.GetBackupFolderPath();
+        BackupFolderText = string.IsNullOrWhiteSpace(configured) ? AppPaths.DefaultBackupDirectory : configured;
+
+        var lastBackupAt = _appSettingRepository.GetLastBackupAt();
+        LastBackupText = lastBackupAt is null ? "未実行" : lastBackupAt.Value.ToString("yyyy年MM月dd日 HH:mm");
+    }
+
+    [RelayCommand]
+    private async Task RunBackupAsync()
+    {
+        IsBackingUp = true;
+        BackupStatusText = "バックアップを実行中...";
+        try
+        {
+            var result = await Task.Run(() => _backupService.Run());
+            BackupStatusText = $"完了しました: {result.FullPath}";
+            LoadBackupInfo();
+        }
+        catch (Exception ex)
+        {
+            BackupStatusText = $"バックアップに失敗しました: {ex.Message}";
+        }
+        finally
+        {
+            IsBackingUp = false;
+        }
+    }
+
+    // --- カテゴリ管理（要件定義書5.3・10.3） ---
+
+    [ObservableProperty]
+    private string _newTypeValueName = string.Empty;
+
+    [ObservableProperty]
+    private string _newTechFieldValueName = string.Empty;
+
+    [RelayCommand]
+    private void AddTypeValue()
+    {
+        AddCategoryValue(CategoryAxis.TypeAxisId, NewTypeValueName);
+        NewTypeValueName = string.Empty;
+    }
+
+    [RelayCommand]
+    private void AddTechFieldValue()
+    {
+        AddCategoryValue(CategoryAxis.TechFieldAxisId, NewTechFieldValueName);
+        NewTechFieldValueName = string.Empty;
+    }
+
+    private void AddCategoryValue(long axisId, string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return;
+        }
+
+        try
+        {
+            _categoryStore.AddValue(axisId, name);
+        }
+        catch (DuplicateCategoryValueException ex)
+        {
+            MessageBox.Show(ex.Message, "メール配信ツール", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    /// <summary>カテゴリ値を削除する。使用件数を示したうえで確認を取る（要件定義書10.3）。</summary>
+    [RelayCommand]
+    private void DeleteCategoryValue(CategoryValue? value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        var usageCount = _categoryStore.GetUsageCount(value.Id);
+        var message = usageCount > 0
+            ? $"「{value.Name}」は {usageCount} 件の宛先で使用されています。\n削除すると、該当する宛先からこの値の紐付けが自動的に外れます。削除しますか？"
+            : $"「{value.Name}」を削除しますか？";
+
+        var result = MessageBox.Show(message, "カテゴリ値の削除", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (result == MessageBoxResult.Yes)
+        {
+            _categoryStore.DeleteValue(value.Id);
+        }
+    }
+}

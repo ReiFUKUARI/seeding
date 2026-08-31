@@ -125,6 +125,16 @@ public sealed partial class PartnersViewModel : ObservableObject
             RunSearch();
         }
     }
+
+    [RelayCommand]
+    private void OpenCsvImport()
+    {
+        var importViewModel = new CsvImportViewModel(_contactRepository, _categoryStore);
+        var window = new CsvImportWindow(importViewModel) { Owner = Application.Current.MainWindow };
+        window.ShowDialog();
+        // インポートの成否によらず、モーダルを閉じたら一覧を最新化する（未実施なら無害な再検索になるだけ）
+        RunSearch();
+    }
 }
 
 /// <summary>パートナーリスト1行分の表示用ラッパー。</summary>

@@ -59,12 +59,16 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Text="{Binding ResultCountText}"
                                Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" />
 
-                    <Button Grid.Column="1" Content="宛先を追加" Command="{Binding OpenAddContactCommand}"
+                    <Button Grid.Column="1" Content="CSVから取り込む" Command="{Binding OpenCsvImportCommand}"
+                            Margin="0,0,8,0" Padding="14,6" />
+
+                    <Button Grid.Column="2" Content="宛先を追加" Command="{Binding OpenAddContactCommand}"
                             Background="{StaticResource AccentBrush}" Foreground="White" BorderThickness="0"
                             Padding="14,6" />
                 </Grid>

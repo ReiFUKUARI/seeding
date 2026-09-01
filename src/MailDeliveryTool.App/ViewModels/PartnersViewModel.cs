@@ -32,10 +32,11 @@ public sealed partial class PartnersViewModel : ObservableObject
     /// <summary>検索フィルタ用のカテゴリ軸・値（CategoryStoreをこの画面用に選択可能な形へ変換したもの）。</summary>
     public ObservableCollection<SelectableCategoryAxis> FilterAxes { get; } = new();
 
+    /// <summary>会社名・担当者名・メモを横断した部分一致キーワード（要件定義書5章のパートナーリスト検索）。</summary>
     [ObservableProperty]
-    private string _companyKeyword = string.Empty;
+    private string _searchKeyword = string.Empty;
 
-    partial void OnCompanyKeywordChanged(string value) => RunSearch();
+    partial void OnSearchKeywordChanged(string value) => RunSearch();
 
     [ObservableProperty]
     private string _resultCountText = string.Empty;
@@ -62,7 +63,7 @@ public sealed partial class PartnersViewModel : ObservableObject
     [RelayCommand]
     private void ClearFilters()
     {
-        CompanyKeyword = string.Empty;
+        SearchKeyword = string.Empty;
         foreach (var axis in FilterAxes)
         {
             foreach (var value in axis.Values)
@@ -80,21 +81,28 @@ public sealed partial class PartnersViewModel : ObservableObject
             axis => axis.AxisId,
             axis => (IReadOnlyList<long>)axis.Values.Where(v => v.IsSelected).Select(v => v.Value.Id).ToList());
 
-        // パートナーリストは停止中の管理そのものが目的の画面のため、停止中も含めて表示する
-        var results = _contactRepository.Search(CompanyKeyword, axisFilters, includeSuspended: true);
+        // パートナーリストは停止中の管理そのものが目的の画面のため、停止中も含めて表示する。
+        // 検索キーワードは会社名だけでなく担当者名・メモにも一致させる（mock_prototype.htmlの仕様）
+        var results = _contactRepository.Search(
+            SearchKeyword, axisFilters, includeSuspended: true, matchContactNameAndMemo: true);
 
         Contacts.Clear();
         foreach (var contact in results)
         {
-            Contacts.Add(new PartnerListItem(contact, DescribeCategories(contact)));
+            Contacts.Add(new PartnerListItem(
+                contact,
+                DescribeCategory(contact, CategoryAxis.TypeAxisId),
+                DescribeCategory(contact, CategoryAxis.TechFieldAxisId)));
         }
 
         ResultCountText = $"{Contacts.Count} 件";
     }
 
-    private string DescribeCategories(Contact contact)
+    /// <summary>指定した軸についてのみ、この宛先が持つカテゴリ値の表示名を返す（mock_prototype.htmlの列構成に合わせ、種別/技術領域を別列にするため）。</summary>
+    private string DescribeCategory(Contact contact, long axisId)
     {
         var names = _categoryStore.Axes
+            .Where(axis => axis.Id == axisId)
             .SelectMany(axis => axis.Values)
             .Where(value => contact.CategoryValueIds.Contains(value.Id))
             .Select(value => value.Name);
@@ -142,15 +150,19 @@ public sealed class PartnerListItem
 {
     public Contact Contact { get; }
 
-    /// <summary>この宛先が持つカテゴリ値の表示名（軸をまたいで結合したもの）。</summary>
-    public string CategoryText { get; }
+    /// <summary>「種別」軸の値の表示名（mock_prototype.htmlと同じく種別・技術領域は別列で表示する）。</summary>
+    public string TypeCategoryText { get; }
+
+    /// <summary>「技術領域」軸の値の表示名。</summary>
+    public string TechFieldCategoryText { get; }
 
     public string StatusText => Contact.IsSuspended ? "停止中" : "配信中";
     public string ToggleLabel => Contact.IsSuspended ? "再開" : "停止";
 
-    public PartnerListItem(Contact contact, string categoryText)
+    public PartnerListItem(Contact contact, string typeCategoryText, string techFieldCategoryText)
     {
         Contact = contact;
-        CategoryText = categoryText;
+        TypeCategoryText = typeCategoryText;
+        TechFieldCategoryText = techFieldCategoryText;
     }
 }

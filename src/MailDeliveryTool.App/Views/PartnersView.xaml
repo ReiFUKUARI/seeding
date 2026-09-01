@@ -11,15 +11,15 @@
     -->
     <StackPanel Margin="0,0,0,20">
 
-        <!-- 検索（要件定義書 6.1と同じ「会社名部分一致×カテゴリ軸内OR・軸間AND」の考え方を流用） -->
+        <!-- 検索（キーワードは会社名・担当者名・メモを横断。カテゴリは軸内OR・軸間AND） -->
         <Border Background="{StaticResource SurfaceBrush}"
                 BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="1" CornerRadius="8" Padding="16">
             <StackPanel>
                 <TextBlock Text="検索" FontWeight="SemiBold" Margin="0,0,0,10" />
 
-                <TextBlock Text="会社名" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
-                <TextBox Text="{Binding CompanyKeyword, UpdateSourceTrigger=PropertyChanged}"
+                <TextBlock Text="キーワード（会社名・担当者名・メモ）" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
                          Width="280" HorizontalAlignment="Left" Margin="0,0,0,12" />
 
                 <ItemsControl ItemsSource="{Binding FilterAxes}">
@@ -46,6 +46,7 @@
                 </ItemsControl>
 
                 <Button Content="条件をクリア" HorizontalAlignment="Left"
+                        Style="{StaticResource SubtleButtonStyle}"
                         Command="{Binding ClearFiltersCommand}" />
             </StackPanel>
         </Border>
@@ -69,8 +70,7 @@
                             Margin="0,0,8,0" Padding="14,6" />
 
                     <Button Grid.Column="2" Content="宛先を追加" Command="{Binding OpenAddContactCommand}"
-                            Background="{StaticResource AccentBrush}" Foreground="White" BorderThickness="0"
-                            Padding="14,6" />
+                            Style="{StaticResource PrimaryButtonStyle}" />
                 </Grid>
 
                 <DataGrid ItemsSource="{Binding Contacts}"
@@ -89,7 +89,8 @@
                         <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" />
                         <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" />
                         <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*" />
-                        <DataGridTextColumn Header="カテゴリ" Binding="{Binding CategoryText}" Width="1.4*" />
+                        <DataGridTextColumn Header="種別" Binding="{Binding TypeCategoryText}" Width="*" />
+                        <DataGridTextColumn Header="技術領域" Binding="{Binding TechFieldCategoryText}" Width="*" />
                         <DataGridTextColumn Header="メモ" Binding="{Binding Contact.Memo}" Width="1.2*" />
                         <DataGridTextColumn Header="状態" Binding="{Binding StatusText}" Width="Auto">
                             <DataGridTextColumn.ElementStyle>

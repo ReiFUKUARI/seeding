@@ -11,16 +11,20 @@ public sealed partial class TargetRowItem : ObservableObject
 {
     public Contact Contact { get; }
 
-    /// <summary>この宛先が持つカテゴリ値の表示名（軸をまたいで結合したもの）。一覧表示用。</summary>
-    public string CategoryText { get; }
+    /// <summary>「種別」軸の値の表示名（mock_prototype.htmlと同じく種別・技術領域は別列で表示する）。</summary>
+    public string TypeCategoryText { get; }
+
+    /// <summary>「技術領域」軸の値の表示名。</summary>
+    public string TechFieldCategoryText { get; }
 
     [ObservableProperty]
     private bool _isChecked;
 
-    public TargetRowItem(Contact contact, string categoryText, bool isChecked = true)
+    public TargetRowItem(Contact contact, string typeCategoryText, string techFieldCategoryText, bool isChecked = true)
     {
         Contact = contact;
-        CategoryText = categoryText;
+        TypeCategoryText = typeCategoryText;
+        TechFieldCategoryText = techFieldCategoryText;
         _isChecked = isChecked;
     }
 }

@@ -205,7 +205,11 @@ public sealed partial class ComposeViewModel : ObservableObject
         SearchResults.Clear();
         foreach (var contact in results)
         {
-            SearchResults.Add(new TargetRowItem(contact, DescribeCategories(contact), isChecked: true));
+            SearchResults.Add(new TargetRowItem(
+                contact,
+                DescribeCategory(contact, CategoryAxis.TypeAxisId),
+                DescribeCategory(contact, CategoryAxis.TechFieldAxisId),
+                isChecked: true));
         }
 
         SearchCountText = SearchResults.Count.ToString();
@@ -213,9 +217,11 @@ public sealed partial class ComposeViewModel : ObservableObject
         IsAllSearchChecked = true;
     }
 
-    private string DescribeCategories(Contact contact)
+    /// <summary>指定した軸についてのみ、この宛先が持つカテゴリ値の表示名を返す（種別・技術領域を別列にするため）。</summary>
+    private string DescribeCategory(Contact contact, long axisId)
     {
         var names = _categoryStore.Axes
+            .Where(axis => axis.Id == axisId)
             .SelectMany(axis => axis.Values)
             .Where(value => contact.CategoryValueIds.Contains(value.Id))
             .Select(value => value.Name);
@@ -234,7 +240,7 @@ public sealed partial class ComposeViewModel : ObservableObject
                 continue;
             }
 
-            var newRow = new TargetRowItem(row.Contact, row.CategoryText, isChecked: true);
+            var newRow = new TargetRowItem(row.Contact, row.TypeCategoryText, row.TechFieldCategoryText, isChecked: true);
             newRow.PropertyChanged += (_, _) => UpdateCanConfirmTarget();
             MailingList.Add(newRow);
             addedCount++;

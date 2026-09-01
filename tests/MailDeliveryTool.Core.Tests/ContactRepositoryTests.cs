@@ -114,6 +114,31 @@ public sealed class ContactRepositoryTests : IDisposable
     }
 
     [Fact]
+    public void Search_matchContactNameAndMemoがtrueなら担当者名やメモにも一致する()
+    {
+        _repo.Add(new Contact { CompanyName = "アルファ商事", ContactName = "山田太郎", Email = "a@x.jp" });
+        _repo.Add(new Contact { CompanyName = "ベータ物産", ContactName = "鈴木花子", Email = "b@x.jp", Memo = "山田さんの紹介" });
+        _repo.Add(new Contact { CompanyName = "ガンマ製作所", ContactName = "佐藤次郎", Email = "c@x.jp" });
+
+        var result = _repo.Search("山田", null, matchContactNameAndMemo: true);
+
+        Assert.Equal(2, result.Count);
+        Assert.Contains(result, c => c.CompanyName == "アルファ商事");
+        Assert.Contains(result, c => c.CompanyName == "ベータ物産");
+    }
+
+    [Fact]
+    public void Search_matchContactNameAndMemoを省略すると会社名のみで一致する()
+    {
+        _repo.Add(new Contact { CompanyName = "アルファ商事", ContactName = "山田太郎", Email = "a@x.jp" });
+        _repo.Add(new Contact { CompanyName = "ベータ物産", ContactName = "鈴木花子", Email = "b@x.jp", Memo = "山田さんの紹介" });
+
+        var result = _repo.Search("山田", null);
+
+        Assert.Empty(result);
+    }
+
+    [Fact]
     public void Search_会社名は部分一致()
     {
         _repo.Add(new Contact

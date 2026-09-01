@@ -33,18 +33,25 @@ public sealed class ContactRepository
     }
 
     /// <summary>
-    /// 会社名・カテゴリ軸での絞り込み検索。会社名は部分一致。カテゴリは軸内OR・軸間AND。
-    /// 「新しい配信」画面（要件定義書 6.1）は停止中を常に除外して使う（<paramref name="includeSuspended"/> を省略）。
-    /// パートナーリスト画面（要件定義書 5章）は停止中の管理そのものが目的のため、
-    /// <paramref name="includeSuspended"/> に true を渡して停止中も含めて検索する。
+    /// キーワード・カテゴリ軸での絞り込み検索。カテゴリは軸内OR・軸間AND。
+    /// 「新しい配信」画面（要件定義書 6.1）は停止中を常に除外し、会社名のみの部分一致で使う
+    /// （<paramref name="includeSuspended"/>・<paramref name="matchContactNameAndMemo"/> を省略）。
+    /// パートナーリスト画面（要件定義書 5章）は停止中の管理そのものが目的のため
+    /// <paramref name="includeSuspended"/> に true を、会社名・担当者名・メモを横断検索するため
+    /// <paramref name="matchContactNameAndMemo"/> に true を渡す。
     /// </summary>
-    /// <param name="companyKeyword">会社名の部分一致キーワード（null/空文字なら絞り込まない）。</param>
+    /// <param name="companyKeyword">部分一致キーワード（null/空文字なら絞り込まない）。</param>
     /// <param name="axisFilters">軸ID→選択されたカテゴリ値IDの一覧。値が空の軸は絞り込みに使わない。</param>
     /// <param name="includeSuspended">true の場合、停止中の宛先も結果に含める。既定は false（除外）。</param>
+    /// <param name="matchContactNameAndMemo">
+    /// true の場合、<paramref name="companyKeyword"/> を会社名だけでなく担当者名・メモにも一致させる。
+    /// 既定は false（会社名のみ）。
+    /// </param>
     public List<Contact> Search(
         string? companyKeyword,
         IReadOnlyDictionary<long, IReadOnlyList<long>>? axisFilters,
-        bool includeSuspended = false)
+        bool includeSuspended = false,
+        bool matchContactNameAndMemo = false)
     {
         using var connection = _factory.Create();
 
@@ -58,7 +65,9 @@ public sealed class ContactRepository
 
         if (!string.IsNullOrWhiteSpace(companyKeyword))
         {
-            conditions.Add("c.CompanyName LIKE $keyword ESCAPE '\\'");
+            conditions.Add(matchContactNameAndMemo
+                ? "(c.CompanyName LIKE $keyword ESCAPE '\\' OR c.ContactName LIKE $keyword ESCAPE '\\' OR c.Memo LIKE $keyword ESCAPE '\\')"
+                : "c.CompanyName LIKE $keyword ESCAPE '\\'");
             parameters["$keyword"] = "%" + EscapeLike(companyKeyword) + "%";
         }
 

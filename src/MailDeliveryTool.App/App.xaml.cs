@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System.Windows;
 using MailDeliveryTool.Core;
 using MailDeliveryTool.Core.Data;
@@ -27,6 +28,25 @@ public partial class App : Application
             ConnectionFactory = new SqliteConnectionFactory(AppPaths.DatabasePath);
             new DatabaseInitializer(ConnectionFactory).EnsureCreated();
             Services = new CoreServices(ConnectionFactory);
+
+            // D-004: 起動時に前回のバックアップから7日以上経過していれば自動的に実行する。
+            // 起動処理をブロックしないよう背景で実行し、進捗モーダルは出さない（手動実行時のみ表示する）。
+            // 保存先が書き込めない等で失敗した場合はLastBackupAtが更新されないため、
+            // 次回起動時に自動的に再試行される。
+            if (Services.BackupService.IsWeeklyBackupDue())
+            {
+                _ = Task.Run(() =>
+                {
+                    try
+                    {
+                        Services.BackupService.Run();
+                    }
+                    catch
+                    {
+                        // 背景実行のため、失敗してもユーザーへは通知しない（次回起動時に再試行する）
+                    }
+                });
+            }
         }
         catch (Exception ex)
         {

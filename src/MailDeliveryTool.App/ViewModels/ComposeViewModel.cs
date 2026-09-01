@@ -111,10 +111,16 @@ public sealed partial class ComposeViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(SearchTabVisibility));
         OnPropertyChanged(nameof(ListTabVisibility));
+        OnPropertyChanged(nameof(IsSearchTabActive));
+        OnPropertyChanged(nameof(IsListTabActive));
     }
 
     public Visibility SearchTabVisibility => ActiveTab == TargetTab.Search ? Visibility.Visible : Visibility.Collapsed;
     public Visibility ListTabVisibility => ActiveTab == TargetTab.List ? Visibility.Visible : Visibility.Collapsed;
+
+    /// <summary>タブの見た目上の選択状態（mock_prototype.htmlの.tab-item.active相当）。</summary>
+    public bool IsSearchTabActive => ActiveTab == TargetTab.Search;
+    public bool IsListTabActive => ActiveTab == TargetTab.List;
 
     [RelayCommand]
     private void SwitchToSearchTab() => ActiveTab = TargetTab.Search;
@@ -135,22 +141,67 @@ public sealed partial class ComposeViewModel : ObservableObject
     [ObservableProperty]
     private bool _isAllSearchChecked = true;
 
+    /// <summary>true の間は、行→ヘッダーの再計算（<see cref="OnSearchRowCheckedChanged"/>）を止める。
+    /// ヘッダーのチェック変更を全行へカスケードしている最中に、再計算が割り込んで
+    /// 無限ループ・中途半端な状態での上書きが起きるのを防ぐ。</summary>
+    private bool _isSyncingSearchAll;
+
     partial void OnIsAllSearchCheckedChanged(bool value)
     {
-        foreach (var row in SearchResults)
+        _isSyncingSearchAll = true;
+        try
         {
-            row.IsChecked = value;
+            foreach (var row in SearchResults)
+            {
+                row.IsChecked = value;
+            }
         }
+        finally
+        {
+            _isSyncingSearchAll = false;
+        }
+    }
+
+    /// <summary>個々の行のチェックが変わるたびに呼び、「すべて選択/解除」ヘッダーの状態を実態に合わせる。</summary>
+    private void OnSearchRowCheckedChanged()
+    {
+        if (_isSyncingSearchAll)
+        {
+            return;
+        }
+
+        IsAllSearchChecked = SearchResults.Count > 0 && SearchResults.All(r => r.IsChecked);
     }
 
     [ObservableProperty]
     private bool _isAllListChecked = true;
 
+    private bool _isSyncingListAll;
+
     partial void OnIsAllListCheckedChanged(bool value)
     {
-        foreach (var row in MailingList)
+        _isSyncingListAll = true;
+        try
         {
-            row.IsChecked = value;
+            foreach (var row in MailingList)
+            {
+                row.IsChecked = value;
+            }
+        }
+        finally
+        {
+            _isSyncingListAll = false;
+        }
+
+        UpdateCanConfirmTarget();
+    }
+
+    /// <summary>個々の行のチェックが変わるたびに呼び、「すべて選択/解除」ヘッダーの状態を実態に合わせる。</summary>
+    private void OnListRowCheckedChanged()
+    {
+        if (!_isSyncingListAll)
+        {
+            IsAllListChecked = MailingList.Count > 0 && MailingList.All(r => r.IsChecked);
         }
 
         UpdateCanConfirmTarget();
@@ -205,11 +256,19 @@ public sealed partial class ComposeViewModel : ObservableObject
         SearchResults.Clear();
         foreach (var contact in results)
         {
-            SearchResults.Add(new TargetRowItem(
+            var row = new TargetRowItem(
                 contact,
                 DescribeCategory(contact, CategoryAxis.TypeAxisId),
                 DescribeCategory(contact, CategoryAxis.TechFieldAxisId),
-                isChecked: true));
+                isChecked: true);
+            row.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(TargetRowItem.IsChecked))
+                {
+                    OnSearchRowCheckedChanged();
+                }
+            };
+            SearchResults.Add(row);
         }
 
         SearchCountText = SearchResults.Count.ToString();
@@ -241,13 +300,19 @@ public sealed partial class ComposeViewModel : ObservableObject
             }
 
             var newRow = new TargetRowItem(row.Contact, row.TypeCategoryText, row.TechFieldCategoryText, isChecked: true);
-            newRow.PropertyChanged += (_, _) => UpdateCanConfirmTarget();
+            newRow.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(TargetRowItem.IsChecked))
+                {
+                    OnListRowCheckedChanged();
+                }
+            };
             MailingList.Add(newRow);
             addedCount++;
         }
 
         UpdateListCount();
-        UpdateCanConfirmTarget();
+        OnListRowCheckedChanged();
         if (addedCount > 0)
         {
             ActiveTab = TargetTab.List;
@@ -264,7 +329,7 @@ public sealed partial class ComposeViewModel : ObservableObject
 
         MailingList.Remove(item);
         UpdateListCount();
-        UpdateCanConfirmTarget();
+        OnListRowCheckedChanged();
     }
 
     private void UpdateListCount()
@@ -637,6 +702,7 @@ public sealed partial class ComposeViewModel : ObservableObject
     {
         MailingList.Clear();
         UpdateListCount();
+        IsAllListChecked = true;
         ConfirmedTargets = new List<Contact>();
         Subject = string.Empty;
         Body = string.Empty;

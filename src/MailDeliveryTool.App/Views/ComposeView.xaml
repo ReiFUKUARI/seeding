@@ -27,32 +27,43 @@
                         <Button Grid.Column="1" Content="条件をクリア" Command="{Binding ClearFiltersCommand}" />
                     </Grid>
 
-                    <TextBlock Text="会社名" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
-                    <TextBox Text="{Binding CompanyKeyword, UpdateSourceTrigger=PropertyChanged}"
-                             Width="220" HorizontalAlignment="Left" Margin="0,0,0,12" />
+                    <!-- mock_prototype.htmlのfilter-panel（display:flex; gap:40px）に合わせ、
+                         キーワード・種別・技術領域を横並びにする -->
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Margin="0,0,40,0" MinWidth="220">
+                            <TextBlock Text="会社名" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                            <TextBox Text="{Binding CompanyKeyword, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="220" HorizontalAlignment="Left" />
+                        </StackPanel>
 
-                    <ItemsControl ItemsSource="{Binding FilterAxes}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="0,0,0,6">
-                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6" />
-                                    <ItemsControl ItemsSource="{Binding Values}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <CheckBox Content="{Binding Value.Name}" IsChecked="{Binding IsSelected}"
-                                                          Margin="0,0,14,4" />
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                        <ItemsControl ItemsSource="{Binding FilterAxes}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,0,40,0" MinWidth="160">
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6" />
+                                        <ItemsControl ItemsSource="{Binding Values}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <WrapPanel />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox Content="{Binding Value.Name}" IsChecked="{Binding IsSelected}"
+                                                              Margin="0,0,14,4" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 
@@ -61,14 +72,37 @@
                     BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,14,0,0">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                        <Button Padding="10,6" Margin="0,0,4,0" Command="{Binding SwitchToSearchTabCommand}">
+                        <Button Style="{StaticResource TabItemStyle}" Margin="0,0,4,0"
+                                Command="{Binding SwitchToSearchTabCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource TabItemStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSearchTabActive}" Value="True">
+                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                            <Setter Property="FontWeight" Value="SemiBold" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
                             <TextBlock>
                                 <Run Text="すべて " />
                                 <Run Text="{Binding SearchCountText, Mode=OneWay}" FontWeight="SemiBold" />
                             </TextBlock>
                         </Button>
-                        <Button Padding="10,6" Command="{Binding SwitchToListTabCommand}"
+                        <Button Style="{StaticResource TabItemStyle}" Command="{Binding SwitchToListTabCommand}"
                                 IsEnabled="{Binding HasMailingListItems}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource TabItemStyle}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsListTabActive}" Value="True">
+                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                            <Setter Property="FontWeight" Value="SemiBold" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
                             <TextBlock>
                                 <Run Text="メールリスト " />
                                 <Run Text="{Binding ListCountText, Mode=OneWay}" FontWeight="SemiBold" />
@@ -83,12 +117,20 @@
                                   CanUserAddRows="False" CanUserDeleteRows="False"
                                   HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeight="32"
                                   Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
-                                  BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360">
+                                  BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360"
+                                  EnableRowVirtualization="False">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="" Width="36">
+                                    <!-- DataGridCellが最初のクリックでセル選択にフォーカスを奪い、
+                                         チェックボックスへのクリックが1回目は届かなくなるのを防ぐ -->
+                                    <DataGridTemplateColumn.CellStyle>
+                                        <Style TargetType="DataGridCell">
+                                            <Setter Property="Focusable" Value="False" />
+                                        </Style>
+                                    </DataGridTemplateColumn.CellStyle>
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                            <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
@@ -114,12 +156,20 @@
                                   CanUserAddRows="False" CanUserDeleteRows="False"
                                   HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeight="32"
                                   Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
-                                  BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360">
+                                  BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360"
+                                  EnableRowVirtualization="False">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="" Width="36">
+                                    <!-- DataGridCellが最初のクリックでセル選択にフォーカスを奪い、
+                                         チェックボックスへのクリックが1回目は届かなくなるのを防ぐ -->
+                                    <DataGridTemplateColumn.CellStyle>
+                                        <Style TargetType="DataGridCell">
+                                            <Setter Property="Focusable" Value="False" />
+                                        </Style>
+                                    </DataGridTemplateColumn.CellStyle>
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                            <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>

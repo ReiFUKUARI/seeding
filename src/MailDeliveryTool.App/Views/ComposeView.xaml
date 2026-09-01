@@ -84,7 +84,14 @@
                                   Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
                                   BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360">
                             <DataGrid.Columns>
-                                <DataGridCheckBoxColumn Header="" Binding="{Binding IsChecked}" Width="36" />
+                                <DataGridTemplateColumn Header="" Width="36">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" IsReadOnly="True" />
                                 <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" IsReadOnly="True" />
                                 <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*" IsReadOnly="True" />
@@ -107,7 +114,14 @@
                                   Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
                                   BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360">
                             <DataGrid.Columns>
-                                <DataGridCheckBoxColumn Header="" Binding="{Binding IsChecked}" Width="36" />
+                                <DataGridTemplateColumn Header="" Width="36">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}"
+                                                      HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" IsReadOnly="True" />
                                 <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" IsReadOnly="True" />
                                 <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*" IsReadOnly="True" />

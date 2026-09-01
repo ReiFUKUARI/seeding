@@ -337,11 +337,13 @@ public sealed partial class ComposeViewModel : ObservableObject
     }
 
     /// <summary>
-    /// 設定画面で署名を編集した後、この画面に戻ってきたときに反映させるための再読み込み。
-    /// ComposeViewModelはMainWindowで使い回すシングルトンのため、署名変更が自動では伝わらない。
+    /// 「新しい配信」タブへ切り替えるたびに呼ぶ。ComposeViewModelはMainWindowで使い回す
+    /// シングルトンのため、パートナーリスト（宛先の追加・停止/再開）や設定画面（署名）での
+    /// 変更が自動では伝わらない。検索条件（会社名・カテゴリ）は変えずに結果だけ再取得する。
     /// </summary>
-    public void RefreshSignature()
+    public void RefreshOnNavigate()
     {
+        RunSearch();
         OnPropertyChanged(nameof(SignatureNoteText));
         UpdatePreview();
     }

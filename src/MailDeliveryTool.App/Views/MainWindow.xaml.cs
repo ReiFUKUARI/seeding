@@ -97,7 +97,7 @@ public partial class MainWindow : Window
             };
         }
 
-        _composeViewModel.RefreshSignature();
+        _composeViewModel.RefreshOnNavigate();
         ComposeViewHost.DataContext = _composeViewModel;
 
         TitleText.Text = "新しい配信";

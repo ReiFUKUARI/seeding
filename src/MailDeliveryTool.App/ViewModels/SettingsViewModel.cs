@@ -47,6 +47,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
         LoadMailAccount();
         LoadBackupInfo();
+        LoadSignature();
     }
 
     /// <summary>種別・技術領域の2軸。CategoryStoreを直接公開する（D-003：単一の共有ストア）。</summary>
@@ -102,6 +103,23 @@ public sealed partial class SettingsViewModel : ObservableObject
             _mailAccountRepository.Save(updated, editViewModel.PasswordChanged);
             LoadMailAccount();
         }
+    }
+
+    // --- 署名（要件定義書7章：1つのみ登録・自動反映） ---
+
+    [ObservableProperty]
+    private string _signatureText = string.Empty;
+
+    [ObservableProperty]
+    private string _signatureStatusText = string.Empty;
+
+    private void LoadSignature() => SignatureText = _appSettingRepository.GetSignature();
+
+    [RelayCommand]
+    private void SaveSignature()
+    {
+        _appSettingRepository.SetSignature(SignatureText);
+        SignatureStatusText = "保存しました。";
     }
 
     // --- バックアップ（要件定義書5.5・10.2） ---

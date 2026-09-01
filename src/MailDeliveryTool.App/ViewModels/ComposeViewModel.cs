@@ -306,7 +306,7 @@ public sealed partial class ComposeViewModel : ObservableObject
     }
 
     /// <summary>
-    /// 本文の下に表示する署名の案内文。署名編集UIは未実装のため、現時点では常に未設定の案内になる。
+    /// 本文の下に表示する署名の案内文。署名は設定画面で編集する（<see cref="RefreshSignature"/>参照）。
     /// </summary>
     public string SignatureNoteText
     {
@@ -317,6 +317,16 @@ public sealed partial class ComposeViewModel : ObservableObject
                 ? "署名は未設定です。"
                 : "-- （自動挿入されます）\n" + signature;
         }
+    }
+
+    /// <summary>
+    /// 設定画面で署名を編集した後、この画面に戻ってきたときに反映させるための再読み込み。
+    /// ComposeViewModelはMainWindowで使い回すシングルトンのため、署名変更が自動では伝わらない。
+    /// </summary>
+    public void RefreshSignature()
+    {
+        OnPropertyChanged(nameof(SignatureNoteText));
+        UpdatePreview();
     }
 
     private void UpdatePreview()

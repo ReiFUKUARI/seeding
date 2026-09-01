@@ -56,6 +56,27 @@
                 </StackPanel>
             </Border>
 
+            <!-- 署名（要件定義書7章：1つのみ登録・自動反映） -->
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,14,0,0">
+                <StackPanel>
+                    <TextBlock Text="署名" FontWeight="SemiBold" Margin="0,0,0,10" />
+                    <TextBlock Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,10"
+                               Text="「新しい配信」の本文末尾に「-- 」区切りで自動的に挿入されます。区切り自体はここに入力する必要はありません。" />
+
+                    <TextBox Text="{Binding SignatureText, UpdateSourceTrigger=PropertyChanged}"
+                             AcceptsReturn="True" TextWrapping="Wrap" MinHeight="90"
+                             VerticalScrollBarVisibility="Auto" Margin="0,0,0,10" />
+
+                    <Button Content="保存する" HorizontalAlignment="Left"
+                            Command="{Binding SaveSignatureCommand}" />
+
+                    <TextBlock Text="{Binding SignatureStatusText}" Margin="0,8,0,0"
+                               Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
             <!-- バックアップ（要件定義書5.5・10.2） -->
             <Border Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"

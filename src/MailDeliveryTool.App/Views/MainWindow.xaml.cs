@@ -65,6 +65,7 @@ public partial class MainWindow : Window
 
         _composeViewModel ??= new ComposeViewModel(
             App.Services.ContactRepository, App.Services.CategoryStore, App.Services.AppSettingRepository);
+        _composeViewModel.RefreshSignature();
         ComposeViewHost.DataContext = _composeViewModel;
 
         TitleText.Text = "新しい配信";

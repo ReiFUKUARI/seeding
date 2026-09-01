@@ -1,0 +1,311 @@
+<UserControl x:Class="MailDeliveryTool.App.Views.ComposeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        「新しい配信」ウィザード（要件定義書6〜8章）。宛先選択→メール作成→送信前の確認の
+        3ステップを、ComposeViewModel.CurrentStepに応じて1画面ずつ切り替える。
+        送信実行（フェーズ5⑥）はまだ未実装で、確認画面の「送信する」はプレースホルダー。
+
+        スクロールはMainWindow側の外側のScrollViewerが担うため、ここには独自の
+        ScrollViewerを入れない（設定画面の実機検証で判明した既知の挙動）。
+    -->
+    <StackPanel Margin="0,0,0,20">
+
+        <!-- ============ ① 宛先選択 ============ -->
+        <StackPanel Visibility="{Binding TargetStepVisibility}">
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="16">
+                <StackPanel>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="検索" FontWeight="SemiBold" FontSize="15" />
+                        <Button Grid.Column="1" Content="条件をクリア" Command="{Binding ClearFiltersCommand}" />
+                    </Grid>
+
+                    <TextBlock Text="会社名" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                    <TextBox Text="{Binding CompanyKeyword, UpdateSourceTrigger=PropertyChanged}"
+                             Width="220" HorizontalAlignment="Left" Margin="0,0,0,12" />
+
+                    <ItemsControl ItemsSource="{Binding FilterAxes}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,0,0,6">
+                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6" />
+                                    <ItemsControl ItemsSource="{Binding Values}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <CheckBox Content="{Binding Value.Name}" IsChecked="{Binding IsSelected}"
+                                                          Margin="0,0,14,4" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <Border Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,14,0,0">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                        <Button Padding="10,6" Margin="0,0,4,0" Command="{Binding SwitchToSearchTabCommand}">
+                            <TextBlock>
+                                <Run Text="すべて " />
+                                <Run Text="{Binding SearchCountText, Mode=OneWay}" FontWeight="SemiBold" />
+                            </TextBlock>
+                        </Button>
+                        <Button Padding="10,6" Command="{Binding SwitchToListTabCommand}">
+                            <TextBlock>
+                                <Run Text="メールリスト " />
+                                <Run Text="{Binding ListCountText, Mode=OneWay}" FontWeight="SemiBold" />
+                            </TextBlock>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- すべてタブ -->
+                    <StackPanel Visibility="{Binding SearchTabVisibility}">
+                        <CheckBox Content="すべて選択/解除" IsChecked="{Binding IsAllSearchChecked}" Margin="0,0,0,8" />
+                        <DataGrid ItemsSource="{Binding SearchResults}" AutoGenerateColumns="False"
+                                  CanUserAddRows="False" CanUserDeleteRows="False"
+                                  HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeight="32"
+                                  Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                                  BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360">
+                            <DataGrid.Columns>
+                                <DataGridCheckBoxColumn Header="" Binding="{Binding IsChecked}" Width="36" />
+                                <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" IsReadOnly="True" />
+                                <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" IsReadOnly="True" />
+                                <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*" IsReadOnly="True" />
+                                <DataGridTextColumn Header="カテゴリ" Binding="{Binding CategoryText}" Width="1.4*" IsReadOnly="True" />
+                                <DataGridTextColumn Header="メモ" Binding="{Binding Contact.Memo}" Width="1.2*" IsReadOnly="True" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                            <Button Content="メールリストに追加" Command="{Binding AddCheckedToListCommand}"
+                                    Background="{StaticResource AccentBrush}" Foreground="White" BorderThickness="0" Padding="14,6" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- メールリストタブ -->
+                    <StackPanel Visibility="{Binding ListTabVisibility}">
+                        <CheckBox Content="すべて選択/解除" IsChecked="{Binding IsAllListChecked}" Margin="0,0,0,8" />
+                        <DataGrid ItemsSource="{Binding MailingList}" AutoGenerateColumns="False"
+                                  CanUserAddRows="False" CanUserDeleteRows="False"
+                                  HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeight="32"
+                                  Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                                  BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360">
+                            <DataGrid.Columns>
+                                <DataGridCheckBoxColumn Header="" Binding="{Binding IsChecked}" Width="36" />
+                                <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" IsReadOnly="True" />
+                                <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" IsReadOnly="True" />
+                                <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*" IsReadOnly="True" />
+                                <DataGridTextColumn Header="カテゴリ" Binding="{Binding CategoryText}" Width="1.4*" IsReadOnly="True" />
+                                <DataGridTextColumn Header="メモ" Binding="{Binding Contact.Memo}" Width="1.2*" IsReadOnly="True" />
+                                <DataGridTemplateColumn Header="" Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="✕" Padding="6,2" Margin="2"
+                                                    Command="{Binding DataContext.RemoveFromListCommand,
+                                                        RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                            <Button Content="確定する" Command="{Binding ConfirmTargetCommand}"
+                                    IsEnabled="{Binding CanConfirmTarget}"
+                                    Background="{StaticResource AccentBrush}" Foreground="White" BorderThickness="0" Padding="14,6" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!-- ============ ② メール作成 ============ -->
+        <StackPanel Visibility="{Binding ComposeStepVisibility}">
+            <Button Content="← 宛先の選択に戻る" Command="{Binding GoBackToTargetCommand}"
+                    HorizontalAlignment="Left" Margin="0,0,0,12" />
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="280" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}"
+                        BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                    <StackPanel>
+                        <TextBlock Text="件名" FontWeight="SemiBold" FontSize="12.5" Margin="0,0,0,5" />
+                        <TextBox Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,14" />
+
+                        <Grid Margin="0,0,0,5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="本文" FontWeight="SemiBold" FontSize="12.5" VerticalAlignment="Center" />
+                            <Button Grid.Column="1" Content="🏷 タグを挿入 ▾" Padding="8,4" Click="OnInsertTagButtonClick">
+                                <Button.ContextMenu>
+                                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
+                                        <MenuItem Header="#会社名#" Command="{Binding InsertTagCommand}" CommandParameter="会社名" />
+                                        <MenuItem Header="#担当者名#" Command="{Binding InsertTagCommand}" CommandParameter="担当者名" />
+                                        <MenuItem Header="#メールアドレス#" Command="{Binding InsertTagCommand}" CommandParameter="メールアドレス" />
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                            </Button>
+                        </Grid>
+                        <TextBox Text="{Binding Body, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True"
+                                 TextWrapping="Wrap" MinHeight="220" VerticalScrollBarVisibility="Auto"
+                                 FontFamily="Consolas, Yu Gothic UI" Margin="0,0,0,4" />
+                        <TextBlock Text="{Binding BodyErrorText}" Foreground="{StaticResource DangerBrush}"
+                                   FontSize="12" TextWrapping="Wrap" Margin="0,0,0,6" />
+
+                        <Border Background="#FAF9F8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                CornerRadius="6" Padding="10,8" Margin="0,0,0,16">
+                            <TextBlock Text="{Binding SignatureNoteText}" FontSize="12.5"
+                                       Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                        </Border>
+
+                        <TextBlock Text="添付ファイル（複数可・合計13MBまで）" FontWeight="SemiBold" FontSize="12.5" Margin="0,0,0,5" />
+                        <Border BorderBrush="#C8C6C4" BorderThickness="1.5" CornerRadius="8" Padding="16"
+                                Background="Transparent" Cursor="Hand">
+                            <Border.InputBindings>
+                                <MouseBinding MouseAction="LeftClick" Command="{Binding AddAttachmentCommand}" />
+                            </Border.InputBindings>
+                            <TextBlock Text="クリックしてファイルを選択" HorizontalAlignment="Center"
+                                       Foreground="{StaticResource TextSecondaryBrush}" FontSize="12.5" />
+                        </Border>
+                        <ItemsControl ItemsSource="{Binding Attachments}" Margin="0,8,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#FAF9F8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                            CornerRadius="6" Padding="8,6" Margin="0,0,0,6">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                                <TextBlock Text="{Binding FileName}" FontSize="12.5" VerticalAlignment="Center" />
+                                                <TextBlock Text="{Binding SizeText, StringFormat=' （{0}）'}" FontSize="11.5"
+                                                           Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1" Content="✕" Padding="6,2"
+                                                    Command="{Binding DataContext.RemoveAttachmentCommand,
+                                                        RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="{Binding AttachmentErrorText}" Foreground="{StaticResource DangerBrush}"
+                                   FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Column="2">
+                    <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="宛先" FontWeight="SemiBold" FontSize="12.5" Margin="0,0,0,6" />
+                            <TextBlock Text="{Binding TargetCountText}" FontSize="26" FontWeight="Bold"
+                                       Foreground="{StaticResource AccentBrush}" />
+                            <TextBlock Text="件に送信します" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12.5" />
+                            <TextBlock Text="{Binding TargetErrorText}" Foreground="{StaticResource DangerBrush}"
+                                       FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,6">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="プレビュー（1件目）" FontWeight="SemiBold" FontSize="12.5" />
+                                <Button Grid.Column="1" Content="拡大" Padding="6,2" Command="{Binding OpenPreviewModalCommand}" />
+                            </Grid>
+                            <TextBlock Text="{Binding PreviewText}" TextWrapping="Wrap" FontSize="12"
+                                       Foreground="{StaticResource TextSecondaryBrush}" MaxHeight="220" />
+                        </StackPanel>
+                    </Border>
+                    <Button Content="確認する" Command="{Binding CheckAndProceedCommand}"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            Background="{StaticResource AccentBrush}" Foreground="White" BorderThickness="0" Padding="0,10" />
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <!-- ============ ③ 送信前の確認 ============ -->
+        <StackPanel Visibility="{Binding ConfirmationStepVisibility}">
+            <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="16" MaxWidth="760" HorizontalAlignment="Left">
+                <StackPanel>
+                    <TextBlock Text="送信内容" FontWeight="SemiBold" Margin="0,0,0,14" />
+
+                    <TextBlock FontWeight="SemiBold" FontSize="12.5" Margin="0,0,0,6">
+                        <Run Text="宛先一覧（" /><Run Text="{Binding TargetCountText, Mode=OneWay}" /><Run Text="件）" />
+                    </TextBlock>
+                    <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="6"
+                            MaxHeight="200" Margin="0,0,0,14">
+                        <DataGrid ItemsSource="{Binding ConfirmTargetRows}" AutoGenerateColumns="False" IsReadOnly="True"
+                                  CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                  Background="{StaticResource SurfaceBrush}" BorderThickness="0" RowHeight="30">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="会社名" Binding="{Binding CompanyName}" Width="1.4*" />
+                                <DataGridTextColumn Header="担当者名" Binding="{Binding ContactName}" Width="*" />
+                                <DataGridTextColumn Header="メールアドレス" Binding="{Binding Email}" Width="1.6*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+
+                    <TextBlock Text="件名" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" />
+                    <TextBlock Text="{Binding ConfirmSubjectText}" FontWeight="SemiBold" Margin="0,2,0,14" />
+
+                    <TextBlock Text="本文" FontWeight="SemiBold" FontSize="12.5" Margin="0,0,0,6" />
+                    <Border Background="#FAF9F8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                            CornerRadius="6" Padding="10,8" MaxHeight="260" Margin="0,0,0,14">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <TextBlock Text="{Binding ConfirmBodyText}" TextWrapping="Wrap" FontSize="12.5" />
+                        </ScrollViewer>
+                    </Border>
+
+                    <TextBlock Text="添付ファイル" FontWeight="SemiBold" FontSize="12.5" Margin="0,0,0,6" />
+                    <TextBlock Text="{Binding ConfirmAttachmentsText}" Foreground="{StaticResource TextSecondaryBrush}"
+                               TextWrapping="Wrap" Margin="0,0,0,10" />
+
+                    <Border Background="#FFF8E1" BorderBrush="#F0DC82" BorderThickness="1" CornerRadius="8" Padding="12"
+                            Visibility="{Binding HasDuplicateWarning, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            Margin="0,0,0,14">
+                        <TextBlock Text="{Binding ConfirmDuplicateWarningText}" TextWrapping="Wrap"
+                                   Foreground="#8A6D00" FontSize="12.5" />
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="戻る" Command="{Binding BackToComposeCommand}" Margin="0,0,8,0" Padding="14,6" />
+                        <Button Content="送信する" Command="{Binding StartSendingCommand}"
+                                Background="{StaticResource AccentBrush}" Foreground="White" BorderThickness="0" Padding="14,6" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+    </StackPanel>
+</UserControl>

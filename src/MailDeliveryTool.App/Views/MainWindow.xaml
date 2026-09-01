@@ -101,20 +101,9 @@
                         </StackPanel>
                     </Border>
 
-                    <Border x:Name="PlaceholderCard"
-                            Background="{StaticResource SurfaceBrush}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1" CornerRadius="8" Padding="16"
-                            Margin="0,14,0,0">
-                        <StackPanel>
-                            <TextBlock x:Name="PlaceholderTitle"
-                                       Text="新しい配信"
-                                       FontWeight="SemiBold" Margin="0,0,0,8" />
-                            <TextBlock x:Name="PlaceholderBody"
-                                       Foreground="{StaticResource TextSecondaryBrush}"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                    </Border>
+                    <views:ComposeView x:Name="ComposeViewHost"
+                                        Margin="0,14,0,0"
+                                        Visibility="Collapsed" />
 
                     <views:SettingsView x:Name="SettingsViewHost"
                                          Margin="0,14,0,0"

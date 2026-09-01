@@ -35,6 +35,7 @@ public partial class MainWindow : Window
 
     private SettingsViewModel? _settingsViewModel;
     private PartnersViewModel? _partnersViewModel;
+    private ComposeViewModel? _composeViewModel;
 
     private void ShowPlaceholder(string key)
     {
@@ -62,14 +63,12 @@ public partial class MainWindow : Window
             return;
         }
 
-        const string title = "新しい配信";
-        TitleText.Text = title;
-        PlaceholderTitle.Text = title;
-        PlaceholderBody.Text =
-            "宛先選択（すべて／メールリストの2タブ）→ メール作成 → 内容の確認 → 送信中 → 送信結果"
-            + "というウィザードフロー（要件定義書 6〜9章）。"
-            + "\n\n（フェーズ5で実装予定）";
-        SetActiveView(PlaceholderCard);
+        _composeViewModel ??= new ComposeViewModel(
+            App.Services.ContactRepository, App.Services.CategoryStore, App.Services.AppSettingRepository);
+        ComposeViewHost.DataContext = _composeViewModel;
+
+        TitleText.Text = "新しい配信";
+        SetActiveView(ComposeViewHost);
     }
 
     /// <summary>
@@ -77,7 +76,7 @@ public partial class MainWindow : Window
     /// </summary>
     private void SetActiveView(UIElement active)
     {
-        PlaceholderCard.Visibility = active == PlaceholderCard ? Visibility.Visible : Visibility.Collapsed;
+        ComposeViewHost.Visibility = active == ComposeViewHost ? Visibility.Visible : Visibility.Collapsed;
         SettingsViewHost.Visibility = active == SettingsViewHost ? Visibility.Visible : Visibility.Collapsed;
         PartnersViewHost.Visibility = active == PartnersViewHost ? Visibility.Visible : Visibility.Collapsed;
     }

@@ -3,6 +3,7 @@
                     xmlns:conv="clr-namespace:MailDeliveryTool.App.Converters">
 
     <conv:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
     <!--
         フェーズ3モック（mock_prototype.html）の配色をそのまま移植した色定義。

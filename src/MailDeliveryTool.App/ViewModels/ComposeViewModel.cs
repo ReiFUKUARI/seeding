@@ -128,6 +128,10 @@ public sealed partial class ComposeViewModel : ObservableObject
     [ObservableProperty]
     private string _listCountText = "0";
 
+    /// <summary>メールリストが0件のときは、そのタブへ切り替えられないようにする。</summary>
+    [ObservableProperty]
+    private bool _hasMailingListItems;
+
     [ObservableProperty]
     private bool _isAllSearchChecked = true;
 
@@ -236,7 +240,7 @@ public sealed partial class ComposeViewModel : ObservableObject
             addedCount++;
         }
 
-        ListCountText = MailingList.Count.ToString();
+        UpdateListCount();
         UpdateCanConfirmTarget();
         if (addedCount > 0)
         {
@@ -253,8 +257,14 @@ public sealed partial class ComposeViewModel : ObservableObject
         }
 
         MailingList.Remove(item);
-        ListCountText = MailingList.Count.ToString();
+        UpdateListCount();
         UpdateCanConfirmTarget();
+    }
+
+    private void UpdateListCount()
+    {
+        ListCountText = MailingList.Count.ToString();
+        HasMailingListItems = MailingList.Count > 0;
     }
 
     private void UpdateCanConfirmTarget() => CanConfirmTarget = MailingList.Any(m => m.IsChecked);
@@ -620,7 +630,7 @@ public sealed partial class ComposeViewModel : ObservableObject
     private void FinishSending()
     {
         MailingList.Clear();
-        ListCountText = "0";
+        UpdateListCount();
         ConfirmedTargets = new List<Contact>();
         Subject = string.Empty;
         Body = string.Empty;

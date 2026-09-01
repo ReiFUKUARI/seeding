@@ -67,7 +67,8 @@
                                 <Run Text="{Binding SearchCountText, Mode=OneWay}" FontWeight="SemiBold" />
                             </TextBlock>
                         </Button>
-                        <Button Padding="10,6" Command="{Binding SwitchToListTabCommand}">
+                        <Button Padding="10,6" Command="{Binding SwitchToListTabCommand}"
+                                IsEnabled="{Binding HasMailingListItems}">
                             <TextBlock>
                                 <Run Text="メールリスト " />
                                 <Run Text="{Binding ListCountText, Mode=OneWay}" FontWeight="SemiBold" />

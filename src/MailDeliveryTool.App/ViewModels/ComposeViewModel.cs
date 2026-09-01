@@ -7,17 +7,20 @@ using CommunityToolkit.Mvvm.Input;
 using MailDeliveryTool.App.Services;
 using MailDeliveryTool.App.Views;
 using MailDeliveryTool.Core.Data.Repositories;
+using MailDeliveryTool.Core.Mail;
 using MailDeliveryTool.Core.Models;
 using Microsoft.Win32;
 
 namespace MailDeliveryTool.App.ViewModels;
 
-/// <summary>「新しい配信」ウィザードの3ステップ（要件定義書6〜8章）。送信実行はフェーズ5⑥で実装する。</summary>
+/// <summary>「新しい配信」ウィザードの5ステップ（要件定義書6〜9章）。</summary>
 public enum ComposeStep
 {
     TargetSelection,
     Compose,
     Confirmation,
+    Sending,
+    Result,
 }
 
 /// <summary>宛先選択画面の2タブ（要件定義書6.1）。</summary>
@@ -28,11 +31,9 @@ public enum TargetTab
 }
 
 /// <summary>
-/// 「新しい配信」ウィザード全体のビューモデル（要件定義書6〜8章）。
+/// 「新しい配信」ウィザード全体のビューモデル（要件定義書6〜9章）。
 /// mock_prototype.htmlのグローバル状態（contacts検索結果・addedList・確認画面）を
-/// 1つのビューモデルにまとめたもの。宛先選択→メール作成→送信前の確認までを扱う。
-/// 実際の送信（フェーズ5⑥：送信エンジン）は<see cref="StartSendingCommand"/>から呼ぶ想定で、
-/// 現時点ではプレースホルダーになっている。
+/// 1つのビューモデルにまとめたもの。宛先選択→メール作成→送信前の確認→送信→送信結果までを扱う。
 /// </summary>
 public sealed partial class ComposeViewModel : ObservableObject
 {
@@ -44,13 +45,21 @@ public sealed partial class ComposeViewModel : ObservableObject
     private readonly ContactRepository _contactRepository;
     private readonly CategoryStore _categoryStore;
     private readonly AppSettingRepository _appSettingRepository;
+    private readonly MailAccountSettingRepository _mailAccountRepository;
+    private readonly MailSender _mailSender;
 
     public ComposeViewModel(
-        ContactRepository contactRepository, CategoryStore categoryStore, AppSettingRepository appSettingRepository)
+        ContactRepository contactRepository,
+        CategoryStore categoryStore,
+        AppSettingRepository appSettingRepository,
+        MailAccountSettingRepository mailAccountRepository,
+        MailSender mailSender)
     {
         _contactRepository = contactRepository;
         _categoryStore = categoryStore;
         _appSettingRepository = appSettingRepository;
+        _mailAccountRepository = mailAccountRepository;
+        _mailSender = mailSender;
 
         _categoryStore.Axes.CollectionChanged += (_, _) => RebuildFilterAxes();
         RebuildFilterAxes();
@@ -65,6 +74,8 @@ public sealed partial class ComposeViewModel : ObservableObject
         OnPropertyChanged(nameof(TargetStepVisibility));
         OnPropertyChanged(nameof(ComposeStepVisibility));
         OnPropertyChanged(nameof(ConfirmationStepVisibility));
+        OnPropertyChanged(nameof(SendingStepVisibility));
+        OnPropertyChanged(nameof(ResultStepVisibility));
     }
 
     public Visibility TargetStepVisibility =>
@@ -75,6 +86,12 @@ public sealed partial class ComposeViewModel : ObservableObject
 
     public Visibility ConfirmationStepVisibility =>
         CurrentStep == ComposeStep.Confirmation ? Visibility.Visible : Visibility.Collapsed;
+
+    public Visibility SendingStepVisibility =>
+        CurrentStep == ComposeStep.Sending ? Visibility.Visible : Visibility.Collapsed;
+
+    public Visibility ResultStepVisibility =>
+        CurrentStep == ComposeStep.Result ? Visibility.Visible : Visibility.Collapsed;
 
     // ================= ① 宛先選択（要件定義書6章） =================
 
@@ -338,15 +355,9 @@ public sealed partial class ComposeViewModel : ObservableObject
             return;
         }
 
-        var substituted = Substitute(Body, sample);
-        var signature = GetSignatureText();
-        PreviewText = string.IsNullOrEmpty(signature) ? substituted : substituted + "\n\n-- \n" + signature;
+        var substituted = MailBodyComposer.Substitute(Body, sample);
+        PreviewText = MailBodyComposer.AppendSignature(substituted, GetSignatureText());
     }
-
-    private static string Substitute(string body, Contact contact) =>
-        body.Replace("#会社名#", contact.CompanyName)
-            .Replace("#担当者名#", contact.ContactName)
-            .Replace("#メールアドレス#", contact.Email);
 
     [RelayCommand]
     private void InsertTag(string? tagName)
@@ -470,8 +481,7 @@ public sealed partial class ComposeViewModel : ObservableObject
             ConfirmTargetRows.Add(contact);
         }
 
-        var signature = GetSignatureText();
-        ConfirmBodyText = string.IsNullOrEmpty(signature) ? Body : Body + "\n\n-- \n" + signature;
+        ConfirmBodyText = MailBodyComposer.AppendSignature(Body, GetSignatureText());
 
         ConfirmAttachmentsText = Attachments.Count == 0
             ? "添付ファイルはありません"
@@ -492,14 +502,129 @@ public sealed partial class ComposeViewModel : ObservableObject
     [RelayCommand]
     private void BackToCompose() => CurrentStep = ComposeStep.Compose;
 
-    /// <summary>実際の送信処理はフェーズ5⑥（送信エンジン）で実装する。</summary>
+    // ================= ④ 送信中（要件定義書9章：75通/分ペーサー） =================
+
+    /// <summary>
+    /// 送信中はtrue。MainWindowがこれを監視し、D-005（送信中は閉じるボタンを無効化する）を実施する。
+    /// </summary>
+    [ObservableProperty]
+    private bool _isSending;
+
+    [ObservableProperty]
+    private string _progressText = "0 / 0 件 送信済み";
+
+    [ObservableProperty]
+    private double _progressPercent;
+
+    public ObservableCollection<string> ProgressLogLines { get; } = new();
+
     [RelayCommand]
-    private void StartSending()
+    private async Task StartSendingAsync()
     {
-        MessageBox.Show(
-            "送信エンジンはフェーズ5⑥で実装予定です。",
-            "メール配信ツール",
-            MessageBoxButton.OK,
-            MessageBoxImage.Information);
+        var account = _mailAccountRepository.Get();
+        if (!account.IsConfigured || string.IsNullOrEmpty(account.Password))
+        {
+            MessageBox.Show(
+                "送信元メールアカウントが未設定です。設定画面から登録してください。",
+                "メール配信ツール",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        CurrentStep = ComposeStep.Sending;
+        ProgressLogLines.Clear();
+        ProgressPercent = 0;
+        ProgressText = $"0 / {ConfirmedTargets.Count} 件 送信済み";
+
+        var request = new MailSendRequest
+        {
+            Subject = Subject,
+            BodyTemplate = Body,
+            Targets = ConfirmedTargets,
+            AttachmentFilePaths = Attachments.Select(a => a.FilePath).ToList(),
+            SignatureText = GetSignatureText(),
+        };
+        var progress = new Progress<SendProgress>(OnSendProgress);
+
+        IsSending = true;
+        try
+        {
+            var results = await _mailSender.SendAsync(account, request, progress);
+            RenderResult(results);
+            CurrentStep = ComposeStep.Result;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"送信中にエラーが発生しました。以降の宛先への送信は行われていません。\n{ex.Message}",
+                "メール配信ツール",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            CurrentStep = ComposeStep.Confirmation;
+        }
+        finally
+        {
+            IsSending = false;
+        }
+    }
+
+    private void OnSendProgress(SendProgress progress)
+    {
+        ProgressPercent = (double)progress.SentCount / progress.TotalCount * 100;
+        ProgressText = $"{progress.SentCount} / {progress.TotalCount} 件 送信済み";
+
+        var result = progress.LastResult;
+        ProgressLogLines.Add(result.Success
+            ? $"✓ {result.Contact.CompanyName} 宛に送信しました"
+            : $"✕ {result.Contact.CompanyName} 宛の送信に失敗（スキップ）: {result.ErrorMessage}");
+    }
+
+    // ================= ⑤ 送信結果（要件定義書9章） =================
+
+    [ObservableProperty]
+    private int _successCount;
+
+    [ObservableProperty]
+    private int _failCount;
+
+    public ObservableCollection<SendItemResult> FailedResults { get; } = new();
+
+    private void RenderResult(IReadOnlyList<SendItemResult> results)
+    {
+        SuccessCount = results.Count(r => r.Success);
+        FailCount = results.Count(r => !r.Success);
+
+        FailedResults.Clear();
+        foreach (var result in results.Where(r => !r.Success))
+        {
+            FailedResults.Add(result);
+        }
+    }
+
+    [RelayCommand]
+    private void CopyFailList()
+    {
+        var text = FailedResults.Count == 0
+            ? "（失敗した宛先はありません）"
+            : string.Join(
+                "\n",
+                FailedResults.Select(r => $"{r.Contact.CompanyName}\t{r.Contact.ContactName}\t{r.Contact.Email}\t{r.ErrorMessage}"));
+        Clipboard.SetText(text);
+    }
+
+    /// <summary>送信結果画面の「完了する」。宛先選択（すべてタブ）に戻り、メールリストと本文をリセットする。</summary>
+    [RelayCommand]
+    private void FinishSending()
+    {
+        MailingList.Clear();
+        ListCountText = "0";
+        ConfirmedTargets = new List<Contact>();
+        Subject = string.Empty;
+        Body = string.Empty;
+        Attachments.Clear();
+        ActiveTab = TargetTab.Search;
+        RunSearch();
+        CurrentStep = ComposeStep.TargetSelection;
     }
 }

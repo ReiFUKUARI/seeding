@@ -307,5 +307,86 @@
             </Border>
         </StackPanel>
 
+        <!-- ============ ④ 送信中 ============ -->
+        <StackPanel Visibility="{Binding SendingStepVisibility}" MaxWidth="480" HorizontalAlignment="Center" Margin="0,60,0,0">
+            <TextBlock Text="送信しています…" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,0,0,10" />
+            <TextBlock Text="{Binding ProgressText}" Foreground="{StaticResource TextSecondaryBrush}"
+                       HorizontalAlignment="Center" Margin="0,0,0,14" />
+            <ProgressBar Minimum="0" Maximum="100" Value="{Binding ProgressPercent, Mode=OneWay}"
+                         Height="10" Foreground="{StaticResource AccentBrush}" Margin="0,0,0,14" />
+            <Border Background="#FAF9F8" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                    CornerRadius="8" Padding="10,8" Height="140">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding ProgressLogLines}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" FontFamily="Consolas, Yu Gothic UI" FontSize="11.5" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+        </StackPanel>
+
+        <!-- ============ ⑤ 送信結果 ============ -->
+        <StackPanel Visibility="{Binding ResultStepVisibility}">
+            <Grid Margin="0,0,0,14">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1" CornerRadius="8" Padding="18">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding SuccessCount}" FontSize="30" FontWeight="Bold"
+                                   Foreground="{StaticResource SuccessBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="送信成功" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12.5"
+                                   HorizontalAlignment="Center" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1" CornerRadius="8" Padding="18">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding FailCount}" FontSize="30" FontWeight="Bold"
+                                   Foreground="{StaticResource DangerBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="送信失敗" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12.5"
+                                   HorizontalAlignment="Center" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="16">
+                <StackPanel>
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="送信失敗の宛先一覧" FontWeight="SemiBold" />
+                        <Button Grid.Column="1" Content="📋 一覧をコピー" Command="{Binding CopyFailListCommand}"
+                                Background="{StaticResource AccentBrush}" Foreground="White" BorderThickness="0" Padding="10,4" />
+                    </Grid>
+                    <DataGrid ItemsSource="{Binding FailedResults}" AutoGenerateColumns="False" IsReadOnly="True"
+                              CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                              Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
+                              BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="260">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.2*" />
+                            <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" />
+                            <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.4*" />
+                            <DataGridTextColumn Header="エラー内容" Binding="{Binding ErrorMessage}" Width="1.8*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </Border>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                <Button Content="完了する" Command="{Binding FinishSendingCommand}"
+                        Background="{StaticResource AccentBrush}" Foreground="White" BorderThickness="0" Padding="14,6" />
+            </StackPanel>
+        </StackPanel>
+
     </StackPanel>
 </UserControl>

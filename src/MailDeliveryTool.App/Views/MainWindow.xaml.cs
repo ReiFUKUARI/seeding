@@ -1,6 +1,9 @@
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using MailDeliveryTool.App.ViewModels;
 using MailDeliveryTool.Core;
 using MailDeliveryTool.Core.Data;
@@ -17,6 +20,20 @@ public partial class MainWindow : Window
             ShowDiagnostics();
             ShowPlaceholder("Compose");
         };
+        Closing += OnWindowClosing;
+    }
+
+    /// <summary>
+    /// D-005：送信中はウィンドウを閉じられないようにする。中断機能は提供しない
+    /// （要件定義書4章「送信中の中断機能は不要。開始したら最後まで自動完了」）ため、
+    /// Closingでキャンセルするだけでよい。
+    /// </summary>
+    private void OnWindowClosing(object? sender, CancelEventArgs e)
+    {
+        if (_composeViewModel?.IsSending == true)
+        {
+            e.Cancel = true;
+        }
     }
 
     /// <summary>
@@ -63,8 +80,23 @@ public partial class MainWindow : Window
             return;
         }
 
-        _composeViewModel ??= new ComposeViewModel(
-            App.Services.ContactRepository, App.Services.CategoryStore, App.Services.AppSettingRepository);
+        if (_composeViewModel is null)
+        {
+            _composeViewModel = new ComposeViewModel(
+                App.Services.ContactRepository,
+                App.Services.CategoryStore,
+                App.Services.AppSettingRepository,
+                App.Services.MailAccountSettingRepository,
+                App.Services.MailSender);
+            _composeViewModel.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(ComposeViewModel.IsSending))
+                {
+                    SetCloseButtonEnabled(!_composeViewModel!.IsSending);
+                }
+            };
+        }
+
         _composeViewModel.RefreshSignature();
         ComposeViewHost.DataContext = _composeViewModel;
 
@@ -80,6 +112,37 @@ public partial class MainWindow : Window
         ComposeViewHost.Visibility = active == ComposeViewHost ? Visibility.Visible : Visibility.Collapsed;
         SettingsViewHost.Visibility = active == SettingsViewHost ? Visibility.Visible : Visibility.Collapsed;
         PartnersViewHost.Visibility = active == PartnersViewHost ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    // ================= D-005：送信中は閉じるボタンを無効化する =================
+    // XAMLだけでは見た目上のグレーアウトができないため、Win32相互運用でシステムメニューの
+    // SC_CLOSEを無効化する。ただしこれだけではAlt+F4やタスクバーからの終了を防げないため、
+    // OnWindowClosingでのe.Cancel=trueが実質的な防御になる（両方が必要）。
+
+    private const uint ScClose = 0xF060;
+    private const uint MfByCommand = 0x00000000;
+    private const uint MfGrayed = 0x00000001;
+    private const uint MfEnabled = 0x00000000;
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
+
+    [DllImport("user32.dll")]
+    private static extern int EnableMenuItem(IntPtr hMenu, uint uIDEnableItem, uint uEnable);
+
+    private void SetCloseButtonEnabled(bool enabled)
+    {
+        var hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero)
+        {
+            return;
+        }
+
+        var systemMenu = GetSystemMenu(hwnd, false);
+        if (systemMenu != IntPtr.Zero)
+        {
+            EnableMenuItem(systemMenu, ScClose, MfByCommand | (enabled ? MfEnabled : MfGrayed));
+        }
     }
 
     /// <summary>

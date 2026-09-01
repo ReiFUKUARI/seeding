@@ -2,6 +2,7 @@ using MailDeliveryTool.App.Services;
 using MailDeliveryTool.Core.Backup;
 using MailDeliveryTool.Core.Data;
 using MailDeliveryTool.Core.Data.Repositories;
+using MailDeliveryTool.Core.Mail;
 
 namespace MailDeliveryTool.App;
 
@@ -18,6 +19,7 @@ public sealed class CoreServices
     public AppSettingRepository AppSettingRepository { get; }
     public CategoryStore CategoryStore { get; }
     public BackupService BackupService { get; }
+    public MailSender MailSender { get; }
 
     public CoreServices(SqliteConnectionFactory connectionFactory)
     {
@@ -27,5 +29,6 @@ public sealed class CoreServices
         AppSettingRepository = new AppSettingRepository(connectionFactory);
         CategoryStore = new CategoryStore(CategoryRepository);
         BackupService = new BackupService(ContactRepository, CategoryRepository, AppSettingRepository);
+        MailSender = new MailSender();
     }
 }

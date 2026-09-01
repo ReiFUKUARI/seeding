@@ -314,8 +314,8 @@ public sealed partial class ComposeViewModel : ObservableObject
         {
             var signature = GetSignatureText();
             return string.IsNullOrEmpty(signature)
-                ? "署名は未設定です。"
-                : "-- （自動挿入されます）\n" + signature;
+                ? "署名は未設定です。「設定」タブから登録できます。"
+                : "-- （本文の末尾に自動挿入されます。編集は「設定」タブから）\n" + signature;
         }
     }
 

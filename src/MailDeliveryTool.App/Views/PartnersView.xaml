@@ -49,11 +49,11 @@
                             <DataTemplate>
                                 <StackPanel Margin="0,0,40,10" MinWidth="160">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6" />
-                                    <!-- 値が6件以上になっても、1行に5つまでで折り返す -->
+                                    <!-- 値が7件以上になっても、1行に6つまでで折り返す -->
                                     <ItemsControl ItemsSource="{Binding Values}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
-                                                <UniformGrid Columns="5" />
+                                                <UniformGrid Columns="6" />
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
@@ -94,6 +94,9 @@
 
                 <!-- 列は幅に応じて伸縮しつつ、MinWidthを下回る幅では横スクロールする。
                      縦方向はMaxHeightを超えると一覧自体が縦スクロールする。 -->
+                <!-- 「操作」列は横スクロールしても常に見えるよう先頭に固定する（FrozenColumnCount）。
+                     ウィンドウを狭くして横スクロールしたときに編集・停止/再開ボタンが
+                     右端に隠れて操作できなくなるのを防ぐため。 -->
                 <DataGrid ItemsSource="{Binding Contacts}"
                           AutoGenerateColumns="False" CanUserReorderColumns="False"
                           CanUserAddRows="False" CanUserDeleteRows="False"
@@ -103,6 +106,7 @@
                           GridLinesVisibility="Horizontal"
                           RowHeight="34"
                           MaxHeight="480"
+                          FrozenColumnCount="1"
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                           Background="{StaticResource SurfaceBrush}"
@@ -125,6 +129,34 @@
                         </Style>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="" Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="✎" ToolTip="編集" Style="{StaticResource IconButtonStyle}"
+                                                Margin="2" IsEnabled="{Binding Contact.IsSuspended, Converter={StaticResource InverseBooleanConverter}}"
+                                                Command="{Binding DataContext.EditContactCommand,
+                                                    RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}" />
+                                        <Button Content="{Binding ToggleGlyph}" ToolTip="{Binding ToggleTooltip}" Margin="2"
+                                                Command="{Binding DataContext.ToggleSuspendCommand,
+                                                    RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource DangerIconButtonStyle}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Contact.IsSuspended}" Value="True">
+                                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                            <Setter Property="BorderBrush" Value="{StaticResource AccentSoftBrush}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" MinWidth="160"
                                              CellStyle="{StaticResource SuspendedDimCellStyle}" />
                         <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" MinWidth="100"
@@ -154,34 +186,6 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTemplateColumn Header="" Width="Auto">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Button Content="✎" ToolTip="編集" Style="{StaticResource IconButtonStyle}"
-                                                Margin="2" IsEnabled="{Binding Contact.IsSuspended, Converter={StaticResource InverseBooleanConverter}}"
-                                                Command="{Binding DataContext.EditContactCommand,
-                                                    RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}" />
-                                        <Button Content="{Binding ToggleGlyph}" ToolTip="{Binding ToggleTooltip}" Margin="2"
-                                                Command="{Binding DataContext.ToggleSuspendCommand,
-                                                    RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                CommandParameter="{Binding}">
-                                            <Button.Style>
-                                                <Style TargetType="Button" BasedOn="{StaticResource DangerIconButtonStyle}">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Contact.IsSuspended}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
-                                                            <Setter Property="BorderBrush" Value="{StaticResource AccentSoftBrush}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Button.Style>
-                                        </Button>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>

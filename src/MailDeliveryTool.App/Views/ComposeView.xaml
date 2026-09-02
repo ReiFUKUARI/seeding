@@ -28,10 +28,12 @@
                         <Button Grid.Column="1" Content="条件をクリア" Command="{Binding ClearFiltersCommand}" />
                     </Grid>
 
-                    <!-- mock_prototype.htmlのfilter-panel（display:flex; gap:40px）に合わせ、
-                         キーワード・種別・技術領域を横並びにする -->
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel Margin="0,0,40,0" MinWidth="220">
+                    <!-- mock_prototype.htmlのfilter-panel（display:flex; gap:40px; flex-wrap:wrap）に合わせ、
+                         キーワード・種別・技術領域を横並びにする。WrapPanelにするのは、画面幅が
+                         足りないときに折り返して、ウィンドウのリサイズに追従させるため
+                         （横並び用のStackPanelは折り返さず幅がアジャストしないため使わない）。 -->
+                    <WrapPanel>
+                        <StackPanel Margin="0,0,40,10" MinWidth="220">
                             <TextBlock Text="会社名" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                             <TextBox Text="{Binding CompanyKeyword, UpdateSourceTrigger=PropertyChanged}"
                                      Width="220" HorizontalAlignment="Left" />
@@ -40,17 +42,18 @@
                         <ItemsControl ItemsSource="{Binding FilterAxes}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
+                                    <WrapPanel />
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <StackPanel Margin="0,0,40,0" MinWidth="160">
+                                    <StackPanel Margin="0,0,40,10" MinWidth="160">
                                         <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6" />
+                                        <!-- 値が6件以上になっても、1行に5つまでで折り返す -->
                                         <ItemsControl ItemsSource="{Binding Values}">
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>
-                                                    <WrapPanel />
+                                                    <UniformGrid Columns="5" />
                                                 </ItemsPanelTemplate>
                                             </ItemsControl.ItemsPanel>
                                             <ItemsControl.ItemTemplate>
@@ -64,7 +67,7 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                    </StackPanel>
+                    </WrapPanel>
                 </StackPanel>
             </Border>
 

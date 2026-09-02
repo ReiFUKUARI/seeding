@@ -174,8 +174,6 @@ public sealed class PartnerListItem
     /// <summary>「技術領域」軸の値の表示名一覧。</summary>
     public IReadOnlyList<string> TechFieldCategoryNames { get; }
 
-    public string StatusText => Contact.IsSuspended ? "停止中" : "配信中";
-
     /// <summary>停止/再開アイコンボタンのツールチップ・記号（mock_prototype.htmlの⏸/↺に相当）。</summary>
     public string ToggleTooltip => Contact.IsSuspended ? "再開する" : "停止する";
     public string ToggleGlyph => Contact.IsSuspended ? "↺" : "⏸";

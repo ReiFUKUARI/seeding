@@ -96,4 +96,30 @@ public sealed class ContactCsvImporterTests : IDisposable
 
         Assert.Empty(result.NewContacts);
     }
+
+    [Fact]
+    public void Import_配信停止列がTRUEの行は停止中として取り込まれる()
+    {
+        WriteCsv("会社名,担当者名,メールアドレス,種別,技術領域,メモ,配信停止\r\n"
+            + "会社A,担当者A,a@x.jp,案件,開発,,TRUE\r\n"
+            + "会社B,担当者B,b@x.jp,案件,開発,,\r\n");
+
+        var result = ContactCsvImporter.Import(_csvPath, _categoryRepo.GetAxes(), new HashSet<string>());
+
+        Assert.Equal(2, result.NewContacts.Count);
+        Assert.True(result.NewContacts.Single(c => c.Email == "a@x.jp").IsSuspended);
+        Assert.False(result.NewContacts.Single(c => c.Email == "b@x.jp").IsSuspended);
+    }
+
+    [Fact]
+    public void Import_配信停止列を含まない旧形式のCSVも取り込める()
+    {
+        WriteCsv("会社名,担当者名,メールアドレス,種別,技術領域,メモ\r\n"
+            + "株式会社サンプル,山田 太郎,sample@example.jp,案件,開発,\r\n");
+
+        var result = ContactCsvImporter.Import(_csvPath, _categoryRepo.GetAxes(), new HashSet<string>());
+
+        Assert.Single(result.NewContacts);
+        Assert.False(result.NewContacts[0].IsSuspended);
+    }
 }

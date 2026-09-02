@@ -27,10 +27,12 @@
                             Command="{Binding ClearFiltersCommand}" />
                 </Grid>
 
-                <!-- mock_prototype.htmlのfilter-panel（display:flex; gap:40px）に合わせ、
-                     キーワード・種別・技術領域を横並びにする -->
-                <StackPanel Orientation="Horizontal">
-                    <StackPanel Margin="0,0,40,0" MinWidth="220">
+                <!-- mock_prototype.htmlのfilter-panel（display:flex; gap:40px; flex-wrap:wrap）に合わせ、
+                     キーワード・種別・技術領域を横並びにする。WrapPanelにするのは、画面幅が
+                     足りないときに折り返して、ウィンドウのリサイズに追従させるため
+                     （横並び用のStackPanelは折り返さず幅がアジャストしないため使わない）。 -->
+                <WrapPanel>
+                    <StackPanel Margin="0,0,40,10" MinWidth="220">
                         <TextBlock Text="キーワード（会社名・担当者名・メモ）" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                         <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
                                  Width="220" HorizontalAlignment="Left" />
@@ -39,17 +41,18 @@
                     <ItemsControl ItemsSource="{Binding FilterAxes}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" />
+                                <WrapPanel />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Margin="0,0,40,0" MinWidth="160">
+                                <StackPanel Margin="0,0,40,10" MinWidth="160">
                                     <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6" />
+                                    <!-- 値が6件以上になっても、1行に5つまでで折り返す -->
                                     <ItemsControl ItemsSource="{Binding Values}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
-                                                <WrapPanel />
+                                                <UniformGrid Columns="5" />
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
@@ -63,7 +66,7 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                </StackPanel>
+                </WrapPanel>
             </StackPanel>
         </Border>
 
@@ -100,52 +103,45 @@
                           BorderBrush="{StaticResource BorderBrush}"
                           BorderThickness="1"
                           HorizontalGridLinesBrush="{StaticResource BorderBrush}">
-                    <!-- 停止中の行は薄く表示する（mock_prototype.htmlの.row-suspended-cell相当） -->
-                    <DataGrid.RowStyle>
-                        <Style TargetType="DataGridRow">
+                    <!--
+                        停止中の行は該当セルだけ薄く表示する（mock_prototype.htmlの.row-suspended-cell相当）。
+                        DataGridRow.Opacityで行全体を下げると、停止中でも操作可能な「再開」ボタンまで
+                        薄く見えて押せるように見えなくなるため、データ列のみCellStyleで個別に下げ、
+                        「操作」列のボタンは常に通常表示のままにする。
+                    -->
+                    <DataGrid.Resources>
+                        <Style x:Key="SuspendedDimCellStyle" TargetType="DataGridCell">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Contact.IsSuspended}" Value="True">
                                     <Setter Property="Opacity" Value="0.5" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </DataGrid.RowStyle>
+                    </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" />
-                        <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" />
-                        <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*" />
-                        <DataGridTemplateColumn Header="種別" Width="*">
+                        <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*"
+                                             CellStyle="{StaticResource SuspendedDimCellStyle}" />
+                        <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*"
+                                             CellStyle="{StaticResource SuspendedDimCellStyle}" />
+                        <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*"
+                                             CellStyle="{StaticResource SuspendedDimCellStyle}" />
+                        <DataGridTemplateColumn Header="種別" Width="*" CellStyle="{StaticResource SuspendedDimCellStyle}">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <controls:CategoryChipList Items="{Binding TypeCategoryNames}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="技術領域" Width="*">
+                        <DataGridTemplateColumn Header="技術領域" Width="*" CellStyle="{StaticResource SuspendedDimCellStyle}">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <controls:CategoryChipList Items="{Binding TechFieldCategoryNames}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="メモ" Binding="{Binding Contact.Memo}" Width="1.2*" />
-                        <DataGridTextColumn Header="状態" Binding="{Binding StatusText}" Width="Auto">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="FontWeight" Value="SemiBold" />
-                                    <Setter Property="VerticalAlignment" Value="Center" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Contact.IsSuspended}" Value="True">
-                                            <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding Contact.IsSuspended}" Value="False">
-                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTemplateColumn Header="操作" Width="Auto">
+                        <DataGridTextColumn Header="メモ" Binding="{Binding Contact.Memo}" Width="1.2*"
+                                             CellStyle="{StaticResource SuspendedDimCellStyle}" />
+                        <DataGridTemplateColumn Header="" Width="Auto">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">

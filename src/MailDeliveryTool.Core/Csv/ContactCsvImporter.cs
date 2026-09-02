@@ -7,8 +7,10 @@ namespace MailDeliveryTool.Core.Csv;
 
 /// <summary>
 /// パートナーリストのCSV取込を担う（mock_prototype.htmlのCSVから取り込むモーダル相当）。
-/// 列順は<see cref="ContactCsvTemplateWriter"/>と同じ固定順（会社名,担当者名,メールアドレス,種別,技術領域,メモ）
-/// を前提とし、列名ではなく位置で読む（軸の表示名はテンプレート生成時点のものと一致するとは限らないため）。
+/// 列順は<see cref="ContactCsvTemplateWriter"/>と同じ固定順
+/// （会社名,担当者名,メールアドレス,種別,技術領域,メモ,配信停止）を前提とし、
+/// 列名ではなく位置で読む（軸の表示名はテンプレート生成時点のものと一致するとは限らないため）。
+/// 7列目「配信停止」は古い6列のみのCSV（配信停止列を含まないテンプレート）とも互換性を保つため省略可能。
 /// </summary>
 public static class ContactCsvImporter
 {
@@ -46,6 +48,7 @@ public static class ContactCsvImporter
             csv.TryGetField(3, out string? typeCell);
             csv.TryGetField(4, out string? techCell);
             csv.TryGetField(5, out string? memo);
+            csv.TryGetField(6, out string? suspendedCell);
 
             email = (email ?? string.Empty).Trim();
             if (string.IsNullOrWhiteSpace(email))
@@ -100,6 +103,7 @@ public static class ContactCsvImporter
                 ContactName = (contactName ?? string.Empty).Trim(),
                 Email = email,
                 Memo = string.IsNullOrWhiteSpace(memo) ? null : memo!.Trim(),
+                IsSuspended = ParseSuspendedFlag(suspendedCell),
             };
             contact.CategoryValueIds.AddRange(categoryValueIds);
             newContacts.Add(contact);
@@ -115,6 +119,13 @@ public static class ContactCsvImporter
 
     private static IEnumerable<string> SplitValues(string? cell) =>
         (cell ?? string.Empty).Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+    /// <summary>「配信停止」列の値を真偽に変換する。空欄は配信中（false）として扱う。</summary>
+    private static bool ParseSuspendedFlag(string? cell)
+    {
+        var trimmed = (cell ?? string.Empty).Trim();
+        return trimmed.Equals("TRUE", StringComparison.OrdinalIgnoreCase) || trimmed is "1" or "○";
+    }
 }
 
 /// <summary>CSV取込の結果。</summary>

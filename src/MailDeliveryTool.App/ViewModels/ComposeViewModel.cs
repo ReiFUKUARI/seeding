@@ -465,7 +465,17 @@ public sealed partial class ComposeViewModel : ObservableObject
             return;
         }
 
-        foreach (var filePath in dialog.FileNames)
+        AddAttachmentFiles(dialog.FileNames);
+    }
+
+    /// <summary>添付ファイルのドロップゾーンにドラッグ＆ドロップされたファイル群を追加する。
+    /// フォルダーがドロップされた場合はそのまま無視する（フォルダーは添付できない）。</summary>
+    public void AddDroppedAttachments(IReadOnlyList<string> filePaths) =>
+        AddAttachmentFiles(filePaths.Where(File.Exists));
+
+    private void AddAttachmentFiles(IEnumerable<string> filePaths)
+    {
+        foreach (var filePath in filePaths)
         {
             var size = new FileInfo(filePath).Length;
             Attachments.Add(new AttachmentItem(filePath, size));

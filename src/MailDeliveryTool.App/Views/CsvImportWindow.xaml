@@ -20,12 +20,13 @@
                 Style="{StaticResource SubtleButtonStyle}"
                 Command="{Binding DownloadTemplateCommand}" />
 
-        <Border BorderBrush="#C8C6C4" BorderThickness="1.5" CornerRadius="8" Padding="16"
-                Background="Transparent" Cursor="Hand">
+        <Border x:Name="DropZoneBorder" BorderBrush="#C8C6C4" BorderThickness="1.5" CornerRadius="8" Padding="16"
+                Background="Transparent" Cursor="Hand"
+                AllowDrop="True" DragEnter="OnDropZoneDragEnter" DragLeave="OnDropZoneDragLeave" Drop="OnDropZoneDrop">
             <Border.InputBindings>
                 <MouseBinding MouseAction="LeftClick" Command="{Binding SelectFileCommand}" />
             </Border.InputBindings>
-            <TextBlock Text="クリックしてCSVファイルを選択" HorizontalAlignment="Center"
+            <TextBlock Text="クリックしてCSVファイルを選択、またはドラッグ＆ドロップ" HorizontalAlignment="Center"
                        Foreground="{StaticResource TextSecondaryBrush}" FontSize="12.5" />
         </Border>
 

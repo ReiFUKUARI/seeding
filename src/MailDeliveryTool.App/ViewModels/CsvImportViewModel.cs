@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MailDeliveryTool.App.Services;
@@ -62,11 +65,30 @@ public sealed partial class CsvImportViewModel : ObservableObject
 
         if (dialog.ShowDialog() == true)
         {
-            _selectedFilePath = dialog.FileName;
-            SelectedFileText = $"選択中のファイル：{Path.GetFileName(dialog.FileName)}";
-            ResultText = string.Empty;
-            CanImport = true;
+            SetSelectedFile(dialog.FileName);
         }
+    }
+
+    /// <summary>ドロップゾーンにドラッグ＆ドロップされたファイル群から取込対象を選ぶ。
+    /// 拡張子が.csvのものが1件でもあれば先頭のものを選択し、なければエラーを表示する。</summary>
+    public void HandleDroppedFiles(IReadOnlyList<string> filePaths)
+    {
+        var csvPath = filePaths.FirstOrDefault(p => string.Equals(Path.GetExtension(p), ".csv", StringComparison.OrdinalIgnoreCase));
+        if (csvPath is null)
+        {
+            ResultText = "CSVファイル（.csv）をドロップしてください。";
+            return;
+        }
+
+        SetSelectedFile(csvPath);
+    }
+
+    private void SetSelectedFile(string filePath)
+    {
+        _selectedFilePath = filePath;
+        SelectedFileText = $"選択中のファイル：{Path.GetFileName(filePath)}";
+        ResultText = string.Empty;
+        CanImport = true;
     }
 
     [RelayCommand]

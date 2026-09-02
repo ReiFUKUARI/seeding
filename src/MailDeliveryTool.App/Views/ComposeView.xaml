@@ -409,8 +409,10 @@
                         </Border>
 
                         <TextBlock Text="添付ファイル（複数可・合計13MBまで）" FontWeight="SemiBold" FontSize="12.5" Margin="0,0,0,5" />
-                        <Border BorderBrush="#C8C6C4" BorderThickness="1.5" CornerRadius="8" Padding="16"
-                                Background="Transparent" Cursor="Hand">
+                        <Border x:Name="AttachmentDropZoneBorder" BorderBrush="#C8C6C4" BorderThickness="1.5" CornerRadius="8" Padding="16"
+                                Background="Transparent" Cursor="Hand"
+                                AllowDrop="True" DragEnter="OnAttachmentDropZoneDragEnter"
+                                DragLeave="OnAttachmentDropZoneDragLeave" Drop="OnAttachmentDropZoneDrop">
                             <Border.InputBindings>
                                 <MouseBinding MouseAction="LeftClick" Command="{Binding AddAttachmentCommand}" />
                             </Border.InputBindings>

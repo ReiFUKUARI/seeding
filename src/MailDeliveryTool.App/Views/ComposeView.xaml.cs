@@ -1,5 +1,8 @@
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using MailDeliveryTool.App.ViewModels;
 
 namespace MailDeliveryTool.App.Views;
 
@@ -18,6 +21,31 @@ public partial class ComposeView : UserControl
         {
             menu.PlacementTarget = button;
             menu.IsOpen = true;
+        }
+    }
+
+    // クリックでの選択に加え、ドロップゾーンへのドラッグ＆ドロップでも添付ファイルを追加できるようにする。
+    private void OnAttachmentDropZoneDragEnter(object sender, DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+        {
+            e.Effects = DragDropEffects.None;
+            return;
+        }
+
+        e.Effects = DragDropEffects.Copy;
+        AttachmentDropZoneBorder.Background = (Brush)FindResource("AccentSoftBrush");
+    }
+
+    private void OnAttachmentDropZoneDragLeave(object sender, DragEventArgs e) =>
+        AttachmentDropZoneBorder.Background = Brushes.Transparent;
+
+    private void OnAttachmentDropZoneDrop(object sender, DragEventArgs e)
+    {
+        AttachmentDropZoneBorder.Background = Brushes.Transparent;
+        if (e.Data.GetData(DataFormats.FileDrop) is string[] filePaths && DataContext is ComposeViewModel viewModel)
+        {
+            viewModel.AddDroppedAttachments(filePaths.ToList());
         }
     }
 }

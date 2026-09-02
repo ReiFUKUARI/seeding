@@ -37,6 +37,7 @@
                         <StackPanel Margin="0,0,40,10" MinWidth="220">
                             <TextBlock Text="キーワード（会社名・担当者名・メモ）" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6" />
                             <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource PlaceholderTextBoxStyle}" Tag="部分一致で検索"
                                      Width="220" HorizontalAlignment="Left" />
                         </StackPanel>
 
@@ -268,7 +269,8 @@
                         BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                     <StackPanel>
                         <TextBlock Text="件名" FontWeight="SemiBold" FontSize="12.5" Margin="0,0,0,5" />
-                        <TextBox Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,14" />
+                        <TextBox Text="{Binding Subject, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource PlaceholderTextBoxStyle}" Tag="件名を入力" Margin="0,0,0,14" />
 
                         <Grid Margin="0,0,0,5">
                             <Grid.ColumnDefinitions>

@@ -152,7 +152,8 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     <StackPanel Orientation="Horizontal" Margin="0,8,0,18">
-                        <TextBox Width="160" Text="{Binding NewTypeValueName, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Width="160" Text="{Binding NewTypeValueName, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource PlaceholderTextBoxStyle}" Tag="新しい値を入力" />
                         <Button Content="追加" Margin="6,0,0,0" Command="{Binding AddTypeValueCommand}" />
                     </StackPanel>
 
@@ -183,7 +184,8 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                        <TextBox Width="160" Text="{Binding NewTechFieldValueName, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Width="160" Text="{Binding NewTechFieldValueName, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource PlaceholderTextBoxStyle}" Tag="新しい値を入力" />
                         <Button Content="追加" Margin="6,0,0,0" Command="{Binding AddTechFieldValueCommand}" />
                     </StackPanel>
                 </StackPanel>

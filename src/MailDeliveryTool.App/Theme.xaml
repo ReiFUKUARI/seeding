@@ -37,6 +37,29 @@
     <FontFamily x:Key="AppFontFamily">Segoe UI Variable, Yu Gothic UI, Segoe UI, Meiryo UI</FontFamily>
 
     <!--
+        プレースホルダー（グレーの案内文）付きのTextBox（mock_prototype.htmlのplaceholder相当）。
+        WPFのTextBoxにはプレースホルダー機能が無いため、Text未入力時だけ背景にVisualBrushで
+        案内文を重ねて表示する定番の手法を使う。使う側はTag属性にプレースホルダー文言を渡す。
+        例: <TextBox Style="{StaticResource PlaceholderTextBoxStyle}" Tag="部分一致で検索" />
+    -->
+    <Style x:Key="PlaceholderTextBoxStyle" TargetType="TextBox">
+        <Style.Triggers>
+            <Trigger Property="Text" Value="">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <VisualBrush AlignmentX="Left" AlignmentY="Center" Stretch="None">
+                            <VisualBrush.Visual>
+                                <TextBlock Text="{Binding RelativeSource={RelativeSource AncestorType=TextBox}, Path=Tag}"
+                                           Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,0,0" />
+                            </VisualBrush.Visual>
+                        </VisualBrush>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!--
         既定（無印）のToolTipすべてに適用する。マウスオーバー表示（カテゴリチップの+N展開、
         メモの全文表示等）も、WPF既定の見た目ではなくアプリ全体のトーンに合わせる。
     -->

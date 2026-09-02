@@ -75,11 +75,34 @@
                     Background="{StaticResource SurfaceBrush}"
                     BorderBrush="{StaticResource BorderBrush}"
                     BorderThickness="0,0,0,1">
-                <TextBlock x:Name="TitleText"
-                           Text="新しい配信"
-                           VerticalAlignment="Center"
-                           Margin="20,0"
-                           FontSize="15" FontWeight="SemiBold" />
+                <!-- タイトルと、新しい配信ウィザード中だけ表示するステップ表示（mock_prototype.htmlの
+                     #titlebarText・.step-indicator相当）。ステップの現在地はMainWindow.xaml.csの
+                     UpdateComposeChrome()でCompose側だけ表示・強調を切り替える。 -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock x:Name="TitleText" Grid.Column="0"
+                               Text="新しい配信"
+                               VerticalAlignment="Center"
+                               Margin="20,0"
+                               FontSize="15" FontWeight="SemiBold" />
+                    <StackPanel x:Name="StepIndicatorPanel" Grid.Column="1" Orientation="Horizontal"
+                                VerticalAlignment="Center" Margin="0,0,20,0" Visibility="Collapsed">
+                        <Border x:Name="StepABorder" CornerRadius="14" Padding="10,4">
+                            <TextBlock x:Name="StepAText" Text="① 宛先選択" FontSize="12.5" />
+                        </Border>
+                        <TextBlock Text="›" Foreground="#C8C6C4" Margin="6,0" VerticalAlignment="Center" />
+                        <Border x:Name="StepBBorder" CornerRadius="14" Padding="10,4">
+                            <TextBlock x:Name="StepBText" Text="② メール作成" FontSize="12.5" />
+                        </Border>
+                        <TextBlock Text="›" Foreground="#C8C6C4" Margin="6,0" VerticalAlignment="Center" />
+                        <Border x:Name="StepCBorder" CornerRadius="14" Padding="10,4">
+                            <TextBlock x:Name="StepCText" Text="③ 送信" FontSize="12.5" />
+                        </Border>
+                    </StackPanel>
+                </Grid>
             </Border>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">

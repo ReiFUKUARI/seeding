@@ -4,6 +4,7 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Windows.Media;
 using MailDeliveryTool.App.ViewModels;
 using MailDeliveryTool.Core;
 using MailDeliveryTool.Core.Data;
@@ -66,6 +67,7 @@ public partial class MainWindow : Window
             SettingsViewHost.DataContext = _settingsViewModel;
 
             TitleText.Text = "設定";
+            StepIndicatorPanel.Visibility = Visibility.Collapsed;
             SetActiveView(SettingsViewHost);
             return;
         }
@@ -76,6 +78,7 @@ public partial class MainWindow : Window
             PartnersViewHost.DataContext = _partnersViewModel;
 
             TitleText.Text = "パートナーリスト";
+            StepIndicatorPanel.Visibility = Visibility.Collapsed;
             SetActiveView(PartnersViewHost);
             return;
         }
@@ -94,14 +97,55 @@ public partial class MainWindow : Window
                 {
                     SetCloseButtonEnabled(!_composeViewModel!.IsSending);
                 }
+
+                if (e.PropertyName == nameof(ComposeViewModel.CurrentStep))
+                {
+                    UpdateComposeChrome();
+                }
             };
         }
 
         _composeViewModel.RefreshOnNavigate();
         ComposeViewHost.DataContext = _composeViewModel;
 
-        TitleText.Text = "新しい配信";
+        StepIndicatorPanel.Visibility = Visibility.Visible;
+        UpdateComposeChrome();
         SetActiveView(ComposeViewHost);
+    }
+
+    /// <summary>
+    /// 「新しい配信」ウィザードのタイトルとステップ表示を、現在のComposeStepに合わせて更新する
+    /// （mock_prototype.htmlの#titlebarText・.step-indicator相当）。
+    /// </summary>
+    private void UpdateComposeChrome()
+    {
+        if (_composeViewModel is null)
+        {
+            return;
+        }
+
+        var (title, currentStep) = _composeViewModel.CurrentStep switch
+        {
+            ComposeStep.TargetSelection => ("宛先を選択", StepAText),
+            ComposeStep.Compose => ("メール作成", StepBText),
+            ComposeStep.Confirmation => ("内容の確認", StepBText),
+            ComposeStep.Sending => ("送信中", StepCText),
+            ComposeStep.Result => ("送信完了", StepCText),
+            _ => ("新しい配信", StepAText),
+        };
+
+        TitleText.Text = title;
+
+        foreach (var (border, text) in new[]
+                 {
+                     (StepABorder, StepAText), (StepBBorder, StepBText), (StepCBorder, StepCText),
+                 })
+        {
+            var isCurrent = text == currentStep;
+            border.Background = isCurrent ? (Brush)FindResource("AccentSoftBrush") : Brushes.Transparent;
+            text.Foreground = isCurrent ? (Brush)FindResource("AccentBrush") : (Brush)FindResource("TextSecondaryBrush");
+            text.FontWeight = isCurrent ? FontWeights.SemiBold : FontWeights.Normal;
+        }
     }
 
     /// <summary>

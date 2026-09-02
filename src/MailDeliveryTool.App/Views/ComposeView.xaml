@@ -72,7 +72,7 @@
                     BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,14,0,0">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                        <Button Style="{StaticResource TabItemStyle}" Margin="0,0,4,0"
+                        <Button Margin="0,0,4,0"
                                 Command="{Binding SwitchToSearchTabCommand}">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource TabItemStyle}">
@@ -90,7 +90,7 @@
                                 <Run Text="{Binding SearchCountText, Mode=OneWay}" FontWeight="SemiBold" />
                             </TextBlock>
                         </Button>
-                        <Button Style="{StaticResource TabItemStyle}" Command="{Binding SwitchToListTabCommand}"
+                        <Button Command="{Binding SwitchToListTabCommand}"
                                 IsEnabled="{Binding HasMailingListItems}">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource TabItemStyle}">

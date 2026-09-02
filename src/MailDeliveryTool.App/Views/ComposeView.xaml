@@ -91,10 +91,34 @@
                                     </Style.Triggers>
                                 </Style>
                             </Button.Style>
-                            <TextBlock>
-                                <Run Text="すべて " />
-                                <Run Text="{Binding SearchCountText, Mode=OneWay}" FontWeight="SemiBold" />
-                            </TextBlock>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="すべて" VerticalAlignment="Center" />
+                                <!-- 件数バッジ（mock_prototype.htmlの.tab-count相当。選択中タブではアクセントカラーになる） -->
+                                <Border CornerRadius="9" Padding="8,1" Margin="6,0,0,0">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="#F0EFED" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSearchTabActive}" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding SearchCountText, Mode=OneWay}" FontSize="11" FontWeight="SemiBold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSearchTabActive}" Value="True">
+                                                        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
+                            </StackPanel>
                         </Button>
                         <Button Command="{Binding SwitchToListTabCommand}"
                                 IsEnabled="{Binding HasMailingListItems}">
@@ -109,10 +133,33 @@
                                     </Style.Triggers>
                                 </Style>
                             </Button.Style>
-                            <TextBlock>
-                                <Run Text="メールリスト " />
-                                <Run Text="{Binding ListCountText, Mode=OneWay}" FontWeight="SemiBold" />
-                            </TextBlock>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="メールリスト" VerticalAlignment="Center" />
+                                <Border CornerRadius="9" Padding="8,1" Margin="6,0,0,0">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="#F0EFED" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsListTabActive}" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource AccentSoftBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding ListCountText, Mode=OneWay}" FontSize="11" FontWeight="SemiBold">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsListTabActive}" Value="True">
+                                                        <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
+                            </StackPanel>
                         </Button>
                     </StackPanel>
 

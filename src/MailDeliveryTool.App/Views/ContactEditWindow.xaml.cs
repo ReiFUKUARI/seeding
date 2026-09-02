@@ -24,12 +24,16 @@ public partial class ContactEditWindow : Window
 
     private void OnSaveClick(object sender, RoutedEventArgs e)
     {
+        // mock_prototype.htmlのsubmitNewContact()と同じく、種別・技術領域も各軸で最低1件必須とする
+        var hasUnselectedAxis = _viewModel.CategoryAxes.Any(axis => axis.Values.All(v => !v.IsSelected));
+
         if (string.IsNullOrWhiteSpace(_viewModel.CompanyName)
             || string.IsNullOrWhiteSpace(_viewModel.ContactName)
-            || string.IsNullOrWhiteSpace(_viewModel.Email))
+            || string.IsNullOrWhiteSpace(_viewModel.Email)
+            || hasUnselectedAxis)
         {
             MessageBox.Show(
-                "会社名・担当者名・メールアドレスは必須です。",
+                "会社名・担当者名・メールアドレス・種別・技術領域は必須です。",
                 "メール配信ツール",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);

@@ -9,28 +9,34 @@
         FontSize="14"
         Background="{StaticResource CanvasBrush}">
 
-    <!-- 要件定義書5.1：会社名・担当者名・メールアドレスは必須（フォーム側で担保。DB制約にはしていない） -->
+    <!--
+        要件定義書5.1：会社名・担当者名・メールアドレス・種別・技術領域は必須（フォーム側で担保。
+        DB制約にはしていない）。項目順・必須マーク（赤い*）はmock_prototype.htmlのaddContactModalに合わせる。
+    -->
     <StackPanel Margin="20">
-        <TextBlock Text="会社名" Margin="0,0,0,4" />
+        <TextBlock Margin="0,0,0,4">
+            <Run Text="会社名" /><Run Text=" *" Foreground="{StaticResource DangerBrush}" />
+        </TextBlock>
         <TextBox Text="{Binding CompanyName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12" />
 
-        <TextBlock Text="担当者名" Margin="0,0,0,4" />
+        <TextBlock Margin="0,0,0,4">
+            <Run Text="担当者名" /><Run Text=" *" Foreground="{StaticResource DangerBrush}" />
+        </TextBlock>
         <TextBox Text="{Binding ContactName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12" />
 
-        <TextBlock Text="メールアドレス" Margin="0,0,0,4" />
+        <TextBlock Margin="0,0,0,4">
+            <Run Text="メールアドレス" /><Run Text=" *" Foreground="{StaticResource DangerBrush}" />
+        </TextBlock>
         <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12" />
-
-        <TextBlock Text="メモ（任意・100文字まで）" Margin="0,0,0,4" />
-        <TextBox Text="{Binding Memo, UpdateSourceTrigger=PropertyChanged}" MaxLength="100"
-                 AcceptsReturn="True" TextWrapping="Wrap" Height="60" VerticalScrollBarVisibility="Auto"
-                 Margin="0,0,0,14" />
 
         <!-- カテゴリはCategoryStore由来（D-003）。追加・削除するとこのモーダルにも即時反映される -->
         <ItemsControl ItemsSource="{Binding CategoryAxes}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Margin="0,0,0,12">
-                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6" />
+                        <TextBlock FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6">
+                            <Run Text="{Binding Name}" /><Run Text=" *" Foreground="{StaticResource DangerBrush}" />
+                        </TextBlock>
                         <ItemsControl ItemsSource="{Binding Values}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -48,6 +54,11 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+
+        <TextBlock Text="メモ（任意・100文字まで）" Margin="0,0,0,4" />
+        <TextBox Text="{Binding Memo, UpdateSourceTrigger=PropertyChanged}" MaxLength="100"
+                 AcceptsReturn="True" TextWrapping="Wrap" Height="60" VerticalScrollBarVisibility="Auto"
+                 Margin="0,0,0,14" />
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
             <Button Content="キャンセル" Click="OnCancelClick" Margin="0,0,8,0" Padding="14,6" />

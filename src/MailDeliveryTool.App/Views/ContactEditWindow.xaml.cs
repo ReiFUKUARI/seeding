@@ -14,6 +14,12 @@ public partial class ContactEditWindow : Window
         InitializeComponent();
         _viewModel = viewModel;
         DataContext = viewModel;
+
+        if (viewModel.IsEditMode)
+        {
+            Title = "宛先を編集";
+            SaveButton.Content = "保存する";
+        }
     }
 
     private void OnSaveClick(object sender, RoutedEventArgs e)

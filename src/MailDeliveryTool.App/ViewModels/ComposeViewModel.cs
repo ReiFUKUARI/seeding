@@ -276,15 +276,15 @@ public sealed partial class ComposeViewModel : ObservableObject
         IsAllSearchChecked = true;
     }
 
-    /// <summary>指定した軸についてのみ、この宛先が持つカテゴリ値の表示名を返す（種別・技術領域を別列にするため）。</summary>
-    private string DescribeCategory(Contact contact, long axisId)
+    /// <summary>指定した軸についてのみ、この宛先が持つカテゴリ値の表示名一覧を返す（種別・技術領域を別列・チップ表示にするため）。</summary>
+    private List<string> DescribeCategory(Contact contact, long axisId)
     {
-        var names = _categoryStore.Axes
+        return _categoryStore.Axes
             .Where(axis => axis.Id == axisId)
             .SelectMany(axis => axis.Values)
             .Where(value => contact.CategoryValueIds.Contains(value.Id))
-            .Select(value => value.Name);
-        return string.Join(" / ", names);
+            .Select(value => value.Name)
+            .ToList();
     }
 
     [RelayCommand]
@@ -299,7 +299,7 @@ public sealed partial class ComposeViewModel : ObservableObject
                 continue;
             }
 
-            var newRow = new TargetRowItem(row.Contact, row.TypeCategoryText, row.TechFieldCategoryText, isChecked: true);
+            var newRow = new TargetRowItem(row.Contact, row.TypeCategoryNames, row.TechFieldCategoryNames, isChecked: true);
             newRow.PropertyChanged += (_, e) =>
             {
                 if (e.PropertyName == nameof(TargetRowItem.IsChecked))

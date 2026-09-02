@@ -98,15 +98,15 @@ public sealed partial class PartnersViewModel : ObservableObject
         ResultCountText = $"{Contacts.Count} 件";
     }
 
-    /// <summary>指定した軸についてのみ、この宛先が持つカテゴリ値の表示名を返す（mock_prototype.htmlの列構成に合わせ、種別/技術領域を別列にするため）。</summary>
-    private string DescribeCategory(Contact contact, long axisId)
+    /// <summary>指定した軸についてのみ、この宛先が持つカテゴリ値の表示名一覧を返す（mock_prototype.htmlのタグチップ表示に合わせ、種別/技術領域を別列・チップにするため）。</summary>
+    private List<string> DescribeCategory(Contact contact, long axisId)
     {
-        var names = _categoryStore.Axes
+        return _categoryStore.Axes
             .Where(axis => axis.Id == axisId)
             .SelectMany(axis => axis.Values)
             .Where(value => contact.CategoryValueIds.Contains(value.Id))
-            .Select(value => value.Name);
-        return string.Join(" / ", names);
+            .Select(value => value.Name)
+            .ToList();
     }
 
     /// <summary>停止／再開を切り替える（要件定義書5.2）。</summary>
@@ -134,6 +134,24 @@ public sealed partial class PartnersViewModel : ObservableObject
         }
     }
 
+    /// <summary>宛先を編集する（mock_prototype.htmlの一覧行「✎」に相当）。</summary>
+    [RelayCommand]
+    private void EditContact(PartnerListItem? item)
+    {
+        if (item is null)
+        {
+            return;
+        }
+
+        var editViewModel = new ContactEditViewModel(_categoryStore.Axes, item.Contact);
+        var window = new ContactEditWindow(editViewModel) { Owner = Application.Current.MainWindow };
+        if (window.ShowDialog() == true)
+        {
+            _contactRepository.Update(editViewModel.ToUpdatedContact(item.Contact));
+            RunSearch();
+        }
+    }
+
     [RelayCommand]
     private void OpenCsvImport()
     {
@@ -150,19 +168,22 @@ public sealed class PartnerListItem
 {
     public Contact Contact { get; }
 
-    /// <summary>「種別」軸の値の表示名（mock_prototype.htmlと同じく種別・技術領域は別列で表示する）。</summary>
-    public string TypeCategoryText { get; }
+    /// <summary>「種別」軸の値の表示名一覧（mock_prototype.htmlのタグチップ表示に合わせ、結合テキストではなく一覧で持つ）。</summary>
+    public IReadOnlyList<string> TypeCategoryNames { get; }
 
-    /// <summary>「技術領域」軸の値の表示名。</summary>
-    public string TechFieldCategoryText { get; }
+    /// <summary>「技術領域」軸の値の表示名一覧。</summary>
+    public IReadOnlyList<string> TechFieldCategoryNames { get; }
 
     public string StatusText => Contact.IsSuspended ? "停止中" : "配信中";
-    public string ToggleLabel => Contact.IsSuspended ? "再開" : "停止";
 
-    public PartnerListItem(Contact contact, string typeCategoryText, string techFieldCategoryText)
+    /// <summary>停止/再開アイコンボタンのツールチップ・記号（mock_prototype.htmlの⏸/↺に相当）。</summary>
+    public string ToggleTooltip => Contact.IsSuspended ? "再開する" : "停止する";
+    public string ToggleGlyph => Contact.IsSuspended ? "↺" : "⏸";
+
+    public PartnerListItem(Contact contact, IReadOnlyList<string> typeCategoryNames, IReadOnlyList<string> techFieldCategoryNames)
     {
         Contact = contact;
-        TypeCategoryText = typeCategoryText;
-        TechFieldCategoryText = techFieldCategoryText;
+        TypeCategoryNames = typeCategoryNames;
+        TechFieldCategoryNames = techFieldCategoryNames;
     }
 }

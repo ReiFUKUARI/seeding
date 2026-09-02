@@ -4,22 +4,31 @@
 
     <!--
         カテゴリ値（種別・技術領域）をタグ状のチップで表示する（mock_prototype.htmlの.tag-chip相当）。
-        パートナーリスト・新しい配信の宛先一覧で、複数選択されたカテゴリ値を
-        「A / B」のような結合テキストではなく個別のチップとして表示するために使う。
+        3件以上登録されている場合は個々のチップの代わりに「+件数」の1チップだけを表示し、
+        マウスオーバーで全件をツールチップ表示する（一覧の行が縦に間延びしないようにするため）。
+        表示の出し分けはItemsのDependencyPropertyが変わるたびに code-behind の Refresh() で行う。
     -->
-    <ItemsControl ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=UserControl}}">
-        <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-                <WrapPanel />
-            </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
-            <DataTemplate>
-                <Border Background="{StaticResource AccentSoftBrush}" CornerRadius="10"
-                        Padding="8,2" Margin="0,2,4,2">
-                    <TextBlock Text="{Binding}" Foreground="{StaticResource AccentBrush}" FontSize="11.5" />
-                </Border>
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
-    </ItemsControl>
+    <Grid>
+        <ItemsControl x:Name="NormalItemsControl">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{StaticResource AccentSoftBrush}" CornerRadius="10"
+                            Padding="8,2" Margin="0,2,4,2">
+                        <TextBlock Text="{Binding}" Foreground="{StaticResource AccentBrush}" FontSize="11.5" />
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Border x:Name="OverflowChip" Background="{StaticResource AccentSoftBrush}" CornerRadius="10"
+                Padding="8,2" Margin="0,2,4,2" HorizontalAlignment="Left" Visibility="Collapsed">
+            <TextBlock x:Name="OverflowLabelText" Foreground="{StaticResource AccentBrush}"
+                       FontSize="11.5" FontWeight="SemiBold" />
+        </Border>
+    </Grid>
 </UserControl>

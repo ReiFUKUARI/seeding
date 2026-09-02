@@ -117,7 +117,7 @@
                     <!-- すべてタブ -->
                     <StackPanel Visibility="{Binding SearchTabVisibility}">
                         <CheckBox Content="すべて選択/解除" IsChecked="{Binding IsAllSearchChecked}" Margin="0,0,0,8" />
-                        <DataGrid ItemsSource="{Binding SearchResults}" AutoGenerateColumns="False"
+                        <DataGrid ItemsSource="{Binding SearchResults}" AutoGenerateColumns="False" CanUserReorderColumns="False"
                                   CanUserAddRows="False" CanUserDeleteRows="False"
                                   HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeight="32"
                                   Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
@@ -156,7 +156,14 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="メモ" Binding="{Binding Contact.Memo}" Width="1.2*" IsReadOnly="True" />
+                                <DataGridTextColumn Header="メモ" Width="1.2*" IsReadOnly="True"
+                                                     Binding="{Binding Contact.Memo, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="ToolTip" Value="{Binding Contact.Memo}" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
@@ -168,7 +175,7 @@
                     <!-- メールリストタブ -->
                     <StackPanel Visibility="{Binding ListTabVisibility}">
                         <CheckBox Content="すべて選択/解除" IsChecked="{Binding IsAllListChecked}" Margin="0,0,0,8" />
-                        <DataGrid ItemsSource="{Binding MailingList}" AutoGenerateColumns="False"
+                        <DataGrid ItemsSource="{Binding MailingList}" AutoGenerateColumns="False" CanUserReorderColumns="False"
                                   CanUserAddRows="False" CanUserDeleteRows="False"
                                   HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeight="32"
                                   Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
@@ -207,11 +214,19 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="メモ" Binding="{Binding Contact.Memo}" Width="1.2*" IsReadOnly="True" />
+                                <DataGridTextColumn Header="メモ" Width="1.2*" IsReadOnly="True"
+                                                     Binding="{Binding Contact.Memo, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="ToolTip" Value="{Binding Contact.Memo}" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                                 <DataGridTemplateColumn Header="" Width="Auto">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <Button Content="✕" ToolTip="リストから削除" Margin="2"
+                                            <Button Content="&#xE74D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                                    ToolTip="リストから削除" Margin="2"
                                                     Style="{StaticResource DangerIconButtonStyle}"
                                                     Command="{Binding DataContext.RemoveFromListCommand,
                                                         RelativeSource={RelativeSource AncestorType=DataGrid}}"
@@ -303,7 +318,8 @@
                                                 <TextBlock Text="{Binding SizeText, StringFormat=' （{0}）'}" FontSize="11.5"
                                                            Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" />
                                             </StackPanel>
-                                            <Button Grid.Column="1" Content="✕" ToolTip="添付を削除"
+                                            <Button Grid.Column="1" Content="&#xE74D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                                    ToolTip="添付を削除"
                                                     Style="{StaticResource DangerIconButtonStyle}"
                                                     Command="{Binding DataContext.RemoveAttachmentCommand,
                                                         RelativeSource={RelativeSource AncestorType=ItemsControl}}"
@@ -366,7 +382,7 @@
                     </TextBlock>
                     <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="6"
                             MaxHeight="200" Margin="0,0,0,14">
-                        <DataGrid ItemsSource="{Binding ConfirmTargetRows}" AutoGenerateColumns="False" IsReadOnly="True"
+                        <DataGrid ItemsSource="{Binding ConfirmTargetRows}" AutoGenerateColumns="False" CanUserReorderColumns="False" IsReadOnly="True"
                                   CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                                   Background="{StaticResource SurfaceBrush}" BorderThickness="0" RowHeight="30">
                             <DataGrid.Columns>
@@ -469,7 +485,7 @@
                         <Button Grid.Column="1" Content="📋 一覧をコピー" Command="{Binding CopyFailListCommand}"
                                 Padding="10,4" Style="{StaticResource PrimaryButtonStyle}" />
                     </Grid>
-                    <DataGrid ItemsSource="{Binding FailedResults}" AutoGenerateColumns="False" IsReadOnly="True"
+                    <DataGrid ItemsSource="{Binding FailedResults}" AutoGenerateColumns="False" CanUserReorderColumns="False" IsReadOnly="True"
                               CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                               Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
                               BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="260">

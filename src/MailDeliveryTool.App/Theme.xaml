@@ -3,6 +3,7 @@
                     xmlns:conv="clr-namespace:MailDeliveryTool.App.Converters">
 
     <conv:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+    <conv:TruncateTextConverter x:Key="TruncateTextConverter" />
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
     <!--
@@ -34,6 +35,29 @@
 
     <!-- モックと同じフォント指定（Segoe UI Variable → Yu Gothic UI の順にフォールバック） -->
     <FontFamily x:Key="AppFontFamily">Segoe UI Variable, Yu Gothic UI, Segoe UI, Meiryo UI</FontFamily>
+
+    <!--
+        既定（無印）のToolTipすべてに適用する。マウスオーバー表示（カテゴリチップの+N展開、
+        メモの全文表示等）も、WPF既定の見た目ではなくアプリ全体のトーンに合わせる。
+    -->
+    <Style TargetType="ToolTip">
+        <Setter Property="Background" Value="{StaticResource TextPrimaryBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Padding" Value="10,7" />
+        <Setter Property="HasDropShadow" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToolTip">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="6"
+                            Padding="{TemplateBinding Padding}" MaxWidth="320">
+                        <ContentPresenter TextBlock.Foreground="{TemplateBinding Foreground}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <!--
         ボタン（mock_prototype.htmlの .btn / .btn.primary / .btn.subtle に対応）。

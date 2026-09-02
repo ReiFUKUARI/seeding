@@ -92,7 +92,7 @@
                 </Grid>
 
                 <DataGrid ItemsSource="{Binding Contacts}"
-                          AutoGenerateColumns="False"
+                          AutoGenerateColumns="False" CanUserReorderColumns="False"
                           CanUserAddRows="False" CanUserDeleteRows="False"
                           CanUserSortColumns="True"
                           IsReadOnly="True"
@@ -139,8 +139,15 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="メモ" Binding="{Binding Contact.Memo}" Width="1.2*"
-                                             CellStyle="{StaticResource SuspendedDimCellStyle}" />
+                        <DataGridTextColumn Header="メモ" Width="1.2*"
+                                             Binding="{Binding Contact.Memo, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}"
+                                             CellStyle="{StaticResource SuspendedDimCellStyle}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="ToolTip" Value="{Binding Contact.Memo}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
                         <DataGridTemplateColumn Header="" Width="Auto">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>

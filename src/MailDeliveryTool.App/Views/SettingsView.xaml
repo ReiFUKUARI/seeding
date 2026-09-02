@@ -139,9 +139,10 @@
                                         BorderThickness="1" CornerRadius="14" Padding="10,4" Margin="0,4,6,0">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="12.5" />
-                                        <Button Content="×" Margin="6,0,0,0" Padding="4,0" BorderThickness="0"
-                                                Background="Transparent" FontSize="12"
-                                                ToolTip="削除"
+                                        <Button Content="&#xE74D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                                Margin="6,0,0,0" Padding="4,0" BorderThickness="0"
+                                                Background="Transparent" Foreground="{StaticResource DangerBrush}" FontSize="11"
+                                                Cursor="Hand" ToolTip="削除"
                                                 Command="{Binding DataContext.DeleteCategoryValueCommand,
                                                     RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 CommandParameter="{Binding}" />
@@ -169,9 +170,10 @@
                                         BorderThickness="1" CornerRadius="14" Padding="10,4" Margin="0,4,6,0">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="12.5" />
-                                        <Button Content="×" Margin="6,0,0,0" Padding="4,0" BorderThickness="0"
-                                                Background="Transparent" FontSize="12"
-                                                ToolTip="削除"
+                                        <Button Content="&#xE74D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                                Margin="6,0,0,0" Padding="4,0" BorderThickness="0"
+                                                Background="Transparent" Foreground="{StaticResource DangerBrush}" FontSize="11"
+                                                Cursor="Hand" ToolTip="削除"
                                                 Command="{Binding DataContext.DeleteCategoryValueCommand,
                                                     RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 CommandParameter="{Binding}" />

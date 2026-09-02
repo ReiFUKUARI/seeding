@@ -31,6 +31,7 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Grid.Column="0" Text="サーバー名"
@@ -41,13 +42,17 @@
                                    Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4" />
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding AccountNameText}" Margin="0,4" />
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="ポート"
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="パスワード"
                                    Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4" />
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding AccountPortText}" Margin="0,4" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding AccountPasswordText}" Margin="0,4" />
 
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="暗号化方法"
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="ポート"
                                    Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4" />
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AccountEncryptionText}"
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AccountPortText}" Margin="0,4" />
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="暗号化方法"
+                                   Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding AccountEncryptionText}"
                                    TextWrapping="Wrap" Margin="0,4" />
                     </Grid>
 

@@ -67,6 +67,10 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string _accountNameText = "未設定";
 
+    /// <summary>パスワードそのものは表示せず、設定済みかどうかだけをマスクして示す（mock_prototype.htmlと同じ）。</summary>
+    [ObservableProperty]
+    private string _accountPasswordText = "未設定";
+
     [ObservableProperty]
     private string _accountPortText = "-";
 
@@ -78,6 +82,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         _currentSetting = _mailAccountRepository.Get();
         AccountServerText = string.IsNullOrWhiteSpace(_currentSetting.Host) ? "未設定" : _currentSetting.Host;
         AccountNameText = string.IsNullOrWhiteSpace(_currentSetting.UserName) ? "未設定" : _currentSetting.UserName;
+        AccountPasswordText = string.IsNullOrEmpty(_currentSetting.Password) ? "未設定" : "********";
         AccountPortText = _currentSetting.Port.ToString();
         AccountEncryptionText = DescribeEncryption(_currentSetting.SecureSocketOption);
     }

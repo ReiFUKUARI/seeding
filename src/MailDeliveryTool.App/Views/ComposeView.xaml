@@ -166,13 +166,11 @@
                     <!-- すべてタブ -->
                     <StackPanel Visibility="{Binding SearchTabVisibility}">
                         <CheckBox Content="すべて選択/解除" IsChecked="{Binding IsAllSearchChecked}" Margin="0,0,0,8" />
-                        <!-- チェックボックス列は横スクロールしても常に見えるよう先頭に固定する -->
                         <DataGrid ItemsSource="{Binding SearchResults}" AutoGenerateColumns="False" CanUserReorderColumns="False"
                                   CanUserAddRows="False" CanUserDeleteRows="False"
                                   HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeight="32"
                                   Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
                                   BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360"
-                                  FrozenColumnCount="1"
                                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                                   EnableRowVirtualization="False">
@@ -192,9 +190,30 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" MinWidth="160" IsReadOnly="True" />
-                                <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" MinWidth="100" IsReadOnly="True" />
-                                <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*" MinWidth="180" IsReadOnly="True" />
+                                <DataGridTextColumn Header="会社名" Width="1.4*" MinWidth="160" IsReadOnly="True"
+                                                     Binding="{Binding Contact.CompanyName, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="ToolTip" Value="{Binding Contact.CompanyName}" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="担当者名" Width="*" MinWidth="100" IsReadOnly="True"
+                                                     Binding="{Binding Contact.ContactName, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="ToolTip" Value="{Binding Contact.ContactName}" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="メールアドレス" Width="1.6*" MinWidth="180" IsReadOnly="True"
+                                                     Binding="{Binding Contact.Email, Converter={StaticResource TruncateTextConverter}, ConverterParameter=15}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="ToolTip" Value="{Binding Contact.Email}" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                                 <DataGridTemplateColumn Header="種別" Width="*" MinWidth="110">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -228,13 +247,15 @@
                     <!-- メールリストタブ -->
                     <StackPanel Visibility="{Binding ListTabVisibility}">
                         <CheckBox Content="すべて選択/解除" IsChecked="{Binding IsAllListChecked}" Margin="0,0,0,8" />
-                        <!-- チェックボックス列と削除ボタン列は横スクロールしても常に見えるよう先頭に固定する -->
+                        <!-- 削除ボタン列はmock_prototype.htmlと同じく右端（元の位置）に置く。誤操作を避けるため
+                             左側への固定（FrozenColumnCount）はしない。横スクロールで最後まで確実に
+                             到達できるよう、幅をAutoではなく固定値にしている（Autoだと横スクロールの
+                             最大幅の計算に含まれず、右端までスクロールしても見えないことがあったため）。 -->
                         <DataGrid ItemsSource="{Binding MailingList}" AutoGenerateColumns="False" CanUserReorderColumns="False"
                                   CanUserAddRows="False" CanUserDeleteRows="False"
                                   HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeight="32"
                                   Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
                                   BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360"
-                                  FrozenColumnCount="2"
                                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                                   EnableRowVirtualization="False">
@@ -254,21 +275,30 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="" Width="Auto">
-                                    <DataGridTemplateColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <Button Content="&#xE74D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
-                                                    ToolTip="リストから削除" Margin="2"
-                                                    Style="{StaticResource DangerIconButtonStyle}"
-                                                    Command="{Binding DataContext.RemoveFromListCommand,
-                                                        RelativeSource={RelativeSource AncestorType=DataGrid}}"
-                                                    CommandParameter="{Binding}" />
-                                        </DataTemplate>
-                                    </DataGridTemplateColumn.CellTemplate>
-                                </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" MinWidth="160" IsReadOnly="True" />
-                                <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" MinWidth="100" IsReadOnly="True" />
-                                <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*" MinWidth="180" IsReadOnly="True" />
+                                <DataGridTextColumn Header="会社名" Width="1.4*" MinWidth="160" IsReadOnly="True"
+                                                     Binding="{Binding Contact.CompanyName, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="ToolTip" Value="{Binding Contact.CompanyName}" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="担当者名" Width="*" MinWidth="100" IsReadOnly="True"
+                                                     Binding="{Binding Contact.ContactName, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="ToolTip" Value="{Binding Contact.ContactName}" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="メールアドレス" Width="1.6*" MinWidth="180" IsReadOnly="True"
+                                                     Binding="{Binding Contact.Email, Converter={StaticResource TruncateTextConverter}, ConverterParameter=15}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="ToolTip" Value="{Binding Contact.Email}" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                                 <DataGridTemplateColumn Header="種別" Width="*" MinWidth="110">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
@@ -291,6 +321,18 @@
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
+                                <DataGridTemplateColumn Header="" Width="60">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="&#xE74D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                                    ToolTip="リストから削除" Margin="2"
+                                                    Style="{StaticResource DangerIconButtonStyle}"
+                                                    Command="{Binding DataContext.RemoveFromListCommand,
+                                                        RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                    CommandParameter="{Binding}" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
@@ -413,8 +455,10 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="プレビュー（1件目）" FontWeight="SemiBold" FontSize="12.5" />
+                                <!-- 記号が小さく分かりづらいとの指摘のため、アイコンボタン既定より大きく太字にする -->
                                 <Button Grid.Column="1" Content="⤢" ToolTip="クリックで拡大表示"
                                         Style="{StaticResource IconButtonStyle}"
+                                        Width="32" Height="32" FontSize="19" FontWeight="Bold"
                                         Command="{Binding OpenPreviewModalCommand}" />
                             </Grid>
                             <TextBlock Text="{Binding PreviewText}" TextWrapping="Wrap" FontSize="12"

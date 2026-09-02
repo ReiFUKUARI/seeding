@@ -21,6 +21,10 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // UIスレッドで捕まえられなかった例外は既定だとアプリが無言で落ちるだけになる。
+        // 原因調査・ユーザーへの通知のため、エラー内容を表示してから続行できるようにする。
+        DispatcherUnhandledException += OnDispatcherUnhandledException;
+
         try
         {
             // 初回起動時にDBを作成し、スキーマと初期データを投入する。
@@ -58,5 +62,19 @@ public partial class App : Application
                 MessageBoxImage.Error);
             Shutdown(1);
         }
+    }
+
+    private static void OnDispatcherUnhandledException(
+        object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+    {
+        MessageBox.Show(
+            $"予期しないエラーが発生しました。\n\n{e.Exception.Message}\n\n"
+            + "この操作は中止されましたが、アプリは終了せず続行できます。",
+            "メール配信ツール",
+            MessageBoxButton.OK,
+            MessageBoxImage.Error);
+
+        // ここでハンドル済みにすることで、UIスレッド例外によるアプリ全体のクラッシュを防ぐ。
+        e.Handled = true;
     }
 }

@@ -93,10 +93,11 @@
                 </Grid>
 
                 <!-- 列は幅に応じて伸縮しつつ、MinWidthを下回る幅では横スクロールする。
-                     縦方向はMaxHeightを超えると一覧自体が縦スクロールする。 -->
-                <!-- 「操作」列は横スクロールしても常に見えるよう先頭に固定する（FrozenColumnCount）。
-                     ウィンドウを狭くして横スクロールしたときに編集・停止/再開ボタンが
-                     右端に隠れて操作できなくなるのを防ぐため。 -->
+                     縦方向はMaxHeightを超えると一覧自体が縦スクロールする。
+                     「操作」列はmock_prototype.htmlと同じく右端（元の位置）に置く。誤操作を避けるため
+                     左側への固定（FrozenColumnCount）はしない。横スクロールで最後まで確実に
+                     到達できるよう、幅をAutoではなく固定値にしている（Autoだと横スクロールの
+                     最大幅の計算に含まれず、右端までスクロールしても見えないことがあったため）。 -->
                 <DataGrid ItemsSource="{Binding Contacts}"
                           AutoGenerateColumns="False" CanUserReorderColumns="False"
                           CanUserAddRows="False" CanUserDeleteRows="False"
@@ -106,7 +107,6 @@
                           GridLinesVisibility="Horizontal"
                           RowHeight="34"
                           MaxHeight="480"
-                          FrozenColumnCount="1"
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                           Background="{StaticResource SurfaceBrush}"
@@ -129,7 +129,57 @@
                         </Style>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="" Width="Auto">
+                        <DataGridTextColumn Header="会社名" Width="1.4*" MinWidth="160"
+                                             Binding="{Binding Contact.CompanyName, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}"
+                                             CellStyle="{StaticResource SuspendedDimCellStyle}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="ToolTip" Value="{Binding Contact.CompanyName}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="担当者名" Width="*" MinWidth="100"
+                                             Binding="{Binding Contact.ContactName, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}"
+                                             CellStyle="{StaticResource SuspendedDimCellStyle}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="ToolTip" Value="{Binding Contact.ContactName}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="メールアドレス" Width="1.6*" MinWidth="180"
+                                             Binding="{Binding Contact.Email, Converter={StaticResource TruncateTextConverter}, ConverterParameter=15}"
+                                             CellStyle="{StaticResource SuspendedDimCellStyle}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="ToolTip" Value="{Binding Contact.Email}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="種別" Width="*" MinWidth="110" CellStyle="{StaticResource SuspendedDimCellStyle}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <controls:CategoryChipList Items="{Binding TypeCategoryNames}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="技術領域" Width="*" MinWidth="110" CellStyle="{StaticResource SuspendedDimCellStyle}">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <controls:CategoryChipList Items="{Binding TechFieldCategoryNames}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="メモ" Width="1.2*" MinWidth="110"
+                                             Binding="{Binding Contact.Memo, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}"
+                                             CellStyle="{StaticResource SuspendedDimCellStyle}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="ToolTip" Value="{Binding Contact.Memo}" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTemplateColumn Header="" Width="90">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
@@ -157,35 +207,6 @@
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" MinWidth="160"
-                                             CellStyle="{StaticResource SuspendedDimCellStyle}" />
-                        <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" MinWidth="100"
-                                             CellStyle="{StaticResource SuspendedDimCellStyle}" />
-                        <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*" MinWidth="180"
-                                             CellStyle="{StaticResource SuspendedDimCellStyle}" />
-                        <DataGridTemplateColumn Header="種別" Width="*" MinWidth="110" CellStyle="{StaticResource SuspendedDimCellStyle}">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <controls:CategoryChipList Items="{Binding TypeCategoryNames}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="技術領域" Width="*" MinWidth="110" CellStyle="{StaticResource SuspendedDimCellStyle}">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <controls:CategoryChipList Items="{Binding TechFieldCategoryNames}" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="メモ" Width="1.2*" MinWidth="110"
-                                             Binding="{Binding Contact.Memo, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}"
-                                             CellStyle="{StaticResource SuspendedDimCellStyle}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="ToolTip" Value="{Binding Contact.Memo}" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </StackPanel>

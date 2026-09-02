@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MailDeliveryTool.App.Services;
@@ -687,6 +688,12 @@ public sealed partial class ComposeViewModel : ObservableObject
         }
     }
 
+    /// <summary>コピー完了を伝える一時的な案内（mock_prototype.htmlのcopyToast相当。1.8秒で自動的に消える）。</summary>
+    [ObservableProperty]
+    private bool _isCopyToastVisible;
+
+    private DispatcherTimer? _copyToastTimer;
+
     [RelayCommand]
     private void CopyFailList()
     {
@@ -696,6 +703,16 @@ public sealed partial class ComposeViewModel : ObservableObject
                 "\n",
                 FailedResults.Select(r => $"{r.Contact.CompanyName}\t{r.Contact.ContactName}\t{r.Contact.Email}\t{r.ErrorMessage}"));
         Clipboard.SetText(text);
+
+        _copyToastTimer?.Stop();
+        IsCopyToastVisible = true;
+        _copyToastTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1800) };
+        _copyToastTimer.Tick += (_, _) =>
+        {
+            IsCopyToastVisible = false;
+            _copyToastTimer!.Stop();
+        };
+        _copyToastTimer.Start();
     }
 
     /// <summary>送信結果画面の「完了する」。宛先選択（すべてタブ）に戻り、メールリストと本文をリセットする。</summary>

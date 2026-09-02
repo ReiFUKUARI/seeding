@@ -489,8 +489,15 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="送信失敗の宛先一覧" FontWeight="SemiBold" />
-                        <Button Grid.Column="1" Content="📋 一覧をコピー" Command="{Binding CopyFailListCommand}"
-                                Padding="10,4" Style="{StaticResource PrimaryButtonStyle}" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <!-- コピー完了の一時的な案内（mock_prototype.htmlのcopyToast相当） -->
+                            <Border Background="{StaticResource TextPrimaryBrush}" CornerRadius="6" Padding="10,4" Margin="0,0,8,0"
+                                    Visibility="{Binding IsCopyToastVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="失敗一覧をクリップボードにコピーしました" Foreground="White" FontSize="12" />
+                            </Border>
+                            <Button Content="📋 一覧をコピー" Command="{Binding CopyFailListCommand}"
+                                    Padding="10,4" Style="{StaticResource PrimaryButtonStyle}" />
+                        </StackPanel>
                     </Grid>
                     <DataGrid ItemsSource="{Binding FailedResults}" AutoGenerateColumns="False" CanUserReorderColumns="False" IsReadOnly="True"
                               CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal"

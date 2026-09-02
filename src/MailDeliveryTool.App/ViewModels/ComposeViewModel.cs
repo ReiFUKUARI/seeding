@@ -99,10 +99,11 @@ public sealed partial class ComposeViewModel : ObservableObject
     public ObservableCollection<TargetRowItem> MailingList { get; } = new();
     public ObservableCollection<SelectableCategoryAxis> FilterAxes { get; } = new();
 
+    /// <summary>会社名・担当者名・メモを横断した部分一致キーワード（パートナーリスト画面と同じ検索対象）。</summary>
     [ObservableProperty]
-    private string _companyKeyword = string.Empty;
+    private string _searchKeyword = string.Empty;
 
-    partial void OnCompanyKeywordChanged(string value) => RunSearch();
+    partial void OnSearchKeywordChanged(string value) => RunSearch();
 
     [ObservableProperty]
     private TargetTab _activeTab = TargetTab.Search;
@@ -232,7 +233,7 @@ public sealed partial class ComposeViewModel : ObservableObject
     [RelayCommand]
     private void ClearFilters()
     {
-        CompanyKeyword = string.Empty;
+        SearchKeyword = string.Empty;
         foreach (var axis in FilterAxes)
         {
             foreach (var value in axis.Values)
@@ -250,8 +251,9 @@ public sealed partial class ComposeViewModel : ObservableObject
             axis => axis.AxisId,
             axis => (IReadOnlyList<long>)axis.Values.Where(v => v.IsSelected).Select(v => v.Value.Id).ToList());
 
-        // 「新しい配信」は停止中を常に除外する（要件定義書5.2・6.1）
-        var results = _contactRepository.Search(CompanyKeyword, axisFilters, includeSuspended: false);
+        // 「新しい配信」は停止中を常に除外する（要件定義書5.2・6.1）。
+        // キーワードはパートナーリストと同じく会社名・担当者名・メモを横断して一致させる。
+        var results = _contactRepository.Search(SearchKeyword, axisFilters, includeSuspended: false, matchContactNameAndMemo: true);
 
         SearchResults.Clear();
         foreach (var contact in results)

@@ -34,8 +34,8 @@
                          （横並び用のStackPanelは折り返さず幅がアジャストしないため使わない）。 -->
                     <WrapPanel>
                         <StackPanel Margin="0,0,40,10" MinWidth="220">
-                            <TextBlock Text="会社名" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
-                            <TextBox Text="{Binding CompanyKeyword, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBlock Text="キーワード（会社名・担当者名・メモ）" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6" />
+                            <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
                                      Width="220" HorizontalAlignment="Left" />
                         </StackPanel>
 
@@ -122,6 +122,8 @@
                                   HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeight="32"
                                   Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
                                   BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                                   EnableRowVirtualization="False">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="" Width="36">
@@ -139,24 +141,24 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" IsReadOnly="True" />
-                                <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" IsReadOnly="True" />
-                                <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*" IsReadOnly="True" />
-                                <DataGridTemplateColumn Header="種別" Width="*">
+                                <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" MinWidth="160" IsReadOnly="True" />
+                                <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" MinWidth="100" IsReadOnly="True" />
+                                <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*" MinWidth="180" IsReadOnly="True" />
+                                <DataGridTemplateColumn Header="種別" Width="*" MinWidth="110">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <controls:CategoryChipList Items="{Binding TypeCategoryNames}" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="技術領域" Width="*">
+                                <DataGridTemplateColumn Header="技術領域" Width="*" MinWidth="110">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <controls:CategoryChipList Items="{Binding TechFieldCategoryNames}" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="メモ" Width="1.2*" IsReadOnly="True"
+                                <DataGridTextColumn Header="メモ" Width="1.2*" MinWidth="110" IsReadOnly="True"
                                                      Binding="{Binding Contact.Memo, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
@@ -180,6 +182,8 @@
                                   HeadersVisibility="Column" GridLinesVisibility="Horizontal" RowHeight="32"
                                   Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource BorderBrush}"
                                   BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                  ScrollViewer.VerticalScrollBarVisibility="Auto"
                                   EnableRowVirtualization="False">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="" Width="36">
@@ -197,24 +201,24 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" IsReadOnly="True" />
-                                <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" IsReadOnly="True" />
-                                <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*" IsReadOnly="True" />
-                                <DataGridTemplateColumn Header="種別" Width="*">
+                                <DataGridTextColumn Header="会社名" Binding="{Binding Contact.CompanyName}" Width="1.4*" MinWidth="160" IsReadOnly="True" />
+                                <DataGridTextColumn Header="担当者名" Binding="{Binding Contact.ContactName}" Width="*" MinWidth="100" IsReadOnly="True" />
+                                <DataGridTextColumn Header="メールアドレス" Binding="{Binding Contact.Email}" Width="1.6*" MinWidth="180" IsReadOnly="True" />
+                                <DataGridTemplateColumn Header="種別" Width="*" MinWidth="110">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <controls:CategoryChipList Items="{Binding TypeCategoryNames}" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTemplateColumn Header="技術領域" Width="*">
+                                <DataGridTemplateColumn Header="技術領域" Width="*" MinWidth="110">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <controls:CategoryChipList Items="{Binding TechFieldCategoryNames}" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
-                                <DataGridTextColumn Header="メモ" Width="1.2*" IsReadOnly="True"
+                                <DataGridTextColumn Header="メモ" Width="1.2*" MinWidth="110" IsReadOnly="True"
                                                      Binding="{Binding Contact.Memo, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">

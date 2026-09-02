@@ -1,7 +1,8 @@
 <UserControl x:Class="MailDeliveryTool.App.Views.PartnersView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:controls="clr-namespace:MailDeliveryTool.App.Controls">
+             xmlns:controls="clr-namespace:MailDeliveryTool.App.Controls"
+             xmlns:behaviors="clr-namespace:MailDeliveryTool.App.Behaviors">
 
     <!--
         パートナーリスト画面（要件定義書5章）。検索・一覧・登録・停止/再開を1画面に統合する。
@@ -109,6 +110,7 @@
                           MaxHeight="480"
                           EnableRowVirtualization="False"
                           EnableColumnVirtualization="False"
+                          behaviors:HorizontalMouseWheelBehavior.IsEnabled="True"
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                           Background="{StaticResource SurfaceBrush}"
@@ -131,7 +133,10 @@
                         </Style>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="会社名" Width="1.4*" MinWidth="160"
+                        <!-- 会社名・担当者名・メールアドレス・メモは省略表示（TruncateTextConverter）にしたため、
+                             全文表示を前提にしていた頃より必要な最小幅を狭くできる。これにより通常の
+                             ウィンドウ幅では横スクロールなしで全列が収まるようにしている。 -->
+                        <DataGridTextColumn Header="会社名" Width="1.4*" MinWidth="100"
                                              Binding="{Binding Contact.CompanyName, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}"
                                              CellStyle="{StaticResource SuspendedDimCellStyle}">
                             <DataGridTextColumn.ElementStyle>
@@ -140,7 +145,7 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="担当者名" Width="*" MinWidth="100"
+                        <DataGridTextColumn Header="担当者名" Width="*" MinWidth="90"
                                              Binding="{Binding Contact.ContactName, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}"
                                              CellStyle="{StaticResource SuspendedDimCellStyle}">
                             <DataGridTextColumn.ElementStyle>
@@ -149,7 +154,7 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="メールアドレス" Width="1.6*" MinWidth="180"
+                        <DataGridTextColumn Header="メールアドレス" Width="1.6*" MinWidth="130"
                                              Binding="{Binding Contact.Email, Converter={StaticResource TruncateTextConverter}, ConverterParameter=15}"
                                              CellStyle="{StaticResource SuspendedDimCellStyle}">
                             <DataGridTextColumn.ElementStyle>
@@ -158,21 +163,21 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTemplateColumn Header="種別" Width="*" MinWidth="110" CellStyle="{StaticResource SuspendedDimCellStyle}">
+                        <DataGridTemplateColumn Header="種別" Width="*" MinWidth="100" CellStyle="{StaticResource SuspendedDimCellStyle}">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <controls:CategoryChipList Items="{Binding TypeCategoryNames}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTemplateColumn Header="技術領域" Width="*" MinWidth="110" CellStyle="{StaticResource SuspendedDimCellStyle}">
+                        <DataGridTemplateColumn Header="技術領域" Width="*" MinWidth="100" CellStyle="{StaticResource SuspendedDimCellStyle}">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <controls:CategoryChipList Items="{Binding TechFieldCategoryNames}" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
-                        <DataGridTextColumn Header="メモ" Width="1.2*" MinWidth="110"
+                        <DataGridTextColumn Header="メモ" Width="1.2*" MinWidth="90"
                                              Binding="{Binding Contact.Memo, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}"
                                              CellStyle="{StaticResource SuspendedDimCellStyle}">
                             <DataGridTextColumn.ElementStyle>

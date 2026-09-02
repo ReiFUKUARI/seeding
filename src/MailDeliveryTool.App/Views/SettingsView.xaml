@@ -108,17 +108,13 @@
 
                     <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                         <Button Content="今すぐバックアップする"
-                                Command="{Binding RunBackupCommand}"
-                                IsEnabled="{Binding IsBackingUp, Converter={StaticResource InverseBooleanConverter}}" />
+                                Command="{Binding RunBackupCommand}" />
                         <Button Content="保存先を変更..." Margin="8,0,0,0"
                                 Command="{Binding ChangeBackupFolderCommand}" />
                         <Button Content="既定に戻す" Margin="8,0,0,0"
                                 Command="{Binding ResetBackupFolderCommand}"
                                 IsEnabled="{Binding IsBackupFolderCustom}" />
                     </StackPanel>
-
-                    <TextBlock Text="{Binding BackupStatusText}" Margin="0,8,0,0"
-                               Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
 

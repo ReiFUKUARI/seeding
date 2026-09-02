@@ -1,0 +1,50 @@
+<Window x:Class="MailDeliveryTool.App.Views.BackupProgressWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="バックアップ"
+        Width="380" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        FontFamily="{StaticResource AppFontFamily}"
+        FontSize="13.5"
+        Background="{StaticResource CanvasBrush}">
+
+    <!-- 「今すぐバックアップする」の実行状況モーダル（mock_prototype.htmlのbackupModal相当） -->
+    <StackPanel Margin="28,26" HorizontalAlignment="Center">
+
+        <StackPanel Visibility="{Binding IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    HorizontalAlignment="Center">
+            <ProgressBar IsIndeterminate="True" Width="180" Height="6"
+                         Foreground="{StaticResource AccentBrush}" Margin="0,0,0,16" />
+            <TextBlock Text="バックアップを実行しています…" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" Margin="0,0,0,4" />
+            <TextBlock Text="しばらくお待ちください" Foreground="{StaticResource TextSecondaryBrush}"
+                       HorizontalAlignment="Center" />
+        </StackPanel>
+
+        <StackPanel Visibility="{Binding IsSuccess, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    HorizontalAlignment="Center">
+            <TextBlock Text="✅" FontSize="32" HorizontalAlignment="Center" Margin="0,0,0,8" />
+            <TextBlock Text="バックアップが完了しました" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" Margin="0,0,0,8" />
+            <TextBlock Text="{Binding FolderText, StringFormat=保存先：{0}}" Foreground="{StaticResource TextSecondaryBrush}"
+                       HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="320" Margin="0,0,0,4" />
+            <TextBlock Text="{Binding FileNameText, StringFormat=ファイル名：{0}}" Foreground="{StaticResource TextSecondaryBrush}"
+                       HorizontalAlignment="Center" Margin="0,0,0,18" />
+            <Button Content="閉じる" Command="{Binding CloseCommand}" Style="{StaticResource PrimaryButtonStyle}"
+                    HorizontalAlignment="Center" Padding="24,7" />
+        </StackPanel>
+
+        <StackPanel Visibility="{Binding IsFailure, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    HorizontalAlignment="Center">
+            <TextBlock Text="⚠️" FontSize="32" HorizontalAlignment="Center" Margin="0,0,0,8" />
+            <TextBlock Text="バックアップに失敗しました" FontWeight="SemiBold"
+                       HorizontalAlignment="Center" Margin="0,0,0,8" />
+            <TextBlock Text="{Binding ErrorText}" Foreground="{StaticResource DangerBrush}"
+                       TextWrapping="Wrap" TextAlignment="Center" MaxWidth="320" Margin="0,0,0,18" />
+            <Button Content="閉じる" Command="{Binding CloseCommand}" Style="{StaticResource PrimaryButtonStyle}"
+                    HorizontalAlignment="Center" Padding="24,7" />
+        </StackPanel>
+
+    </StackPanel>
+</Window>

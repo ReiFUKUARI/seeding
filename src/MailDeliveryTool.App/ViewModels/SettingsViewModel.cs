@@ -130,12 +130,6 @@ public sealed partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string _lastBackupText = "未実行";
 
-    [ObservableProperty]
-    private string _backupStatusText = string.Empty;
-
-    [ObservableProperty]
-    private bool _isBackingUp;
-
     /// <summary>既定の保存先ではなく、ユーザーが変更している場合のみ「既定に戻す」を有効にする。</summary>
     [ObservableProperty]
     private bool _isBackupFolderCustom;
@@ -167,7 +161,6 @@ public sealed partial class SettingsViewModel : ObservableObject
         {
             _appSettingRepository.SetBackupFolderPath(dialog.FolderName);
             LoadBackupInfo();
-            BackupStatusText = string.Empty;
         }
     }
 
@@ -177,40 +170,49 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         _appSettingRepository.SetBackupFolderPath(string.Empty);
         LoadBackupInfo();
-        BackupStatusText = string.Empty;
     }
 
+    /// <summary>
+    /// 「今すぐバックアップする」。実行状況はモーダル（mock_prototype.htmlのbackupModal相当）で表示する。
+    /// バックアップ自体はバックグラウンドスレッドで実行し、完了後にUIスレッドへ結果を反映する。
+    /// </summary>
     [RelayCommand]
-    private async Task RunBackupAsync()
+    private void RunBackup()
     {
-        IsBackingUp = true;
-        BackupStatusText = "バックアップを実行中...";
-        try
+        var progressViewModel = new BackupProgressViewModel();
+        var window = new BackupProgressWindow(progressViewModel) { Owner = Application.Current.MainWindow };
+
+        Task.Run(() => _backupService.Run()).ContinueWith(task =>
         {
-            var result = await Task.Run(() => _backupService.Run());
-            BackupStatusText = $"完了しました: {result.FullPath}";
-            LoadBackupInfo();
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            // フォルダ自体は作成できているのにファイル書き込みだけ拒否される場合、
-            // 多くは Windows の「コントロールされたフォルダー アクセス」（ランサムウェア対策）が
-            // 未許可アプリとしてドキュメントフォルダーへの書き込みをブロックしている。
-            BackupStatusText = "バックアップに失敗しました: 保存先フォルダーへのアクセスが拒否されました。\n"
-                + "Windowsセキュリティ →「ウイルスと脅威の防止」→「ランサムウェアの防止」→"
-                + "「コントロールされたフォルダー アクセス」で本アプリが許可されているか確認するか、"
-                + "保存先を変更してください。\n"
-                + $"詳細: {ex.Message}";
-        }
-        catch (Exception ex)
-        {
-            BackupStatusText = $"バックアップに失敗しました: {ex.Message}";
-        }
-        finally
-        {
-            IsBackingUp = false;
-        }
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (task.IsFaulted)
+                {
+                    progressViewModel.ShowFailure(DescribeBackupError(task.Exception!.GetBaseException()));
+                }
+                else
+                {
+                    progressViewModel.ShowSuccess(task.Result.FolderPath, task.Result.FileName);
+                    LoadBackupInfo();
+                }
+            });
+        });
+
+        window.ShowDialog();
     }
+
+    private static string DescribeBackupError(Exception ex) => ex switch
+    {
+        // フォルダ自体は作成できているのにファイル書き込みだけ拒否される場合、
+        // 多くは Windows の「コントロールされたフォルダー アクセス」（ランサムウェア対策）が
+        // 未許可アプリとしてドキュメントフォルダーへの書き込みをブロックしている。
+        UnauthorizedAccessException => "保存先フォルダーへのアクセスが拒否されました。\n"
+            + "Windowsセキュリティ →「ウイルスと脅威の防止」→「ランサムウェアの防止」→"
+            + "「コントロールされたフォルダー アクセス」で本アプリが許可されているか確認するか、"
+            + "保存先を変更してください。\n"
+            + $"詳細: {ex.Message}",
+        _ => ex.Message,
+    };
 
     // --- カテゴリ管理（要件定義書5.3・10.3） ---
 

@@ -25,7 +25,8 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="検索" FontWeight="SemiBold" FontSize="15" />
-                        <Button Grid.Column="1" Content="条件をクリア" Command="{Binding ClearFiltersCommand}" />
+                        <Button Grid.Column="1" Content="条件をクリア" Style="{StaticResource SubtleButtonStyle}"
+                                Command="{Binding ClearFiltersCommand}" />
                     </Grid>
 
                     <!-- mock_prototype.htmlのfilter-panel（display:flex; gap:40px; flex-wrap:wrap）に合わせ、

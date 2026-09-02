@@ -28,19 +28,26 @@
                             Command="{Binding ClearFiltersCommand}" />
                 </Grid>
 
-                <!-- mock_prototype.htmlのfilter-panel（display:flex; gap:40px; flex-wrap:wrap）に合わせ、
-                     キーワード・種別・技術領域を横並びにする。WrapPanelにするのは、画面幅が
-                     足りないときに折り返して、ウィンドウのリサイズに追従させるため
-                     （横並び用のStackPanelは折り返さず幅がアジャストしないため使わない）。 -->
-                <WrapPanel>
-                    <StackPanel Margin="0,0,40,10" MinWidth="220">
-                        <TextBlock Text="キーワード（会社名・担当者名・メモ）" FontWeight="SemiBold" FontSize="12" Margin="0,0,0,6" />
+                <!-- mock_prototype.htmlのfilter-panel（display:flex; gap:40px）に合わせ、
+                     キーワード・種別・技術領域を横並びにする。左列はキーワード欄の実幅（220pxの2/3＝147px）に
+                     固定し、右列（*）を種別・技術領域にすべて割り当てる。これにより、条件をクリアボタンの
+                     真下まで種別・技術領域の表示スペースとして使え、ウィンドウ幅を多少縮めても
+                     種別・技術領域がキーワードの下に折り返されにくくなる（WrapPanelを2つ横に並べる
+                     従来方式だと、右側の折り返し用スペースが確保できず早期に縦並びになっていた）。 -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="147" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Margin="0,0,24,10">
+                        <TextBlock Text="キーワード（会社名・担当者名・メモ）" FontWeight="SemiBold" FontSize="12"
+                                   Margin="0,0,0,6" TextWrapping="Wrap" />
                         <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource PlaceholderTextBoxStyle}" Tag="部分一致で検索"
-                                 Width="220" HorizontalAlignment="Left" />
+                                 Width="147" HorizontalAlignment="Left" />
                     </StackPanel>
 
-                    <ItemsControl ItemsSource="{Binding FilterAxes}">
+                    <ItemsControl Grid.Column="1" Margin="0,0,0,10" ItemsSource="{Binding FilterAxes}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel />
@@ -68,7 +75,7 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                </WrapPanel>
+                </Grid>
             </StackPanel>
         </Border>
 

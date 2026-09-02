@@ -107,9 +107,13 @@
 
             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,20">
                 <StackPanel>
+                    <!-- フェーズ4の疎通確認用パネル。フェーズ5で各画面が実装済みのため、通常利用時は
+                         表示しない（ShowDiagnostics()自体はサイドバーのアカウント名表示を兼ねているため
+                         呼び出しは残す）。 -->
                     <Border Background="{StaticResource SurfaceBrush}"
                             BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1" CornerRadius="8" Padding="16">
+                            BorderThickness="1" CornerRadius="8" Padding="16"
+                            Visibility="Collapsed">
                         <StackPanel>
                             <TextBlock Text="フェーズ4：環境構築の確認"
                                        FontWeight="SemiBold" Margin="0,0,0,10" />

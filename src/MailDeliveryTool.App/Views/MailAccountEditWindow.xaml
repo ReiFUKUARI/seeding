@@ -25,7 +25,8 @@
 
         <TextBlock Text="暗号化方法" Margin="0,0,0,4" />
         <ComboBox ItemsSource="{Binding SecureSocketOptions}"
-                  SelectedItem="{Binding SecureSocketOption}" Margin="0,0,0,12" />
+                  DisplayMemberPath="Label" SelectedValuePath="Value"
+                  SelectedValue="{Binding SecureSocketOption}" Margin="0,0,0,12" />
 
         <TextBlock Text="送信元アドレス" Margin="0,0,0,4" />
         <TextBox Text="{Binding FromAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12" />

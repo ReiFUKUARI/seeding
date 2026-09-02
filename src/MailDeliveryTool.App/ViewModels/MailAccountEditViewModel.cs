@@ -28,9 +28,14 @@ public sealed partial class MailAccountEditViewModel : ObservableObject
     [ObservableProperty]
     private string _newPassword = string.Empty;
 
-    /// <summary>入力欄で選べる暗号化方式の一覧（MailKitのSecureSocketOptions名）。</summary>
-    public IReadOnlyList<string> SecureSocketOptions { get; } =
-        new[] { "Auto", "StartTls", "StartTlsWhenAvailable", "SslOnConnect", "None" };
+    /// <summary>入力欄で選べる暗号化方式の一覧（mock_prototype.htmlのacctEncryptionと同じ3択）。
+    /// Valueはそのまま保存されMailKitのSecureSocketOptions名としてパースされる。</summary>
+    public IReadOnlyList<SecureSocketOptionItem> SecureSocketOptions { get; } = new[]
+    {
+        new SecureSocketOptionItem("Auto", "自動（STARTTLSが利用可能な場合は自動使用）"),
+        new SecureSocketOptionItem("StartTls", "STARTTLSを必須にする"),
+        new SecureSocketOptionItem("None", "暗号化なし"),
+    };
 
     /// <summary>パスワード欄に入力があったか（true の場合のみ保存時に再暗号化する）。</summary>
     public bool PasswordChanged => !string.IsNullOrEmpty(NewPassword);
@@ -60,3 +65,6 @@ public sealed partial class MailAccountEditViewModel : ObservableObject
         Password = PasswordChanged ? NewPassword : existingPassword,
     };
 }
+
+/// <summary>暗号化方法コンボボックスの1項目。Valueが保存値、Labelが表示用の日本語。</summary>
+public sealed record SecureSocketOptionItem(string Value, string Label);

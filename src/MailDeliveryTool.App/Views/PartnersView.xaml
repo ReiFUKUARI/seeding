@@ -33,21 +33,25 @@
                      固定し、右列（*）を種別・技術領域にすべて割り当てる。これにより、条件をクリアボタンの
                      真下まで種別・技術領域の表示スペースとして使え、ウィンドウ幅を多少縮めても
                      種別・技術領域がキーワードの下に折り返されにくくなる（WrapPanelを2つ横に並べる
-                     従来方式だと、右側の折り返し用スペースが確保できず早期に縦並びになっていた）。 -->
+                     従来方式だと、右側の折り返し用スペースが確保できず早期に縦並びになっていた）。
+                     キーワード列と種別・技術領域列の間隔は専用の24px列で確保する（StackPanel側にMargin-Rightを
+                     付けると、列幅からマージン分を差し引いた幅に対してTextBox（Width=147）がはみ出し、Gridの
+                     既定のセル内クリップでTextBox右側のボーダーが消えてしまうため、Marginではなく列で分離する）。 -->
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="147" />
+                        <ColumnDefinition Width="24" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,24,10">
-                        <TextBlock Text="キーワード（会社名・担当者名・メモ）" FontWeight="SemiBold" FontSize="12"
+                    <StackPanel Grid.Column="0" Margin="0,0,0,10">
+                        <TextBlock Text="キーワード" FontWeight="SemiBold" FontSize="12"
                                    Margin="0,0,0,6" TextWrapping="Wrap" />
                         <TextBox Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource PlaceholderTextBoxStyle}" Tag="部分一致で検索"
                                  Width="147" HorizontalAlignment="Left" />
                     </StackPanel>
 
-                    <ItemsControl Grid.Column="1" Margin="0,0,0,10" ItemsSource="{Binding FilterAxes}">
+                    <ItemsControl Grid.Column="2" Margin="0,0,0,10" ItemsSource="{Binding FilterAxes}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <WrapPanel />

@@ -173,7 +173,7 @@
                                   BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360"
                                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                  EnableRowVirtualization="False">
+                                  EnableRowVirtualization="False" EnableColumnVirtualization="False">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="" Width="36">
                                     <!-- DataGridCellが最初のクリックでセル選択にフォーカスを奪い、
@@ -258,7 +258,7 @@
                                   BorderThickness="1" HorizontalGridLinesBrush="{StaticResource BorderBrush}" MaxHeight="360"
                                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
                                   ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                  EnableRowVirtualization="False">
+                                  EnableRowVirtualization="False" EnableColumnVirtualization="False">
                             <DataGrid.Columns>
                                 <DataGridTemplateColumn Header="" Width="36">
                                     <!-- DataGridCellが最初のクリックでセル選択にフォーカスを奪い、
@@ -321,7 +321,7 @@
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
-                                <DataGridTemplateColumn Header="" Width="60">
+                                <DataGridTemplateColumn Header="" Width="72">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
                                             <Button Content="&#xE74D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"

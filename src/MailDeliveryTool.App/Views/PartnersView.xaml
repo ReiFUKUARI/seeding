@@ -107,6 +107,8 @@
                           GridLinesVisibility="Horizontal"
                           RowHeight="34"
                           MaxHeight="480"
+                          EnableRowVirtualization="False"
+                          EnableColumnVirtualization="False"
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                           Background="{StaticResource SurfaceBrush}"
@@ -179,7 +181,7 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTemplateColumn Header="" Width="90">
+                        <DataGridTemplateColumn Header="" Width="104">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">

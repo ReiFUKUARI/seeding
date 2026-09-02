@@ -35,7 +35,7 @@
                 <DataTemplate>
                     <StackPanel Margin="0,0,0,12">
                         <TextBlock FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6">
-                            <Run Text="{Binding Name}" /><Run Text=" *" Foreground="{StaticResource DangerBrush}" />
+                            <Run Text="{Binding Name, Mode=OneWay}" /><Run Text=" *" Foreground="{StaticResource DangerBrush}" />
                         </TextBlock>
                         <ItemsControl ItemsSource="{Binding Values}">
                             <ItemsControl.ItemsPanel>

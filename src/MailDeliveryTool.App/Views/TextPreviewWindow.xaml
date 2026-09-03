@@ -1,6 +1,7 @@
 <Window x:Class="MailDeliveryTool.App.Views.TextPreviewWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Icon="pack://application:,,,/Assets/app.ico"
         Width="640" Height="480"
         WindowStartupLocation="CenterOwner"
         FontFamily="{StaticResource AppFontFamily}"

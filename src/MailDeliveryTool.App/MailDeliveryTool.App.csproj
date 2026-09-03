@@ -30,10 +30,13 @@
 
   <ItemGroup>
     <!--
-      アプリアイコンは社内ロゴの利用可否確認待ち（要件定義書 14章）。
-      未配置でもビルドが止まらないよう、存在する場合のみ ApplicationIcon を使う。
+      アプリアイコン（D-008で確定・採用済み）。存在しない場合でもビルドが止まらないよう
+      Condition を付けている。Resourceとして埋め込むことで、Window.Iconからpack URI
+      （pack://application:,,,/Assets/app.ico）で参照できるようにする。ApplicationIconは
+      .exe自体に埋め込まれるアイコン（デスクトップに置いた場合・タスクバーへのピン留め時に表示）で、
+      これとは別にWindow.Icon（実行中ウィンドウのタスクバー表示用）の指定が必要。
     -->
-    <None Include="Assets\app.ico" Condition="Exists('Assets\app.ico')" />
+    <Resource Include="Assets\app.ico" Condition="Exists('Assets\app.ico')" />
   </ItemGroup>
 
   <PropertyGroup Condition="!Exists('Assets\app.ico')">

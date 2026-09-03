@@ -4,7 +4,7 @@ using MailDeliveryTool.App.ViewModels;
 namespace MailDeliveryTool.App.Views;
 
 /// <summary>「メールアカウントを変更」モーダル（要件定義書10.1）。
-/// 送信元アドレス・送信者名以外（サーバー名・アカウント名・パスワード・ポート・暗号化方法）を
+/// 送信者名以外（サーバー名・アカウント名・パスワード・ポート・暗号化方法・送信元アドレス）を
 /// 必須項目とする。</summary>
 public partial class MailAccountEditWindow : Window
 {
@@ -51,6 +51,11 @@ public partial class MailAccountEditWindow : Window
         if (string.IsNullOrWhiteSpace(_viewModel.SecureSocketOption))
         {
             missingFields.Add("暗号化方法");
+        }
+
+        if (string.IsNullOrWhiteSpace(_viewModel.FromAddress))
+        {
+            missingFields.Add("送信元アドレス");
         }
 
         if (missingFields.Count > 0)

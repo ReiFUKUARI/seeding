@@ -10,7 +10,7 @@
         Background="{StaticResource CanvasBrush}">
 
     <!-- 要件定義書10.1：パスワードは変更する場合のみ入力する。
-         送信元アドレス・送信者名以外は必須項目とし、赤い*で明示する。 -->
+         送信者名以外は必須項目とし、赤い*で明示する。 -->
     <StackPanel Margin="20">
         <TextBlock Margin="0,0,0,4">
             <Run Text="サーバー名" /><Run Text=" *" Foreground="{StaticResource DangerBrush}" />
@@ -39,7 +39,9 @@
                   DisplayMemberPath="Label" SelectedValuePath="Value"
                   SelectedValue="{Binding SecureSocketOption}" Margin="0,0,0,12" />
 
-        <TextBlock Text="送信元アドレス" Margin="0,0,0,4" />
+        <TextBlock Margin="0,0,0,4">
+            <Run Text="送信元アドレス" /><Run Text=" *" Foreground="{StaticResource DangerBrush}" />
+        </TextBlock>
         <TextBox Text="{Binding FromAddress, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,12" />
 
         <TextBlock Text="送信者名（任意）" Margin="0,0,0,4" />

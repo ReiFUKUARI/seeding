@@ -16,7 +16,7 @@
     Version="0.1.0.0" />
 
   <Properties>
-    <DisplayName>メール配信ツール</DisplayName>
+    <DisplayName>MailDeliveryTool</DisplayName>
     <PublisherDisplayName>ESC</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
   </Properties>
@@ -37,7 +37,7 @@
                  Executable="MailDeliveryTool.exe"
                  EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
-        DisplayName="メール配信ツール"
+        DisplayName="MailDeliveryTool"
         Description="営業向けのメール一斉配信ツール"
         BackgroundColor="transparent"
         Square150x150Logo="Images\Square150x150Logo.png"

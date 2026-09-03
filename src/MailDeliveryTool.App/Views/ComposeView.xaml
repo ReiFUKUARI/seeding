@@ -211,11 +211,15 @@
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
+                                <!-- 担当者名が未入力の宛先は、mock_prototype.htmlと同じ「（未入力）」をWarnBrushで表示する
+                                     （会社名が空欄でも送信対象からは除外しないため、Dangerではなく注意喚起のWarnにする）。 -->
                                 <DataGridTextColumn Header="担当者名" Width="*" MinWidth="90" IsReadOnly="True"
-                                                     Binding="{Binding Contact.ContactName, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}">
+                                                     Binding="{Binding Contact.ContactName, Converter={StaticResource TruncateTextConverter}, ConverterParameter='10|（未入力）'}">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="ToolTip" Value="{Binding Contact.ContactName}" />
+                                            <Setter Property="Foreground"
+                                                    Value="{Binding Contact.ContactName, Converter={StaticResource BlankToBrushConverter}, ConverterParameter=WarnBrush}" />
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
@@ -297,11 +301,15 @@
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
+                                <!-- 担当者名が未入力の宛先は、mock_prototype.htmlと同じ「（未入力）」をWarnBrushで表示する
+                                     （会社名が空欄でも送信対象からは除外しないため、Dangerではなく注意喚起のWarnにする）。 -->
                                 <DataGridTextColumn Header="担当者名" Width="*" MinWidth="90" IsReadOnly="True"
-                                                     Binding="{Binding Contact.ContactName, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}">
+                                                     Binding="{Binding Contact.ContactName, Converter={StaticResource TruncateTextConverter}, ConverterParameter='10|（未入力）'}">
                                     <DataGridTextColumn.ElementStyle>
                                         <Style TargetType="TextBlock">
                                             <Setter Property="ToolTip" Value="{Binding Contact.ContactName}" />
+                                            <Setter Property="Foreground"
+                                                    Value="{Binding Contact.ContactName, Converter={StaticResource BlankToBrushConverter}, ConverterParameter=WarnBrush}" />
                                         </Style>
                                     </DataGridTextColumn.ElementStyle>
                                 </DataGridTextColumn>
@@ -505,7 +513,9 @@
                                   Background="{StaticResource SurfaceBrush}" BorderThickness="0" RowHeight="30">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="会社名" Binding="{Binding CompanyName}" Width="1.4*" />
-                                <DataGridTextColumn Header="担当者名" Binding="{Binding ContactName}" Width="*" />
+                                <DataGridTextColumn Header="担当者名"
+                                                     Binding="{Binding ContactName, Converter={StaticResource TruncateTextConverter}, ConverterParameter='9999|-'}"
+                                                     Width="*" />
                                 <DataGridTextColumn Header="メールアドレス" Binding="{Binding Email}" Width="1.6*" />
                             </DataGrid.Columns>
                         </DataGrid>

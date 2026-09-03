@@ -147,17 +147,21 @@
                         <!-- 会社名・担当者名・メールアドレス・メモは省略表示（TruncateTextConverter）にしたため、
                              全文表示を前提にしていた頃より必要な最小幅を狭くできる。これにより通常の
                              ウィンドウ幅では横スクロールなしで全列が収まるようにしている。 -->
+                        <!-- 会社名が未入力の宛先は要件定義書7.1のとおり送信対象にできないため、
+                             mock_prototype.htmlと同じ「（未入力・保存不可）」をDangerBrushで表示する。 -->
                         <DataGridTextColumn Header="会社名" Width="1.4*" MinWidth="100"
-                                             Binding="{Binding Contact.CompanyName, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}"
+                                             Binding="{Binding Contact.CompanyName, Converter={StaticResource TruncateTextConverter}, ConverterParameter='10|（未入力・保存不可）'}"
                                              CellStyle="{StaticResource SuspendedDimCellStyle}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="ToolTip" Value="{Binding Contact.CompanyName}" />
+                                    <Setter Property="Foreground"
+                                            Value="{Binding Contact.CompanyName, Converter={StaticResource BlankToBrushConverter}, ConverterParameter=DangerBrush}" />
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
                         <DataGridTextColumn Header="担当者名" Width="*" MinWidth="90"
-                                             Binding="{Binding Contact.ContactName, Converter={StaticResource TruncateTextConverter}, ConverterParameter=10}"
+                                             Binding="{Binding Contact.ContactName, Converter={StaticResource TruncateTextConverter}, ConverterParameter='10|-'}"
                                              CellStyle="{StaticResource SuspendedDimCellStyle}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">

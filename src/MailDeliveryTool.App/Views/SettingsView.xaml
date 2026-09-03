@@ -130,69 +130,81 @@
                 <StackPanel>
                     <TextBlock Text="カテゴリ管理" FontWeight="SemiBold" Margin="0,0,0,10" />
 
-                    <!-- 種別軸 -->
-                    <TextBlock Text="{Binding TypeAxis.Name}" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6" />
-                    <ItemsControl ItemsSource="{Binding TypeAxis.Values}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="#F5F5F4" BorderBrush="{StaticResource BorderBrush}"
-                                        BorderThickness="1" CornerRadius="14" Padding="10,4" Margin="0,4,6,0">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="12.5" />
-                                        <Button Content="&#xE74D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
-                                                Margin="6,0,0,0" Padding="4,0" BorderThickness="0"
-                                                Background="Transparent" Foreground="{StaticResource DangerBrush}" FontSize="11"
-                                                Cursor="Hand" ToolTip="削除"
-                                                Command="{Binding DataContext.DeleteCategoryValueCommand,
-                                                    RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                CommandParameter="{Binding}" />
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,18">
-                        <TextBox Width="160" Text="{Binding NewTypeValueName, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource PlaceholderTextBoxStyle}" Tag="新しい値を入力" />
-                        <Button Content="追加" Margin="6,0,0,0" Command="{Binding AddTypeValueCommand}" />
-                    </StackPanel>
+                    <!-- 各軸をmock_prototype.htmlの.axis-card（枠線1px・角丸8px・内側余白14px・
+                         下マージン12px）と同じ見た目のカードで囲む。 -->
+                    <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                            CornerRadius="8" Padding="14" Margin="0,0,0,12">
+                        <StackPanel>
+                            <!-- 種別軸 -->
+                            <TextBlock Text="{Binding TypeAxis.Name}" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6" />
+                            <ItemsControl ItemsSource="{Binding TypeAxis.Values}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#F5F5F4" BorderBrush="{StaticResource BorderBrush}"
+                                                BorderThickness="1" CornerRadius="14" Padding="10,4" Margin="0,4,6,0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="12.5" />
+                                                <Button Content="&#xE74D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                                        Margin="6,0,0,0" Padding="4,0" BorderThickness="0"
+                                                        Background="Transparent" Foreground="{StaticResource DangerBrush}" FontSize="11"
+                                                        Cursor="Hand" ToolTip="削除"
+                                                        Command="{Binding DataContext.DeleteCategoryValueCommand,
+                                                            RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <TextBox Width="160" Text="{Binding NewTypeValueName, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource PlaceholderTextBoxStyle}" Tag="新しい値を入力" />
+                                <Button Content="追加" Margin="6,0,0,0" Command="{Binding AddTypeValueCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
 
                     <!-- 技術領域軸 -->
-                    <TextBlock Text="{Binding TechFieldAxis.Name}" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6" />
-                    <ItemsControl ItemsSource="{Binding TechFieldAxis.Values}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <WrapPanel />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Border Background="#F5F5F4" BorderBrush="{StaticResource BorderBrush}"
-                                        BorderThickness="1" CornerRadius="14" Padding="10,4" Margin="0,4,6,0">
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="12.5" />
-                                        <Button Content="&#xE74D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
-                                                Margin="6,0,0,0" Padding="4,0" BorderThickness="0"
-                                                Background="Transparent" Foreground="{StaticResource DangerBrush}" FontSize="11"
-                                                Cursor="Hand" ToolTip="削除"
-                                                Command="{Binding DataContext.DeleteCategoryValueCommand,
-                                                    RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                CommandParameter="{Binding}" />
-                                    </StackPanel>
-                                </Border>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                        <TextBox Width="160" Text="{Binding NewTechFieldValueName, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource PlaceholderTextBoxStyle}" Tag="新しい値を入力" />
-                        <Button Content="追加" Margin="6,0,0,0" Command="{Binding AddTechFieldValueCommand}" />
-                    </StackPanel>
+                    <Border BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                            CornerRadius="8" Padding="14">
+                        <StackPanel>
+                            <TextBlock Text="{Binding TechFieldAxis.Name}" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6" />
+                            <ItemsControl ItemsSource="{Binding TechFieldAxis.Values}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#F5F5F4" BorderBrush="{StaticResource BorderBrush}"
+                                                BorderThickness="1" CornerRadius="14" Padding="10,4" Margin="0,4,6,0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="12.5" />
+                                                <Button Content="&#xE74D;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                                        Margin="6,0,0,0" Padding="4,0" BorderThickness="0"
+                                                        Background="Transparent" Foreground="{StaticResource DangerBrush}" FontSize="11"
+                                                        Cursor="Hand" ToolTip="削除"
+                                                        Command="{Binding DataContext.DeleteCategoryValueCommand,
+                                                            RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <TextBox Width="160" Text="{Binding NewTechFieldValueName, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource PlaceholderTextBoxStyle}" Tag="新しい値を入力" />
+                                <Button Content="追加" Margin="6,0,0,0" Command="{Binding AddTechFieldValueCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </Border>
 

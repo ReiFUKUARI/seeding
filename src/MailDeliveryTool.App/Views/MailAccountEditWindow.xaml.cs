@@ -68,6 +68,19 @@ public partial class MailAccountEditWindow : Window
             return;
         }
 
+        // DBのCHECK制約（Port BETWEEN 1 AND 65535）と同じ範囲を保存前に検証する。
+        // ここで弾かないと、保存時にSqliteExceptionが未処理のままダイアログに出て、
+        // 「ポートは必須です」等の分かりやすいメッセージにならない。
+        if (_viewModel.Port is < 1 or > 65535)
+        {
+            MessageBox.Show(
+                "ポートは1〜65535の範囲で入力してください。",
+                "メール配信ツール",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
         DialogResult = true;
     }
 

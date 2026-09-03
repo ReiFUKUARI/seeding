@@ -24,6 +24,21 @@ public partial class ComposeView : UserControl
         }
     }
 
+    // タグはBodyTextBoxの現在のキャレット位置に挿入する（mock_prototype.htmlのinsertTag()相当）。
+    // ContextMenuのDataContextはPlacementTarget.DataContext経由でComposeViewModelに
+    // バインドされているため、MenuItem（sender）のDataContextからも同じものを取得できる。
+    private void OnInsertTagMenuItemClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { DataContext: ComposeViewModel viewModel, Tag: string tagName })
+        {
+            return;
+        }
+
+        var newCaretIndex = viewModel.InsertTagAt(tagName, BodyTextBox.CaretIndex);
+        BodyTextBox.Focus();
+        BodyTextBox.CaretIndex = newCaretIndex;
+    }
+
     // クリックでの選択に加え、ドロップゾーンへのドラッグ＆ドロップでも添付ファイルを追加できるようにする。
     private void OnAttachmentDropZoneDragEnter(object sender, DragEventArgs e)
     {

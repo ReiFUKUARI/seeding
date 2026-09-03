@@ -9,6 +9,7 @@ using MailDeliveryTool.Core;
 using MailDeliveryTool.Core.Backup;
 using MailDeliveryTool.Core.Data.Repositories;
 using MailDeliveryTool.Core.Models;
+using Microsoft.Data.Sqlite;
 using Microsoft.Win32;
 
 namespace MailDeliveryTool.App.ViewModels;
@@ -102,12 +103,29 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         var editViewModel = MailAccountEditViewModel.FromModel(_currentSetting);
         var window = new MailAccountEditWindow(editViewModel) { Owner = Application.Current.MainWindow };
-        if (window.ShowDialog() == true)
+        if (window.ShowDialog() != true)
         {
-            var updated = editViewModel.ToModel(_currentSetting.Password);
-            _mailAccountRepository.Save(updated, editViewModel.PasswordChanged);
-            LoadMailAccount();
+            return;
         }
+
+        var updated = editViewModel.ToModel(_currentSetting.Password);
+        try
+        {
+            _mailAccountRepository.Save(updated, editViewModel.PasswordChanged);
+        }
+        catch (SqliteException ex)
+        {
+            // MailAccountEditWindow側で入力値は検証済みだが、DBのCHECK制約（Port等）に
+            // 万一抵触した場合でも、生の例外がそのままダイアログに出ないようにする保険。
+            MessageBox.Show(
+                $"メールアカウントの保存に失敗しました。入力内容を確認してください。\n詳細: {ex.Message}",
+                "メール配信ツール",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        LoadMailAccount();
     }
 
     // --- 署名（要件定義書7章：1つのみ登録・自動反映） ---

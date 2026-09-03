@@ -396,15 +396,17 @@
                             <Button Grid.Column="1" Content="🏷 タグを挿入 ▾" Style="{StaticResource SubtleButtonStyle}"
                                     Click="OnInsertTagButtonClick">
                                 <Button.ContextMenu>
+                                    <!-- タグはキャレット位置に挿入するため、Command経由ではなくClickで
+                                         コードビハインド（BodyTextBox.CaretIndex）へ渡す。 -->
                                     <ContextMenu DataContext="{Binding PlacementTarget.DataContext, RelativeSource={RelativeSource Self}}">
-                                        <MenuItem Header="#会社名#" Command="{Binding InsertTagCommand}" CommandParameter="会社名" />
-                                        <MenuItem Header="#担当者名#" Command="{Binding InsertTagCommand}" CommandParameter="担当者名" />
-                                        <MenuItem Header="#メールアドレス#" Command="{Binding InsertTagCommand}" CommandParameter="メールアドレス" />
+                                        <MenuItem Header="#会社名#" Tag="会社名" Click="OnInsertTagMenuItemClick" />
+                                        <MenuItem Header="#担当者名#" Tag="担当者名" Click="OnInsertTagMenuItemClick" />
+                                        <MenuItem Header="#メールアドレス#" Tag="メールアドレス" Click="OnInsertTagMenuItemClick" />
                                     </ContextMenu>
                                 </Button.ContextMenu>
                             </Button>
                         </Grid>
-                        <TextBox Text="{Binding Body, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True"
+                        <TextBox x:Name="BodyTextBox" Text="{Binding Body, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True"
                                  TextWrapping="Wrap" MinHeight="220" VerticalScrollBarVisibility="Auto"
                                  FontFamily="Consolas, Yu Gothic UI" Margin="0,0,0,4" />
                         <TextBlock Text="{Binding BodyErrorText}" Foreground="{StaticResource DangerBrush}"

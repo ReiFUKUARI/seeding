@@ -445,15 +445,18 @@ public sealed partial class ComposeViewModel : ObservableObject
         PreviewText = MailBodyComposer.AppendSignature(substituted, GetSignatureText());
     }
 
-    [RelayCommand]
-    private void InsertTag(string? tagName)
+    /// <summary>
+    /// 本文中の指定位置にタグを挿入する（mock_prototype.htmlのinsertTag()相当。
+    /// textarea.selectionStartにタグを挿入する動作に合わせ、常に末尾へ追記していた
+    /// 従来の実装を修正）。キャレット位置はView側（TextBox.CaretIndex）が把握しているため、
+    /// 呼び出し元から渡してもらう。挿入後の新しいキャレット位置（タグの直後）を返す。
+    /// </summary>
+    public int InsertTagAt(string tagName, int caretIndex)
     {
-        if (string.IsNullOrEmpty(tagName))
-        {
-            return;
-        }
-
-        Body += $"#{tagName}#";
+        var tag = $"#{tagName}#";
+        var index = Math.Clamp(caretIndex, 0, Body.Length);
+        Body = Body.Insert(index, tag);
+        return index + tag.Length;
     }
 
     [RelayCommand]

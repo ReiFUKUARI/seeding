@@ -40,6 +40,10 @@ public sealed partial class MailAccountEditViewModel : ObservableObject
     /// <summary>パスワード欄に入力があったか（true の場合のみ保存時に再暗号化する）。</summary>
     public bool PasswordChanged => !string.IsNullOrEmpty(NewPassword);
 
+    /// <summary>既にパスワードが保存済みか。true なら、パスワード欄を空のままにしても
+    /// 既存のパスワードを引き継ぐため必須にはしない（初回設定時のみ必須とするため）。</summary>
+    public bool HasExistingPassword { get; private init; }
+
     public static MailAccountEditViewModel FromModel(MailAccountSetting setting) => new()
     {
         Host = setting.Host,
@@ -48,6 +52,7 @@ public sealed partial class MailAccountEditViewModel : ObservableObject
         SecureSocketOption = setting.SecureSocketOption,
         FromAddress = setting.FromAddress,
         FromDisplayName = setting.FromDisplayName,
+        HasExistingPassword = !string.IsNullOrEmpty(setting.Password),
     };
 
     /// <summary>

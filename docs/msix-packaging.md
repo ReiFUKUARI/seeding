@@ -234,12 +234,25 @@ $wapProjPath = Get-ChildItem -Path $vsInstall -Recurse -Filter "Microsoft.Deskto
 
 ### 署名ありの配布パッケージ
 
+`.pfx`はパスワード保護されているため、`PackageCertificateKeyFile`（.pfxのパス）・
+`PackageCertificateThumbprint`（拇印）に加えて**`PackageCertificatePassword`も必須**。
+これが抜けていると「証明書を開くことができませんでした」「指定されたネットワーク
+パスワードが間違っています」というエラーになる（実機で確認済み）。
+
+パスワードをコマンド履歴に平文で残さないよう、`Read-Host -AsSecureString`で
+安全に入力してから渡すこと。
+
 ```powershell
+$securePwd = Read-Host -AsSecureString "PFXのパスワードを入力"
+$plainPwd = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
+  [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePwd))
+
 & $msbuild[0] packaging\MailDeliveryTool.Package\MailDeliveryTool.Package.wapproj `
   /p:Configuration=Release /p:Platform=x64 /p:WapProjPath="$wapProjPath" /restore `
   /p:AppxPackageSigningEnabled=true `
   /p:PackageCertificateKeyFile=C:\path\to\signing.pfx `
-  /p:PackageCertificateThumbprint=<拇印>
+  /p:PackageCertificateThumbprint=<拇印> `
+  /p:PackageCertificatePassword=$plainPwd
 ```
 
 出力先は `artifacts/msix/`（`.gitignore` 済み）。

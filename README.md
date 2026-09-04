@@ -87,4 +87,5 @@ MSIX でインストールした場合、**アンインストールでデータ�
 | [フェーズ4 作業報告](docs/phase4-environment-setup.md) | 環境構築の成果・未実施事項・次のアクション |
 | [DBスキーマ 初版](docs/db-schema.md) | テーブル設計と設計判断の記録 |
 | [SMTP疎通検証 手順書](docs/smtp-verification.md) | WebARENA への疎通検証手順と結果記録 |
-| [MSIXパッケージング](docs/msix-packaging.md) | 配布形式の構成検討と未決事項 |
+| [MSIXパッケージング](docs/msix-packaging.md) | 配布形式の構成検討と決定事項 |
+| [インストール手順書（利用者向け）](docs/user-installation-guide.md) | 非エンジニア向けのセットアップ手順と配布パッケージの作り方 |

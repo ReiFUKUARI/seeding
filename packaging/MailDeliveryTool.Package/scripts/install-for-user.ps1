@@ -28,10 +28,16 @@ if (-not (Test-Path $MsixPath)) {
     throw "MSIXパッケージが見つかりません: $MsixPath"
 }
 
+# ZIPをダウンロード・展開したファイルには「インターネットからのファイル」の
+# マークが付いており、これが原因でImport-Certificate/Add-AppxPackageが
+# 不可解な警告やブロックを起こすことがある。事前に解除しておく（無害な操作）。
+Unblock-File -Path $CerPath -ErrorAction SilentlyContinue
+Unblock-File -Path $MsixPath -ErrorAction SilentlyContinue
+
 Write-Host "1/2 証明書を信頼済み発行元として登録します（現在のユーザーのみ、管理者権限不要）..."
 Import-Certificate -FilePath $CerPath -CertStoreLocation Cert:\CurrentUser\TrustedPeople | Out-Null
 
 Write-Host "2/2 メール配信ツールをインストールします..."
 Add-AppxPackage -Path $MsixPath
 
-Write-Host "完了しました。スタートメニューから「メール配信ツール」を起動できます。"
+Write-Host "完了しました。スタートメニューから「MailDeliveryTool」を起動できます。"

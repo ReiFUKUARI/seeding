@@ -142,20 +142,34 @@
 実機で署名済みビルドを作成した後、以下を1つの空フォルダにまとめてから
 ZIP化してください（詳細な作成手順は [`msix-packaging.md`](./msix-packaging.md) を参照）。
 
+**そのままコピー＆ペーストして実行できます**（`$env:USERPROFILE`が自動的に
+自分のユーザーフォルダに置き換わるため、手で書き換える必要はありません）。
+
 ```powershell
-# 例：配布用フォルダを作り、必要な4ファイルだけを集める
-$dist = "C:\Users\<自分のユーザー名>\Desktop\MailDeliveryTool_配布用"
+# 配布用フォルダを作り、必要な4ファイルだけを集める
+$dist = "$env:USERPROFILE\Desktop\MailDeliveryTool_配布用"
 New-Item -ItemType Directory -Path $dist -Force | Out-Null
 
-$pkgDir = "C:\Users\<自分のユーザー名>\Documents\GitHub\seeding\artifacts\msix\MailDeliveryTool.Package_x.x.x.x_x64_Test"
+$repoRoot = "$env:USERPROFILE\Documents\GitHub\seeding"
+
+# バージョン番号が変わっても書き換えなくていいよう、フォルダ名をワイルドカードで探す
+$pkgDir = Get-ChildItem -Path "$repoRoot\artifacts\msix" -Directory -Filter "MailDeliveryTool.Package_*_Test" |
+  Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
+
 Copy-Item "$pkgDir\*.msix" $dist
 Copy-Item "$pkgDir\*.cer" $dist
-Copy-Item "C:\Users\<自分のユーザー名>\Documents\GitHub\seeding\packaging\MailDeliveryTool.Package\scripts\install-for-user.ps1" $dist
-Copy-Item "C:\Users\<自分のユーザー名>\Documents\GitHub\seeding\packaging\MailDeliveryTool.Package\scripts\install.bat" $dist
+Copy-Item "$repoRoot\packaging\MailDeliveryTool.Package\scripts\install-for-user.ps1" $dist
+Copy-Item "$repoRoot\packaging\MailDeliveryTool.Package\scripts\install.bat" $dist
+
+# 中身を確認（.msix・.cer・install-for-user.ps1・install.batの4つが表示されればOK）
+Get-ChildItem $dist
 
 # ZIP化
 Compress-Archive -Path "$dist\*" -DestinationPath "$dist.zip" -Force
 ```
+
+もし `$repoRoot` のクローン場所が `Documents\GitHub\seeding` 以外の場合は、
+その行だけ実際のパスに書き換えてください。
 
 このZIP以外のファイル（`.appxsym` や `Add-AppDevPackage.ps1` 等の
 Visual Studio既定の付随ファイル）は配布に不要なので含めないでください。

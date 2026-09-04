@@ -164,8 +164,11 @@ Copy-Item "$repoRoot\packaging\MailDeliveryTool.Package\scripts\install.bat" $di
 # 中身を確認（.msix・.cer・install-for-user.ps1・install.batの4つが表示されればOK）
 Get-ChildItem $dist
 
-# ZIP化
-Compress-Archive -Path "$dist\*" -DestinationPath "$dist.zip" -Force
+# ZIP化（フォルダ名に日本語を含む場合、"$dist\*" のようなワイルドカード指定だと
+# Compress-Archiveが「パスが存在しない」と誤判定することがあるため、
+# 対象ファイルの一覧を明示的に渡す）
+$files = Get-ChildItem -Path $dist -File | Select-Object -ExpandProperty FullName
+Compress-Archive -Path $files -DestinationPath "$dist.zip" -Force
 ```
 
 もし `$repoRoot` のクローン場所が `Documents\GitHub\seeding` 以外の場合は、

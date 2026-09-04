@@ -18,10 +18,64 @@ public partial class MainWindow : Window
         InitializeComponent();
         Loaded += (_, _) =>
         {
+            SetTaskbarIconFromExe();
             ShowDiagnostics();
             ShowPlaceholder("Compose");
         };
         Closing += OnWindowClosing;
+    }
+
+    // ================= タスクバーアイコンの明示的な設定 =================
+    // Window.Icon（XAMLのpack URI経由）だけでは、実機で一部の環境において
+    // タスクバーのアイコンに反映されない事象が報告された（原因はWindowsのアイコン
+    // キャッシュ、またはWPFのpack URIベースのアイコン解決の環境依存の問題と推測される。
+    // 詳細な再現条件の切り分けはできていない）。Window.Iconの指定はそのまま残しつつ、
+    // より確実な手段として、実行中の.exe自体に埋め込まれているアイコン
+    // （ApplicationIconにより既に正しく埋め込み済み）をWin32 APIで直接抽出し、
+    // WM_SETICONでウィンドウへ強制的に設定する。
+
+    private const uint WmSeticon = 0x0080;
+    private const int IconSmall = 0;
+    private const int IconBig = 1;
+
+    [DllImport("shell32.dll", CharSet = CharSet.Auto)]
+    private static extern int ExtractIconEx(
+        string lpszFile, int nIconIndex, IntPtr[] phiconLarge, IntPtr[] phiconSmall, int nIcons);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
+
+    private void SetTaskbarIconFromExe()
+    {
+        var exePath = Environment.ProcessPath;
+        if (string.IsNullOrEmpty(exePath))
+        {
+            return;
+        }
+
+        var largeIcons = new IntPtr[1];
+        var smallIcons = new IntPtr[1];
+        var extractedCount = ExtractIconEx(exePath, 0, largeIcons, smallIcons, 1);
+        if (extractedCount <= 0)
+        {
+            return;
+        }
+
+        var hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero)
+        {
+            return;
+        }
+
+        if (largeIcons[0] != IntPtr.Zero)
+        {
+            SendMessage(hwnd, WmSeticon, (IntPtr)IconBig, largeIcons[0]);
+        }
+
+        if (smallIcons[0] != IntPtr.Zero)
+        {
+            SendMessage(hwnd, WmSeticon, (IntPtr)IconSmall, smallIcons[0]);
+        }
     }
 
     /// <summary>
